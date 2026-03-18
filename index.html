@@ -107,7 +107,7 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm h-16 flex items-center px-6 md:px-8">
         <div class="flex-1 flex items-center gap-3">
             <span class="text-xl font-black text-slate-900 tracking-tight">📱 세린캠 예약 관리자</span>
-            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">PC 버전</span>
+            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">v1</span>
         </div>
         
         <div class="flex-1 max-w-md mx-auto">
@@ -414,19 +414,43 @@
             <textarea id="bulk-tracking-input" rows="8" class="w-full p-4 border border-slate-300 rounded-xl font-tnum text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 resize-none whitespace-pre leading-relaxed font-bold bg-slate-50 text-slate-800" placeholder="예시:&#10;123456789012&#10;987654321098&#10;... (엑셀에서 복사 후 바로 붙여넣기)"></textarea>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeBulkTrackingModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-colors">취소</button>
-                <button onclick="submitBulkTracking()" id="bulk-tracking-save-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm">일괄 등록하기</button>
+                <button onclick="submitBulkTracking()" id="bulk-tracking-save-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm">다음 (검토하기)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- [NEW] 송장 매칭 검토 모달 -->
+    <div id="bulk-tracking-review-modal" class="fixed inset-0 hidden flex items-center justify-center p-6" style="z-index: 10000;">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeBulkTrackingReviewModal()"></div>
+        <div class="bg-white rounded-[24px] p-6 w-full max-w-md relative z-10 shadow-2xl flex flex-col transform transition-all max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">👀 매칭 내역 검토</h3>
+                <button onclick="closeBulkTrackingReviewModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <p class="text-[13px] text-slate-500 font-medium mb-4 leading-relaxed break-keep">
+                아래 고객에게 배정될 송장번호가 맞는지 최종 확인해주세요.<br/>문제가 없다면 <strong>'최종 등록하기'</strong>를 눌러주세요.
+            </p>
+            <div class="overflow-y-auto flex-1 bg-slate-50 rounded-xl border border-slate-200 p-2.5 mb-6 space-y-2" id="bulk-tracking-review-list">
+                <!-- JS에서 검토 리스트가 자동으로 생성됩니다 -->
+            </div>
+            <div class="flex gap-3 mt-auto pt-2">
+                <button onclick="backToBulkTrackingModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-colors">다시 수정</button>
+                <button onclick="confirmBulkTracking()" id="bulk-tracking-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm">최종 등록하기</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzLgQJCJOQq6YPtTOjA4ErqELyErJOkLgrrpLmTrPJa8n4sleuJS7Qn_XIhECz6CMQ2aA/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwAobfY64-gI1p1FmqP5kDJAAlnfn5t1mDJOKJZfz-bUJCyDrlwfP-e96pQvv14jwcIJQ/exec"; 
         const MODEL_LIST = ['23U', '24U', '25U', '26U', '17P', '17PM'];
         const STATUS_PRIORITY = { '예약신청': 1, '대기': 2, '확정': 3, '반납완료': 4, '취소': 5 };
 
         let allData = [];
         let currentlyFilteredList = []; // 현재 필터링된 리스트 (전체선택을 위함)
         let selectedRows = []; // 다중 선택된 row ID 배열
+        let tempTrackingNumbers = []; // [NEW] 검토용 임시 송장번호 저장
 
         let currentFilterStatus = 'all';
         let currentModelFilter = 'all';
@@ -441,20 +465,31 @@
         async function fetchData() {
             toggleLoading(true);
             try {
-                const res = await fetch(`${API_URL}?type=admin_list`);
+                // [UPDATE] 리다이렉트(redirect: 'follow') 속성을 명시적으로 추가
+                const res = await fetch(`${API_URL}?type=admin_list`, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: { 'Accept': 'application/json' }
+                });
                 const json = await res.json();
                 if(json.result === 'success') {
-                    allData = json.data.sort(sortLogic);
+                    // [수정] 데이터에 빈 값이 있거나 숫자로 변환된 경우를 방어하기 위해 String() 처리 추가
+                    const validData = json.data.filter(item => item.name || item.phone || (item.model && String(item.model).trim() !== ''));
+                    allData = validData.sort(sortLogic);
                     renderDateFilters();
                     filterData();
-                } else { showToast("데이터 로드 실패"); }
-            } catch(e) { showToast("네트워크 오류"); } 
+                } else { showToast("데이터 로드 실패: " + (json.message || "")); }
+            } catch(e) { 
+                console.error("Fetch Error:", e);
+                showAppAlert(`앱에서 데이터를 처리하다가 오류가 났습니다.\n(숫자/날짜 형식 문제일 수 있습니다)\n\n상세오류: ${e.message}`, "🚨 데이터 로드 실패", "⚠️");
+            } 
             finally { toggleLoading(false); }
         }
 
         function renderDateFilters() {
             const container = document.getElementById('filter-group-date');
-            const dates = [...new Set(allData.map(item => item.startDate).filter(d => d))].sort();
+            // [수정] 날짜 데이터가 숫자로 깨져들어와도 에러가 나지 않도록 String() 강제 변환
+            const dates = [...new Set(allData.map(item => String(item.startDate || '')).filter(d => d && d.includes('-')))].sort();
             
             let html = `<button onclick="setDateFilter('all')" class="chip-btn date-filter-item ${selectedDates.length === 0 ? 'active' : ''}" data-id="all">전체</button>`;
             dates.forEach(date => {
@@ -501,10 +536,10 @@
 
         function sortLogic(a, b) {
             if (currentSortMode === 'model') {
-                const modelA = (a.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
-                const modelB = (b.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
+                // [수정] 모델명이 숫자로 변환된 경우를 대비해 String() 추가
+                const modelA = String(a.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
+                const modelB = String(b.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
                 
-                // localeCompare로 24U 2번이 24U 10번보다 먼저 오도록 숫자 인식 정렬
                 const comp = modelA.localeCompare(modelB, undefined, { numeric: true, sensitivity: 'base' });
                 if (comp !== 0) return comp;
             }
@@ -556,15 +591,20 @@
             });
 
             const filtered = allData.filter(item => {
-                const name = (item.name || '').toLowerCase();
-                const phone = (item.phone || '').toLowerCase();
-                const model = (item.model || '').toUpperCase();
-                const delivery = (item.delivery || '');
-                const status = (item.status || '');
-                const startDateStr = item.startDate || '';
+                // [수정] 엑셀의 자동 변환(숫자, 날짜 포맷)으로 인한 앱 크래시 방지를 위해 모두 텍스트로 강제 변환
+                const name = String(item.name || '').toLowerCase();
+                const phone = String(item.phone || '').toLowerCase();
+                const model = String(item.model || '').toUpperCase();
+                const delivery = String(item.delivery || '');
+                const status = String(item.status || '');
+                const startDateStr = String(item.startDate || '');
                 
                 const cleanModel = model.replace(/\s*\+?\s*보조배터리/g, '').trim();
                 const isAssigned = /\d$/.test(cleanModel);
+
+                // [NEW] 카테고리, 모델명, 메모 등 어디에든 백업/연장이 포함되어 있으면 카운팅하도록 강화
+                const isBackup = String(item.category).includes('백업') || model.includes('백업') || String(item.dataBackup).includes('신청') || String(item.memo).includes('백업');
+                const isExtension = String(item.category).includes('연장') || model.includes('연장') || String(item.memo).includes('연장');
 
                 const matchQuery = name.includes(query) || phone.includes(query) || model.includes(query);
                 const matchDate = selectedDates.length === 0 || selectedDates.includes(startDateStr);
@@ -577,8 +617,8 @@
                 if (matchDate && matchQuery) {
                     counts.model.all++;
                     MODEL_LIST.forEach(m => { if(model.includes(m)) counts.model[m]++; });
-                    if (model.includes('백업')) counts.model['백업']++;
-                    if (model.includes('연장')) counts.model['연장']++;
+                    if (isBackup) counts.model['백업']++;
+                    if (isExtension) counts.model['연장']++;
 
                     counts.delivery.all++;
                     if (delivery.includes('택배')) counts.delivery['택배']++;
@@ -600,7 +640,11 @@
 
                 if (currentFilterStatus !== 'all' && status !== currentFilterStatus) return false;
 
-                const matchModel = (currentModelFilter === 'all') || model.includes(currentModelFilter.toUpperCase());
+                const matchModel = (currentModelFilter === 'all') || 
+                                   (currentModelFilter === '백업' ? isBackup : 
+                                   (currentModelFilter === '연장' ? isExtension : 
+                                   model.includes(currentModelFilter.toUpperCase())));
+                
                 const matchDelivery = (currentDeliveryFilter === 'all') || delivery.includes(currentDeliveryFilter);
                 const matchReturn = (currentReturnFilter === 'all') || (item.returnWay || '').includes(currentReturnFilter);
 
@@ -649,7 +693,9 @@
             updateTabCounts('filter-group-return', counts.return);
             
             const backupBtn = document.getElementById('btn-quick-backup');
+            const backupCount = document.getElementById('quick-backup-count');
             if(backupBtn) {
+                if(backupCount) backupCount.innerText = counts.model['백업'] || 0;
                 if (counts.model['백업'] === 0) backupBtn.classList.add('hidden');
                 else {
                     backupBtn.classList.remove('hidden');
@@ -659,7 +705,9 @@
             }
 
             const extensionBtn = document.getElementById('btn-quick-extension');
+            const extensionCount = document.getElementById('quick-extension-count');
             if(extensionBtn) {
+                if(extensionCount) extensionCount.innerText = counts.model['연장'] || 0;
                 if (counts.model['연장'] === 0) extensionBtn.classList.add('hidden');
                 else {
                     extensionBtn.classList.remove('hidden');
@@ -774,9 +822,15 @@
                         model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
                     };
                     
-                    return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                        .then(res => res.json())
-                        .then(data => { if(data.result !== 'success') throw new Error("서버에서 처리를 실패했습니다."); });
+                    // [UPDATE] 리다이렉트 허용 및 헤더 강화
+                    return fetch(API_URL, { 
+                        method: 'POST', 
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload) 
+                    })
+                    .then(res => res.json())
+                    .then(data => { if(data.result !== 'success') throw new Error("서버에서 처리를 실패했습니다."); });
                 });
 
                 await Promise.all(promises);
@@ -839,7 +893,7 @@
             if (selectedRows.length === 0) return;
             document.getElementById('bulk-tracking-count').innerText = selectedRows.length;
             document.getElementById('bulk-tracking-input').value = '';
-            document.getElementById('bulk-tracking-save-btn').innerText = '일괄 등록하기';
+            document.getElementById('bulk-tracking-save-btn').innerText = '다음 (검토하기)';
             document.getElementById('bulk-tracking-save-btn').disabled = false;
             
             const modal = document.getElementById('bulk-tracking-modal');
@@ -861,19 +915,88 @@
                 return;
             }
 
+            tempTrackingNumbers = trackingNumbers; // 임시 저장
+
             // 개수가 다를 경우 기본 confirm 대신 커스텀 모달 사용
             if (trackingNumbers.length !== selectedRows.length) {
                 showAppConfirm(
                     `체크된 고객은 ${selectedRows.length}명인데, 붙여넣은 송장번호는 ${trackingNumbers.length}개입니다.\n(위에서부터 순서대로 빈틈없이 배정됩니다) 계속 진행할까요?`, 
-                    () => executeBulkTracking(trackingNumbers), 
+                    () => openBulkTrackingReviewModal(trackingNumbers), 
                     "개수 불일치 안내", 
-                    "계속 진행하기", 
+                    "검토 화면으로", 
                     "bg-emerald-600", 
                     "⚠️"
                 );
             } else {
-                executeBulkTracking(trackingNumbers);
+                openBulkTrackingReviewModal(trackingNumbers);
             }
+        }
+
+        // [NEW] 검토 모달 열기 및 리스트 생성
+        function openBulkTrackingReviewModal(trackingNumbers) {
+            closeBulkTrackingModal(); // 입력 모달 닫기
+            const reviewList = document.getElementById('bulk-tracking-review-list');
+            reviewList.innerHTML = ''; 
+
+            // 화면상 보이는 순서대로 정렬
+            const sortedSelectedRows = [...selectedRows].sort((a, b) => {
+                const idxA = currentlyFilteredList.findIndex(item => String(item.row) === String(a));
+                const idxB = currentlyFilteredList.findIndex(item => String(item.row) === String(b));
+                return idxA - idxB;
+            });
+
+            // 고객 수와 송장번호 수 중 더 많은 것에 맞춤 (누락되거나 남는 송장도 보여주기 위함)
+            const limit = Math.max(selectedRows.length, trackingNumbers.length);
+
+            for (let i = 0; i < limit; i++) {
+                const rowId = sortedSelectedRows[i];
+                const item = rowId ? allData.find(it => String(it.row) === String(rowId)) : null;
+                const tracking = trackingNumbers[i] || '<span class="text-red-500 font-bold text-[11px]">송장 누락</span>';
+                
+                const card = document.createElement('div');
+                card.className = "flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm";
+                
+                let customerInfo = '<span class="text-slate-400 text-xs font-bold">고객 정보 부족 (송장 남음)</span>';
+                if (item) {
+                    const displayModel = String(item.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim();
+                    customerInfo = `
+                        <div class="flex flex-col min-w-0 pr-2">
+                            <span class="text-[13px] font-black text-slate-800 truncate">${item.name} <span class="text-slate-400 font-bold text-[11px]">(${item.phone || '-'})</span></span>
+                            <span class="text-[11px] text-blue-600 font-bold mt-0.5 truncate">${displayModel || '기종미정'}</span>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex-1 overflow-hidden">
+                        ${customerInfo}
+                    </div>
+                    <div class="shrink-0 flex items-center justify-end">
+                        <span class="text-sm text-slate-300 mx-2">➔</span>
+                        <span class="text-[13px] font-extrabold ${trackingNumbers[i] ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} px-2 py-1 rounded-lg border font-tnum break-all text-center max-w-[120px]">${tracking}</span>
+                    </div>
+                `;
+                reviewList.appendChild(card);
+            }
+
+            document.getElementById('bulk-tracking-review-modal').classList.remove('hidden');
+        }
+
+        // [NEW] 검토 모달 닫기
+        function closeBulkTrackingReviewModal() {
+            document.getElementById('bulk-tracking-review-modal').classList.add('hidden');
+        }
+
+        // [NEW] 다시 수정하기 (입력 모달로 돌아가기)
+        function backToBulkTrackingModal() {
+            closeBulkTrackingReviewModal();
+            document.getElementById('bulk-tracking-modal').classList.remove('hidden');
+        }
+
+        // [NEW] 검토 후 최종 등록 실행
+        function confirmBulkTracking() {
+            closeBulkTrackingReviewModal();
+            executeBulkTracking(tempTrackingNumbers);
         }
 
         async function executeBulkTracking(trackingNumbers) {
@@ -916,9 +1039,16 @@
                         startDate: item.startDate || '', endDate: item.endDate || '', delivery: item.delivery || '', returnWay: item.returnWay || '',
                         status: item.status || '', tracking: updateInfo.newTracking, model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
                     };
-                    return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                        .then(res => res.json())
-                        .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); });
+                    
+                    // [UPDATE] 리다이렉트 허용 및 헤더 강화
+                    return fetch(API_URL, { 
+                        method: 'POST', 
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload) 
+                    })
+                    .then(res => res.json())
+                    .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); });
                 });
                 await Promise.all(promises);
             } catch (err) {
@@ -953,20 +1083,25 @@
 
                 const time = formatTime(item.orderTime);
                 const price = (parseInt(String(item.totalPrice||0).replace(/[^0-9]/g, '')) || 0).toLocaleString() + '원';
-                const formatMD = (d) => { if(!d) return '-'; const p = d.split('-'); return p.length >= 3 ? `${parseInt(p[1])}/${parseInt(p[2])}` : d; };
+                const formatMD = (d) => { if(!d) return '-'; const p = String(d).split('-'); return p.length >= 3 ? `${parseInt(p[1])}/${parseInt(p[2])}` : String(d); };
                 const start = formatMD(item.startDate);
                 const end = formatMD(item.endDate);
-                const displayModel = (item.model || '').replace(/\r?\n|\r/g, ' ').replace(/\s*\+?\s*보조배터리/g, '').trim();
-                const battery = (item.model || '').includes('보조배터리') ? '⚡' : '';
+                const displayModel = String(item.model || '').replace(/\r?\n|\r/g, ' ').replace(/\s*\+?\s*보조배터리/g, '').trim();
+                const battery = String(item.model || '').includes('보조배터리') ? '⚡' : '';
                 const trackingDisplay = item.trackingNumber ? item.trackingNumber : '입력';
                 const memo = item.memo ? '📝' : '';
                 
-                let fullAddress = '';
-                if(item.zipCode) fullAddress += `[${item.zipCode}] `;
-                // 화면 리스트 UI에서도 주소가 2줄로 넘어가지 않도록 엔터(줄바꿈) 원천 차단
-                if(item.address) fullAddress += item.address.replace(/\r?\n|\r/g, ' ');
+                // [NEW] 백업 여부 확인 및 클래스/뱃지 생성
+                const isBackup = String(item.category).includes('백업') || String(item.model).includes('백업') || String(item.dataBackup).includes('신청') || String(item.memo).includes('백업');
+                const backupBorderClass = isBackup ? '!border-2 !border-yellow-400 !bg-yellow-50/40' : '';
+                const backupBadge = isBackup ? `<span class="bg-yellow-400 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap shrink-0 ml-1">💾 백업</span>` : '';
 
-                const rawPay = item.paymentMethod || ''; 
+                let fullAddress = '';
+                // 화면 리스트 UI에서도 주소가 2줄로 넘어가지 않도록 엔터(줄바꿈) 원천 차단
+                if(item.zipCode) fullAddress += `[${item.zipCode}] `;
+                if(item.address) fullAddress += String(item.address).replace(/\r?\n|\r/g, ' ');
+
+                const rawPay = String(item.paymentMethod || ''); 
                 let payShort = rawPay;
                 let payBadgeClass = 'bg-slate-100 text-slate-600'; 
                 if(rawPay.includes('계좌이체')) { payShort = '이체'; payBadgeClass = 'bg-blue-100 text-blue-700 border border-blue-200'; } 
@@ -974,7 +1109,7 @@
                 else if(rawPay === '') { payShort = '-'; }
 
                 const card = document.createElement('div');
-                card.className = `list-row relative overflow-hidden flex items-center px-4 py-4 gap-3 ${isSelected ? 'selected' : ''}`;
+                card.className = `list-row relative overflow-hidden flex items-center px-4 py-4 gap-3 ${isSelected ? 'selected' : ''} ${backupBorderClass}`;
                 card.onclick = () => openModal(item);
                 
                 card.innerHTML = `
@@ -1002,6 +1137,7 @@
                     <div class="flex-1 shrink-0 flex flex-col justify-center min-w-0 pr-2">
                         <div class="flex items-center gap-1">
                             <span class="text-base font-black text-slate-900 truncate">${item.name}</span>
+                            ${backupBadge}
                             <span class="text-sm shrink-0">${memo}</span>
                         </div>
                         <div class="flex items-center mt-0.5 text-slate-500 font-bold text-[13px] font-tnum whitespace-nowrap">
@@ -1073,7 +1209,7 @@
             const container = document.getElementById(`model-display-${rowId}`);
             if(!container) return;
 
-            const displayModel = (item.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim();
+            const displayModel = String(item.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim();
             currentInlineEditRow = rowId;
 
             // 라벨을 입력 폼(Input)으로 변경
@@ -1114,7 +1250,7 @@
             if (itemIndex === -1) return;
 
             const item = allData[itemIndex];
-            const oldModel = item.model || '';
+            const oldModel = String(item.model || '');
             const hasBattery = oldModel.includes('보조배터리');
             const oldDisplayModel = oldModel.replace(/\s*\+?\s*보조배터리/g, '').trim();
 
@@ -1143,13 +1279,19 @@
                     status: item.status || '', tracking: item.trackingNumber || '', model: finalModel, memo: item.memo || '', totalPrice: item.totalPrice || 0
                 };
 
-                fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                    .then(res => res.json())
-                    .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                    .catch(err => {
-                        allData[itemIndex].model = oldModel; filterData();
-                        showToast("인터넷 연결 불안정으로 기기 배정이 취소되었습니다.");
-                    });
+                // [UPDATE] 리다이렉트 허용 및 헤더 강화
+                fetch(API_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                })
+                .then(res => res.json())
+                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
+                .catch(err => {
+                    allData[itemIndex].model = oldModel; filterData();
+                    showToast("인터넷 연결 불안정으로 기기 배정이 취소되었습니다.");
+                });
             }
 
             filterData(); // 화면 즉시 갱신
@@ -1171,7 +1313,7 @@
             const container = document.getElementById(`tracking-display-${rowId}`);
             if(!container) return;
 
-            const currentTracking = item.trackingNumber || '';
+            const currentTracking = String(item.trackingNumber || '');
             currentTrackingInlineEditRow = rowId;
 
             // 라벨을 입력 폼(Input)으로 변경
@@ -1212,8 +1354,8 @@
             if (itemIndex === -1) return;
 
             const item = allData[itemIndex];
-            const oldTracking = item.trackingNumber || '';
-            const newTracking = newValue.trim().replace(/[^0-9\-]/g, ''); // 숫자와 하이픈만 허용
+            const oldTracking = String(item.trackingNumber || '');
+            const newTracking = String(newValue).trim().replace(/[^0-9\-]/g, '');
 
             // 엔터를 쳤을 때 다음 줄의 ID 찾기
             let nextRowId = null;
@@ -1237,13 +1379,19 @@
                     status: item.status || '', tracking: newTracking, model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
                 };
 
-                fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                    .then(res => res.json())
-                    .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                    .catch(err => {
-                        allData[itemIndex].trackingNumber = oldTracking; filterData();
-                        showToast("인터넷 연결 불안정으로 송장번호 입력이 취소되었습니다.");
-                    });
+                // [UPDATE] 리다이렉트 허용 및 헤더 강화
+                fetch(API_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                })
+                .then(res => res.json())
+                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
+                .catch(err => {
+                    allData[itemIndex].trackingNumber = oldTracking; filterData();
+                    showToast("인터넷 연결 불안정으로 송장번호 입력이 취소되었습니다.");
+                });
             }
 
             filterData(); // 화면 즉시 갱신
@@ -1297,7 +1445,7 @@
             document.getElementById('edit-memo').value = item.memo || '';
             document.getElementById('edit-price').value = (item.totalPrice || 0);
 
-            const deliveryVal = item.delivery || '';
+            const deliveryVal = String(item.delivery || '');
             let selectedDelivery = '';
             if(deliveryVal.includes('택배')) selectedDelivery = '택배';
             else if(deliveryVal.includes('공연장') || deliveryVal.includes('현장')) selectedDelivery = '공연장';
@@ -1306,7 +1454,7 @@
             selectMethod('delivery', selectedDelivery);
             document.getElementById('edit-delivery').value = deliveryVal; 
 
-            const returnVal = item.returnWay || '';
+            const returnVal = String(item.returnWay || '');
             let selectedReturn = '';
             if(returnVal.includes('택배')) selectedReturn = '택배';
             else if(returnVal.includes('공연장') || returnVal.includes('현장')) selectedReturn = '공연장';
@@ -1315,7 +1463,7 @@
             selectMethod('return', selectedReturn);
             document.getElementById('edit-return-way').value = returnVal; 
 
-            let rawModel = item.model || '';
+            let rawModel = String(item.model || '');
             const hasBattery = rawModel.includes('보조배터리');
             rawModel = rawModel.replace(/\+?\s*보조배터리/g, '').trim();
             let matchedModel = '기타', deviceId = rawModel;
@@ -1404,15 +1552,21 @@
             showAppAlert("수정 내역이 화면에 즉시 반영되었습니다.", "완료", "✅"); 
             btn.innerText = '수정 완료 (즉시반영)'; btn.disabled = false;
 
-            fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-                .then(res => res.json())
-                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                .catch(err => {
-                    if(targetIndex !== -1 && originalData) {
-                        allData[targetIndex] = originalData; filterData(); 
-                        showAppAlert("인터넷 연결이 불안정하여 원상복구 되었습니다.", "🚨 저장 실패", "⚠️");
-                    }
-                });
+            // [UPDATE] 리다이렉트 허용 및 헤더 강화
+            fetch(API_URL, { 
+                method: 'POST', 
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
+            })
+            .then(res => res.json())
+            .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
+            .catch(err => {
+                if(targetIndex !== -1 && originalData) {
+                    allData[targetIndex] = originalData; filterData(); 
+                    showAppAlert("인터넷 연결이 불안정하여 원상복구 되었습니다.", "🚨 저장 실패", "⚠️");
+                }
+            });
         }
 
         function confirmDelete() {
@@ -1425,7 +1579,13 @@
                 closeModal();
                 showAppAlert("삭제 처리되었습니다.", "완료", "🗑️");
                 
-                fetch(API_URL, { method: 'POST', body: JSON.stringify({ type: 'delete', row: rowId, sheetName: document.getElementById('edit-sheet-name').value }) })
+                // [UPDATE] 리다이렉트 허용 및 헤더 강화
+                fetch(API_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ type: 'delete', row: rowId, sheetName: document.getElementById('edit-sheet-name').value }) 
+                })
                 .then(res => res.json())
                 .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
                 .catch(err => {
