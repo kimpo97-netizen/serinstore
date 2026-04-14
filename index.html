@@ -310,7 +310,6 @@ const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) 
   };
 
   // 모든 폼 항목 정의
-  // 기계 종류(machineType)를 select(드롭다운) 타입으로 변경했습니다.
   const formGroups = [
     { id: 'basic', title: '기본 정보', theme: 'slate', icon: null, gridCols: 'grid-cols-2', fields: [
       {id:'client', label:'업체명', type: 'text'}, 
@@ -329,16 +328,14 @@ const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) 
     { id: 'memo', title: '메모 (비고)', theme: 'red', icon: <AlertTriangle size={14} className="text-red-600" />, gridCols: 'grid-cols-1', fields: [{id:'note', label:'특이사항 및 주의점 입력'}] }
   ];
 
-  // 현재 선택된 기계 종류 값을 가져옵니다.
   const currentMachineType = formData.machineType || '';
 
-  // 기계 종류 선택값에 따라 보여줄 폼 그룹을 동적으로 필터링합니다.
   const visibleFormGroups = formGroups.filter(group => {
     if (group.id === 'cutter') return currentMachineType.includes('컷팅');
-    if (group.id === 'tension') return currentMachineType.includes('인장'); // 인장기1, 인장기2 모두 포함
+    if (group.id === 'tension') return currentMachineType.includes('인장'); 
     if (group.id === 'qtex1') return currentMachineType.includes('큐텍스1');
     if (group.id === 'qtex2') return currentMachineType.includes('큐텍스2');
-    return true; // 기본 정보, 규격 등은 항상 표시
+    return true; 
   });
 
   return (
@@ -362,7 +359,6 @@ const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) 
                 </h3>
                 <div className={`grid ${group.gridCols} gap-2.5`}>
                   {group.fields.map(field => {
-                    // 💡 인장기 종류에 따른 입력 비활성화 로직
                     let isDisabled = false;
                     if (currentMachineType === '인장기1' && field.id === 'tension2') isDisabled = true;
                     if (currentMachineType === '인장기2' && field.id === 'tension1') isDisabled = true;
@@ -373,7 +369,6 @@ const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) 
                           {field.label}
                         </label>
                         
-                        {/* select 타입 처리 */}
                         {field.type === 'select' ? (
                           <select
                             name={field.id}
@@ -434,7 +429,6 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // 모달 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTask, setEditingTask] = useState(null); 
@@ -505,16 +499,36 @@ export default function App() {
   const filteredTasks = tasks.filter(task => {
     const isExtrusion = task.currentProcess === '압출';
     
-    // 검색어가 없으면 압출 공정 데이터만 모두 보여줌
     if (!searchQuery) return isExtrusion;
 
-    // 검색어를 소문자로 변환하여 대소문자 구분 없이 검색
     const lowerQuery = searchQuery.toLowerCase();
     
-    // task 객체의 모든 값(value)들을 검사하여 하나라도 검색어를 포함하면 true 반환
-    const matchesSearch = Object.values(task).some(value => 
+    // 1. 기본 전체 항목 검색
+    let matchesSearch = Object.values(task).some(value => 
       value && String(value).toLowerCase().includes(lowerQuery)
     );
+
+    // 2. 내경*외경*길이 특수 검색 (예: "4 7", "4*7", "4 7 410")
+    // 붙여쓴 숫자(예: 47)는 내경/외경 조합으로 인식하지 않음
+    if (!matchesSearch && task.prodInner && task.prodOuter) {
+      const i = parseFloat(task.prodInner);
+      const o = parseFloat(task.prodOuter);
+      const l = parseFloat(task.prodLength);
+      
+      if (!isNaN(i) && !isNaN(o)) {
+        // 검색어의 공백(연속된 공백 포함)을 '*'로 변환
+        // "4 7" -> "4*7", "4 7 410" -> "4*7*410", "47" -> "47"
+        const normalizedQuery = lowerQuery.trim().replace(/\s+/g, '*');
+        
+        const target1 = `${i}*${o}`;
+        const target2 = !isNaN(l) ? `${i}*${o}*${l}` : "";
+
+        // 정규화된 검색어가 타겟 문자열에 포함되는지 확인
+        if (target1.includes(normalizedQuery) || (target2 && target2.includes(normalizedQuery))) {
+          matchesSearch = true;
+        }
+      }
+    }
 
     return isExtrusion && matchesSearch;
   });
@@ -538,7 +552,7 @@ export default function App() {
           <input
             type="text"
             className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
-            placeholder="모든 항목 검색 (업체명, 온도, 메모 등)"
+            placeholder="검색 (업체명, 5 8, 4 7 410 등)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -566,7 +580,7 @@ export default function App() {
         ) : (
           <div className="flex flex-col items-center justify-center h-40 text-gray-400 space-y-2">
             <Factory size={40} className="text-gray-300 opacity-50" />
-            <p className="text-sm font-medium">압출 공정 데이터가 없습니다.</p>
+            <p className="text-sm font-medium">검색 결과가 없습니다.</p>
           </div>
         )}
       </main>
