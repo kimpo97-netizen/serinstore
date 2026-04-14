@@ -1,1606 +1,592 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예약 관리자 (PC 대시보드)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
-    <style>
-        :root {
-            --primary: #3B82F6; 
-            --bg-color: #F1F5F9; 
-            --card-bg: #FFFFFF;
-            --text-main: #0F172A; 
-            --text-sub: #64748B;  
-            --border: #CBD5E1;   
-        }
+import React, { useState, useEffect } from 'react';
+import { 
+  Factory, 
+  Search, 
+  Menu,
+  Settings,
+  Beaker,
+  Wrench,
+  AlertTriangle,
+  PlayCircle,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  X,
+  Save,
+  Pencil
+} from 'lucide-react';
 
-        body { 
-            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            letter-spacing: -0.02em; 
-            overflow-y: scroll; 
-        }
+const GOOGLE_SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzQgGcPys6m3PRfdFLiIPhvYpwn8Rnydck5xcCnjfpmasiZ7NQx6o6wRPp9qYCmP_9G/exec';
 
-        .font-tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; letter-spacing: 0; }
-        body.modal-open { overflow: hidden; height: 100vh; position: fixed; width: 100%; padding-right: 15px; }
+// 임시 데이터
+const mockExtrusionData = [
+  {
+    id: "압출-1",
+    currentProcess: "압출",
+    client: "대한의료기기",
+    product: "의료용 실리콘 튜브",
+    registeredAt: "2026-04-14 09:30",
+    machineType: "큐텍스1",
+    machineNo: "1호기",
+    prodInner: "5.0mm",
+    prodOuter: "8.0mm",
+    prodLength: "2000M",
+    nogis: "7.95mm",
+    preShrink: "2010M",
+    moldInner: "4.8mm",
+    moldOuter: "8.2mm",
+    inputSpeed: "20",
+    massiveDecel: "적용",
+    reverseSpeed: "10",
+    singleSpeed: "5",
+    extruderTemp: "120℃",
+    extruderSpeed: "45 rpm",
+    cutterSpeed: "60",
+    cutterLength: "100mm",
+    tension1: "30",
+    tension2: "32",
+    qtex1Jig: "A형 지그",
+    qtex1Feed: "15",
+    qtex1Speed: "20",
+    qtex1Press: "0.5",
+    qtex2Jig: "B형 지그",
+    qtex2Feed: "15",
+    qtex2Speed: "20",
+    qtex2Press: "0.5",
+    status: "진행중",
+    note: "치수 공차 매우 중요, 클린룸 작업"
+  }
+];
 
-        /* 가로형 리스트 및 체크박스 스타일 */
-        .list-row {
-            background: var(--card-bg);
-            border-width: 1px;
-            border-style: solid;
-            border-color: #E2E8F0;
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .list-row:hover { border-color: #CBD5E1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transform: translateY(-1px); }
-        .list-row.selected { background-color: #EFF6FF; border-color: #93C5FD; }
+// 작은 정보 표시용 일반 아이템 컴포넌트
+const DetailItem = ({ label, value }) => (
+  <div className="flex flex-col bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+    <span className="text-sm text-gray-500 font-semibold mb-0.5">{label}</span>
+    <span className="font-bold text-gray-800 text-lg truncate">{value || '-'}</span>
+  </div>
+);
 
-        .checkbox-custom { accent-color: #2563EB; width: 1.1rem; height: 1.1rem; cursor: pointer; border-radius: 4px; }
+// ----------------------------------------------------
+// 1. 압출 전용 상세 카드 컴포넌트
+// ----------------------------------------------------
+const ExtrusionCard = ({ task, onEdit }) => {
+  const typeStr = task.machineType || '';
+  const showCutter = typeStr.includes('컷팅');
+  const showTension = typeStr.includes('인장');
+  const showQtex1 = typeStr.includes('큐텍스1');
+  const showQtex2 = typeStr.includes('큐텍스2');
 
-        .status-badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; line-height: 1; border: 1px solid transparent; white-space: nowrap; }
-        .status-wait { background-color: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
-        .status-confirm { background-color: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; }
-        .status-return { background-color: #F1F5F9; color: #475569; border-color: #E2E8F0; }
-        .status-hold { background-color: #F5F3FF; color: #7C3AED; border-color: #DDD6FE; } 
-        .status-cancel { background-color: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+  // 아이템 렌더링
+  const renderItems = (items) => {
+    const validItems = items.filter(item => item.value && String(item.value).trim() !== '' && item.value !== '-');
+    if (validItems.length === 0) return <p className="text-xs text-gray-400 py-1 pl-1">입력된 항목 없음</p>;
+    return (
+      <div className="grid grid-cols-2 gap-2.5">
+        {validItems.map((item, idx) => (
+          <DetailItem key={idx} label={item.label} value={item.value} />
+        ))}
+      </div>
+    );
+  };
 
-        /* 모달 스타일 PC 최적화 */
-        #modal-root, #calendar-modal-root { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 200; display: none; justify-content: center; align-items: center; }
-        #modal-root.active, #calendar-modal-root.active { display: flex; }
-        .modal-overlay { position: absolute; inset: 0; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); }
-
-        .center-modal {
-            position: relative; width: 100%; max-width: 650px; 
-            background-color: #FFFFFF; border-radius: 20px; max-height: 90vh;
-            display: flex; flex-direction: column; transform: scale(0.95); opacity: 0;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); z-index: 210;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-        #modal-root.active .center-modal, #calendar-modal-root.active .center-modal { transform: scale(1); opacity: 1; }
-
-        .scroll-area { flex: 1; overflow-y: auto; padding: 24px; }
-        .form-section { background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .form-title { font-size: 14px; font-weight: 800; color: #1E293B; margin-bottom: 16px; display: flex; align-items: center; }
-        .form-title::before { content: ''; width: 4px; height: 14px; background: var(--primary); margin-right: 8px; border-radius: 2px; }
-        .input-label { display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 6px; margin-left: 2px; }
-        
-        .input-field { width: 100%; padding: 12px 14px; background: white; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; font-weight: 600; outline: none; transition: all 0.2s; }
-        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-
-        .status-btn { border: 1px solid #CBD5E1; background: white; font-size: 13px; font-weight: 700; color: #64748B; padding: 12px 0; border-radius: 8px; transition: all 0.2s; cursor: pointer; }
-        .status-btn:hover { background-color: #F8FAFC; }
-        
-        .chip-btn { border: 1px solid #CBD5E1; background: white; color: var(--text-sub); transition: all 0.2s; border-radius: 8px; font-size: 13px; font-weight: 700; padding: 8px 14px; cursor: pointer; }
-        .chip-btn:hover { border-color: #94A3B8; background-color: #F8FAFC; }
-        .chip-btn.active { background: #1E293B !important; color: white !important; border-color: #1E293B !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        .delivery-sub-filter-item { border-style: dashed; }
-        .delivery-sub-filter-item.active { border-style: solid; }
-
-        .model-select-chip, .method-chip { padding: 10px 16px; border-radius: 8px; border: 1px solid #CBD5E1; background: white; color: #64748B; font-size: 13px; font-weight: 700; transition: all 0.2s; cursor: pointer; }
-        .model-select-chip:hover, .method-chip:hover { background-color: #F8FAFC; }
-        .model-select-chip.active, .method-chip.active { background: #1E293B; color: white; border-color: #1E293B; }
-
-        @keyframes fade-in-up { 0% { opacity: 0; transform: translate(-50%, 20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
-        .toast-msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #191F28; color: white; padding: 14px 24px; border-radius: 50px; font-size: 14px; font-weight: 700; z-index: 1000; animation: fade-in-up 0.3s ease-out; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-        
-        .cal-day-cell { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.1s; margin: 2px; }
-        .cal-day-cell:hover { background-color: #E2E8F0; }
-        .range-start, .range-end { background-color: #2563EB !important; color: white !important; }
-        .range-middle { background-color: #EFF6FF !important; color: #1E293B !important; border-radius: 4px !important; }
-    </style>
-</head>
-<body>
-
-    <!-- 상단 네비게이션 바 -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm h-16 flex items-center px-6 md:px-8">
-        <div class="flex-1 flex items-center gap-3">
-            <span class="text-xl font-black text-slate-900 tracking-tight">📱 세린캠 예약 관리자</span>
-            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">v1</span>
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-slate-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-200 rounded text-sm font-bold text-slate-700 shadow-sm">
+          <Factory size={16} className="text-blue-500" />압출
         </div>
-        
-        <div class="flex-1 max-w-md mx-auto">
-            <div class="relative flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
-                <svg class="text-slate-400 ml-3 shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="search-input" onkeyup="filterData()" placeholder="이름, 연락처, 기기명 검색" class="w-full bg-transparent border-none text-sm font-bold text-slate-800 placeholder-slate-400 outline-none p-2.5">
-            </div>
+        <div className="flex items-center gap-2">
+          {task.machineType && (
+            <span className="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-md shadow-sm">
+              기계 종류: {task.machineType}
+            </span>
+          )}
+          <button 
+            onClick={() => onEdit(task)}
+            className="flex items-center gap-1 text-xs font-bold text-slate-600 bg-white hover:text-blue-600 hover:border-blue-300 border border-slate-200 px-2.5 py-1.5 rounded-md shadow-sm transition-all"
+          >
+            <Pencil size={12} /> 수정
+          </button>
+        </div>
+      </div>
+
+      <div className="p-4">
+        {/* 기본 정보 및 뱃지 */}
+        <div className="mb-5">
+          <p className="text-sm font-bold text-blue-600 mb-0.5">
+            {task.client} <span className="text-gray-400 font-normal ml-1">| {task.registeredAt}</span>
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-2xl font-black text-gray-900 leading-tight">{task.product}</h3>
+          </div>
         </div>
 
-        <div class="flex-1 flex justify-end items-center gap-2">
-            <button onclick="toggleSortMode()" class="h-10 px-4 flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-sm font-bold text-slate-700 shadow-sm transition-all">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
-                정렬: <span id="sort-mode-text" class="text-blue-600">최신순</span>
-            </button>
-            <button onclick="fetchData()" class="h-10 px-4 flex items-center gap-2 bg-slate-800 hover:bg-slate-900 rounded-lg text-sm font-bold text-white shadow-sm transition-all">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                새로고침
-            </button>
+        {/* 세부 정보 목록 */}
+        <div className="space-y-4">
+          
+          {/* 1. 제품 규격 */}
+          <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+            <h4 className="text-sm font-extrabold text-blue-800 mb-3 flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-600"></div> 제품 규격
+            </h4>
+            <div className="grid grid-cols-3 gap-1 text-center divide-x divide-blue-200/60">
+              <div className="flex flex-col">
+                <span className="text-sm text-blue-600 font-bold mb-1">내경</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.prodInner || '-'}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-blue-600 font-bold mb-1">외경</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.prodOuter || '-'}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-blue-600 font-bold mb-1">길이</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.prodLength || '-'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. 압출기 세팅 */}
+          <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 shadow-sm">
+             <h4 className="text-sm font-extrabold text-orange-800 mb-3 flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-orange-600"></div> 압출기 세팅
+            </h4>
+            <div className="grid grid-cols-3 gap-1 text-center divide-x divide-orange-200/60">
+              <div className="flex flex-col">
+                <span className="text-sm text-orange-600 font-bold mb-1">번호</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.machineNo || '-'}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-orange-600 font-bold mb-1">온도</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.extruderTemp || '-'}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-orange-600 font-bold mb-1">속도</span>
+                <span className="font-black text-gray-800 text-2xl truncate">{task.extruderSpeed || '-'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. 금형 및 실측 규격 */}
+          <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-sm">
+             <h5 className="text-sm font-extrabold text-emerald-800 mb-3 flex items-center gap-1.5">
+               <div className="w-2 h-2 rounded-full bg-emerald-600"></div> 금형 및 실측 규격
+             </h5>
+             <div className="grid grid-cols-4 gap-1 text-center divide-x divide-emerald-200/60">
+               <div className="flex flex-col">
+                 <span className="text-xs text-emerald-600 font-bold mb-1">금형 내경</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.moldInner || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-emerald-600 font-bold mb-1">금형 외경</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.moldOuter || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-emerald-600 font-bold mb-1">노기스</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.nogis || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-emerald-600 font-bold mb-1">수축 전</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.preShrink || '-'}</span>
+               </div>
+             </div>
+          </div>
+
+          {/* 4. 회전 및 투입 세팅 */}
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+             <h5 className="text-sm font-extrabold text-slate-700 mb-3 flex items-center gap-1.5">
+               <div className="w-2 h-2 rounded-full bg-slate-500"></div> 회전 및 투입 세팅
+             </h5>
+             <div className="grid grid-cols-4 gap-1 text-center divide-x divide-slate-200/60">
+               <div className="flex flex-col">
+                 <span className="text-xs text-slate-500 font-bold mb-1">투입속도</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.inputSpeed || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-slate-500 font-bold mb-1">다량감속</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.massiveDecel || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-slate-500 font-bold mb-1">역회전</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.reverseSpeed || '-'}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs text-slate-500 font-bold mb-1">싱글속도</span>
+                 <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.singleSpeed || '-'}</span>
+               </div>
+             </div>
+          </div>
+
+          {/* 5. 조건부 노출 (컷팅기/인장기/큐텍스) */}
+          {showCutter && (
+             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+               <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">✂️ 컷팅기 세팅</h5>
+               {renderItems([
+                 { label: '컷팅기 속도', value: task.cutterSpeed },
+                 { label: '컷팅기 길이', value: task.cutterLength },
+               ])}
+             </div>
+          )}
+
+          {showTension && (
+             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+               <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">⛓️ 인장기 세팅</h5>
+               {renderItems([
+                 { label: '1번 속도', value: task.tension1 },
+                 { label: '2번 속도', value: task.tension2 },
+               ])}
+             </div>
+          )}
+
+          {showQtex1 && (
+             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+               <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">🕹️ 큐텍스1 세팅</h5>
+               <div className="grid grid-cols-2 gap-2.5">
+                 <DetailItem label="지그" value={task.qtex1Jig} />
+                 <DetailItem label="피딩 속도" value={task.qtex1Feed} />
+                 <DetailItem label="속도" value={task.qtex1Speed} />
+                 <DetailItem label="누름" value={task.qtex1Press} />
+               </div>
+             </div>
+          )}
+
+          {showQtex2 && (
+             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+               <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">🕹️ 큐텍스2 세팅</h5>
+               <div className="grid grid-cols-2 gap-2.5">
+                 <DetailItem label="지그" value={task.qtex2Jig} />
+                 <DetailItem label="피딩 속도" value={task.qtex2Feed} />
+                 <DetailItem label="속도" value={task.qtex2Speed} />
+                 <DetailItem label="누름" value={task.qtex2Press} />
+               </div>
+             </div>
+          )}
         </div>
-    </header>
 
-    <!-- 메인 레이아웃 -->
-    <div class="max-w-[1800px] mx-auto flex gap-6 p-6">
-        
-        <!-- 왼쪽 사이드바 (고정 필터 영역) -->
-        <aside class="w-[300px] shrink-0 flex flex-col gap-5">
-            <!-- 1. 대여 일정 필터 (NEW) -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">📅 수령일(예약일)</h3>
-                    <button onclick="setDateFilter('all')" id="btn-clear-date" class="hidden text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors">초기화 ✕</button>
-                </div>
-                <div id="filter-group-date" class="flex flex-wrap gap-2 max-h-[160px] overflow-y-auto pr-1">
-                    <button onclick="setDateFilter('all')" class="chip-btn date-filter-item active" data-id="all">전체</button>
-                </div>
-            </div>
-
-            <!-- 2. 기기 모델 필터 -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">📱 기기 모델</h3>
-                    <div class="flex gap-1">
-                        <button onclick="toggleBackupFilter()" id="btn-quick-backup" class="px-2 py-1 rounded text-[11px] font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-1">
-                            백업 <span id="quick-backup-count" class="text-blue-600 font-tnum">0</span>
-                        </button>
-                        <button onclick="toggleExtensionFilter()" id="btn-quick-extension" class="px-2 py-1 rounded text-[11px] font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-1">
-                            연장 <span id="quick-extension-count" class="text-emerald-600 font-tnum">0</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="filter-group-model" class="flex flex-wrap gap-2">
-                    <button onclick="setModelFilter('all')" class="chip-btn model-filter-item active" data-id="all">전체</button>
-                    <button onclick="setModelFilter('23U')" class="chip-btn model-filter-item" data-id="23U">23U</button>
-                    <button onclick="setModelFilter('24U')" class="chip-btn model-filter-item" data-id="24U">24U</button>
-                    <button onclick="setModelFilter('25U')" class="chip-btn model-filter-item" data-id="25U">25U</button>
-                    <button onclick="setModelFilter('26U')" class="chip-btn model-filter-item" data-id="26U">26U</button>
-                    <button onclick="setModelFilter('17P')" class="chip-btn model-filter-item" data-id="17P">17P</button>
-                    <button onclick="setModelFilter('17PM')" class="chip-btn model-filter-item" data-id="17PM">17PM</button>
-                </div>
-            </div>
-
-            <!-- 3. 수령 방법 필터 -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">📦 수령 방법</h3>
-                <div id="filter-group-delivery" class="flex flex-wrap gap-2">
-                    <button onclick="setDeliveryFilter('all')" class="chip-btn delivery-filter-item active" data-id="all">전체</button>
-                    <button onclick="setDeliveryFilter('택배')" class="chip-btn delivery-filter-item" data-id="택배">택배</button>
-                    <button onclick="setDeliveryFilter('공연장')" class="chip-btn delivery-filter-item" data-id="공연장">공연장</button>
-                    <button onclick="setDeliveryFilter('사무실')" class="chip-btn delivery-filter-item" data-id="사무실">사무실</button>
-                </div>
-                <div id="sub-filter-group-delivery" class="hidden flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
-                    <button onclick="setDeliverySubFilter('all')" class="chip-btn delivery-sub-filter-item active !bg-slate-50 !border-slate-300 text-slate-600" data-id="all">전체보기</button>
-                    <button onclick="setDeliverySubFilter('remaining')" class="chip-btn delivery-sub-filter-item !border-blue-300 text-blue-700 hover:bg-blue-50" data-id="remaining">남은인원</button>
-                    <button onclick="setDeliverySubFilter('pickedup')" class="chip-btn delivery-sub-filter-item !border-emerald-300 text-emerald-700 hover:bg-emerald-50" data-id="pickedup">수령인원</button>
-                </div>
-            </div>
-
-            <!-- 4. 반납 방법 필터 -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">↩️ 반납 방법</h3>
-                <div id="filter-group-return" class="flex flex-wrap gap-2">
-                    <button onclick="setReturnFilter('all')" class="chip-btn return-filter-item active" data-id="all">전체</button>
-                    <button onclick="setReturnFilter('택배')" class="chip-btn return-filter-item" data-id="택배">택배</button>
-                    <button onclick="setReturnFilter('당일')" class="chip-btn return-filter-item" data-id="당일">당일</button>
-                    <button onclick="setReturnFilter('사무실')" class="chip-btn return-filter-item" data-id="사무실">사무실</button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- 오른쪽 메인 콘텐츠 (예약 리스트) -->
-        <main class="flex-1 relative">
-            <div id="loading" class="flex flex-col items-center justify-center py-40 h-full bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div class="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-                <p class="text-sm font-bold text-slate-500">서버에서 예약 데이터를 불러오는 중입니다...</p>
-            </div>
-            
-            <!-- 리스트 헤더 (가로형) - 체크박스 및 열 순서/넓이 변경 -->
-            <div id="list-header" class="hidden bg-white border border-slate-200 rounded-xl mb-3 items-center px-4 py-3 text-[13px] font-extrabold text-slate-500 gap-3 shadow-sm sticky top-[72px] z-10">
-                <div class="w-8 text-center shrink-0 flex items-center justify-center pl-1">
-                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(event)" class="checkbox-custom" title="전체 선택">
-                </div>
-                <div class="w-14 text-center shrink-0">상태</div>
-                <div class="w-20 text-center shrink-0">접수일시</div>
-                <div class="w-32 shrink-0">기기 및 번호</div>
-                <div class="flex-1 shrink-0">고객 정보</div>
-                <div class="w-48 shrink-0 px-2">배송지 주소</div>
-                <div class="w-64 shrink-0">대여 일정 및 행사명</div>
-                <div class="w-[72px] shrink-0">결제 금액</div>
-                <div class="w-24 shrink-0 text-center">송장번호</div>
-            </div>
-
-            <!-- PC 가로형 리스트 컨테이너 -->
-            <div id="list-container" class="flex flex-col gap-2.5 pb-24"></div>
-        </main>
+        {/* 메모 */}
+        {task.note && (
+          <div className="flex items-start gap-2 mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm font-medium border border-red-100">
+            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+            <p className="leading-snug">{task.note}</p>
+          </div>
+        )}
+      </div>
     </div>
+  );
+};
 
-    <!-- 다중 선택 일괄 처리 바 -->
-    <div id="bulk-action-bar" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white p-4 rounded-[20px] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-slate-700 flex flex-col gap-3 z-50 transition-all duration-300 translate-y-32 opacity-0 pointer-events-none w-max max-w-[90vw]">
-        
-        <!-- 1열: 상태 변경 및 선택 정보 -->
-        <div class="flex items-center justify-between gap-4 w-full">
-            <div class="flex items-center gap-2 pl-1">
-                <!-- 선택 개수가 많아져도 상자가 글씨에 맞게 늘어납니다 -->
-                <span class="flex items-center justify-center px-2 min-w-[24px] h-6 rounded-full bg-blue-500 text-white font-black text-[12px] font-tnum" id="bulk-count">0</span>
-                <span class="font-bold text-[13px] text-slate-200 whitespace-nowrap">선택됨</span>
-            </div>
-            <div class="w-px h-5 bg-slate-700"></div>
-            <div class="flex items-center gap-1.5 flex-wrap justify-center">
-                <button onclick="bulkUpdateStatus('확정')" class="text-[13px] font-bold bg-[#0064FF] hover:bg-[#0052D4] px-3.5 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap">확정 ➔</button>
-                <button onclick="bulkUpdateStatus('반납완료')" class="text-[13px] font-bold bg-slate-700 hover:bg-slate-600 px-3.5 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap">반납완료 ➔</button>
-                <button onclick="bulkUpdateStatus('대기')" class="text-[13px] font-bold bg-purple-600 hover:bg-purple-500 px-3.5 py-1.5 rounded-lg transition-colors shadow-sm whitespace-nowrap">대기 ➔</button>
-                <button onclick="bulkUpdateStatus('취소')" class="text-[13px] font-bold bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">취소 ➔</button>
-            </div>
-            <button onclick="clearSelection()" class="ml-1 p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors shrink-0" title="선택 해제">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
+// ----------------------------------------------------
+// 신규 작업 추가 및 수정 폼 (모달) 컴포넌트
+// ----------------------------------------------------
+const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) => {
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialData || {});
+    }
+  }, [isOpen, initialData]);
+
+  if (!isOpen) return null;
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  const themeStyles = {
+    slate: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-800', label: 'text-slate-600', inputBorder: 'border-slate-200', focus: 'focus:ring-slate-500 focus:border-slate-500' },
+    blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', label: 'text-blue-600', inputBorder: 'border-blue-200', focus: 'focus:ring-blue-500 focus:border-blue-500' },
+    orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', label: 'text-orange-600', inputBorder: 'border-orange-200', focus: 'focus:ring-orange-500 focus:border-orange-500' },
+    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', label: 'text-emerald-600', inputBorder: 'border-emerald-200', focus: 'focus:ring-emerald-500 focus:border-emerald-500' },
+    gray: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', label: 'text-gray-600', inputBorder: 'border-gray-200', focus: 'focus:ring-gray-500 focus:border-gray-500' },
+    red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', label: 'text-red-600', inputBorder: 'border-red-200', focus: 'focus:ring-red-500 focus:border-red-500' }
+  };
+
+  // 모든 폼 항목 정의
+  // 기계 종류(machineType)를 select(드롭다운) 타입으로 변경했습니다.
+  const formGroups = [
+    { id: 'basic', title: '기본 정보', theme: 'slate', icon: null, gridCols: 'grid-cols-2', fields: [
+      {id:'client', label:'업체명', type: 'text'}, 
+      {id:'product', label:'품명', type: 'text'}, 
+      {id:'machineType', label:'기계 종류 (택1)', type: 'select', options: ['선택 안함', '컷팅기', '인장기1', '인장기2', '큐텍스1', '큐텍스2']}, 
+      {id:'machineNo', label:'압출기 번호', type: 'text'}
+    ] },
+    { id: 'specs', title: '제품 규격', theme: 'blue', icon: <div className="w-2 h-2 rounded-full bg-blue-600"></div>, gridCols: 'grid-cols-3', fields: [{id:'prodInner', label:'내경'}, {id:'prodOuter', label:'외경'}, {id:'prodLength', label:'길이'}] },
+    { id: 'extruder', title: '압출기 세팅', theme: 'orange', icon: <div className="w-2 h-2 rounded-full bg-orange-600"></div>, gridCols: 'grid-cols-2', fields: [{id:'extruderTemp', label:'온도'}, {id:'extruderSpeed', label:'속도'}] },
+    { id: 'mold', title: '금형 및 실측', theme: 'emerald', icon: <div className="w-2 h-2 rounded-full bg-emerald-600"></div>, gridCols: 'grid-cols-2', fields: [{id:'moldInner', label:'금형 내경'}, {id:'moldOuter', label:'금형 외경'}, {id:'nogis', label:'노기스'}, {id:'preShrink', label:'수축 전'}] },
+    { id: 'rotation', title: '회전 및 투입 세팅', theme: 'slate', icon: <div className="w-2 h-2 rounded-full bg-slate-500"></div>, gridCols: 'grid-cols-2', fields: [{id:'inputSpeed', label:'투입속도'}, {id:'massiveDecel', label:'다량감속'}, {id:'reverseSpeed', label:'역회전'}, {id:'singleSpeed', label:'싱글속도'}] },
+    { id: 'cutter', title: '✂️ 컷팅기 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'cutterSpeed', label:'속도'}, {id:'cutterLength', label:'길이'}] },
+    { id: 'tension', title: '⛓️ 인장기 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'tension1', label:'1번 속도'}, {id:'tension2', label:'2번 속도'}] },
+    { id: 'qtex1', title: '🕹️ 큐텍스1 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'qtex1Jig', label:'지그'}, {id:'qtex1Feed', label:'피딩속도'}, {id:'qtex1Speed', label:'속도'}, {id:'qtex1Press', label:'누름'}] },
+    { id: 'qtex2', title: '🕹️ 큐텍스2 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'qtex2Jig', label:'지그'}, {id:'qtex2Feed', label:'피딩속도'}, {id:'qtex2Speed', label:'속도'}, {id:'qtex2Press', label:'누름'}] },
+    { id: 'memo', title: '메모 (비고)', theme: 'red', icon: <AlertTriangle size={14} className="text-red-600" />, gridCols: 'grid-cols-1', fields: [{id:'note', label:'특이사항 및 주의점 입력'}] }
+  ];
+
+  // 현재 선택된 기계 종류 값을 가져옵니다.
+  const currentMachineType = formData.machineType || '';
+
+  // 기계 종류 선택값에 따라 보여줄 폼 그룹을 동적으로 필터링합니다.
+  const visibleFormGroups = formGroups.filter(group => {
+    if (group.id === 'cutter') return currentMachineType.includes('컷팅');
+    if (group.id === 'tension') return currentMachineType.includes('인장'); // 인장기1, 인장기2 모두 포함
+    if (group.id === 'qtex1') return currentMachineType.includes('큐텍스1');
+    if (group.id === 'qtex2') return currentMachineType.includes('큐텍스2');
+    return true; // 기본 정보, 규격 등은 항상 표시
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-md max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="flex justify-between items-center px-5 py-4 bg-slate-900 text-white">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            {initialData ? <Pencil size={20} /> : <Plus size={20} />} 
+            {initialData ? '작업 수정' : '신규 작업 등록'}
+          </h2>
+          <button onClick={onClose} disabled={isSubmitting} className="text-slate-300 hover:text-white"><X size={24} /></button>
         </div>
         
-        <!-- 구분선 -->
-        <div class="w-full h-px bg-slate-700/50"></div>
-        
-        <!-- 2열: 배송 및 엑셀 관련 기능 -->
-        <div class="flex items-center gap-2 w-full justify-center">
-            <button onclick="copyForPostOffice()" class="flex-1 justify-center text-[13px] font-bold bg-[#F59E0B] hover:bg-[#D97706] text-white px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-1.5 whitespace-nowrap" title="대여모델/이름/우편번호/주소/연락처 복사">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                우체국 배송 등록
-            </button>
+        <form id="newTaskForm" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-4">
+          {visibleFormGroups.map((group) => {
+            const style = themeStyles[group.theme];
+            return (
+              <div key={group.id} className={`${style.bg} p-4 rounded-xl border ${style.border} shadow-sm`}>
+                <h3 className={`text-sm font-extrabold ${style.text} mb-3 flex items-center gap-1.5 border-b ${style.border} pb-2`}>
+                  {group.icon} {group.title}
+                </h3>
+                <div className={`grid ${group.gridCols} gap-2.5`}>
+                  {group.fields.map(field => {
+                    // 💡 인장기 종류에 따른 입력 비활성화 로직
+                    let isDisabled = false;
+                    if (currentMachineType === '인장기1' && field.id === 'tension2') isDisabled = true;
+                    if (currentMachineType === '인장기2' && field.id === 'tension1') isDisabled = true;
 
-            <button onclick="openBulkTrackingModal()" class="flex-1 justify-center text-[13px] font-bold bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-1.5 whitespace-nowrap">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 
-                배송시작 알림톡 발송
-            </button>
-        </div>
-        
-    </div>
-
-    <!-- 상세 정보 모달 (PC 폼) -->
-    <div id="modal-root">
-        <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="center-modal">
-            <div class="px-8 py-6 border-b border-slate-200 flex-none bg-white rounded-t-[20px] flex justify-between items-center">
-                <h2 class="text-xl font-black tracking-tight text-slate-900">예약 상세 내용</h2>
-                <button type="button" onclick="closeModal()" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-            </div>
-            
-            <div class="scroll-area bg-slate-50">
-                <form id="edit-form" onsubmit="submitUpdate(event)">
-                    <input type="hidden" id="edit-row">
-                    <input type="hidden" id="edit-sheet-name">
-                    
-                    <div class="form-section shadow-sm bg-white">
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="form-title !mb-0">고객 정보</div>
-                            <span id="display-order-time" class="text-xs font-bold text-slate-400 font-tnum">접수: -</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="input-group"><label class="input-label">이름</label><input type="text" id="edit-name" class="input-field"></div>
-                            <div class="input-group"><label class="input-label">연락처</label><input type="text" id="edit-phone" class="input-field font-tnum font-bold"></div>
-                        </div>
-                        <div class="grid grid-cols-1 gap-2">
-                            <label class="input-label">우편번호 / 배송지 주소</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="edit-zipcode" placeholder="우편번호" class="input-field w-1/3 font-tnum text-center">
-                                <input type="text" id="edit-address" placeholder="기본 주소 및 상세 주소" class="input-field w-2/3">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section shadow-sm bg-white">
-                        <div class="form-title">진행 상태</div>
-                        <input type="hidden" id="edit-status-val">
-                        <div class="grid grid-cols-5 gap-2">
-                            <button type="button" onclick="setEditStatus('예약신청')" id="btn-status-wait" class="status-btn">신청</button>
-                            <button type="button" onclick="setEditStatus('대기')" id="btn-status-hold" class="status-btn">대기</button>
-                            <button type="button" onclick="setEditStatus('확정')" id="btn-status-confirm" class="status-btn">확정</button>
-                            <button type="button" onclick="setEditStatus('반납완료')" id="btn-status-return" class="status-btn">반납</button>
-                            <button type="button" onclick="setEditStatus('취소')" id="btn-status-cancel" class="status-btn">취소</button>
-                        </div>
-                    </div>
-
-                    <div class="form-section shadow-sm bg-white">
-                        <div class="form-title">기기 배정 및 결제</div>
-                        <div class="space-y-5">
-                            <div>
-                                <label class="input-label mb-2">기기 모델 선택</label>
-                                <div class="flex flex-wrap gap-2" id="edit-model-list">
-                                    <button type="button" onclick="selectEditModel('23U')" class="model-select-chip" data-val="23U">23U</button>
-                                    <button type="button" onclick="selectEditModel('24U')" class="model-select-chip" data-val="24U">24U</button>
-                                    <button type="button" onclick="selectEditModel('25U')" class="model-select-chip" data-val="25U">25U</button>
-                                    <button type="button" onclick="selectEditModel('26U')" class="model-select-chip" data-val="26U">26U</button>
-                                    <button type="button" onclick="selectEditModel('17P')" class="model-select-chip" data-val="17P">17P</button>
-                                    <button type="button" onclick="selectEditModel('17PM')" class="model-select-chip" data-val="17PM">17PM</button>
-                                    <button type="button" onclick="selectEditModel('기타')" class="model-select-chip" data-val="기타">기타</button>
-                                </div>
-                                <input type="hidden" id="edit-model-type">
-                                
-                                <div class="grid grid-cols-3 gap-4 mt-4">
-                                    <div class="col-span-2"><label class="input-label">기기 상세 정보/번호</label><input type="text" id="edit-device-id" placeholder="예: 화이트 12번" class="input-field font-tnum"></div>
-                                    <div>
-                                        <label class="input-label">보조배터 유무</label>
-                                        <label class="checkbox-wrapper cursor-pointer block h-[46px]">
-                                            <input type="checkbox" id="edit-battery" class="hidden">
-                                            <div id="battery-box-ui" class="w-full h-full border border-slate-300 rounded-lg flex items-center justify-center bg-white text-slate-500 hover:bg-slate-50 transition-all font-bold text-sm">⚡ 포함</div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="input-label">결제 금액</label><input type="text" id="edit-price" placeholder="금액 입력" inputmode="numeric" class="input-field font-bold text-blue-600 font-tnum"></div>
-                                <div><label class="input-label">택배 송장번호</label><input type="text" id="edit-tracking" placeholder="- 없이 숫자만 입력" inputmode="numeric" class="input-field font-tnum font-bold"></div>
-                            </div>
-                            <div><label class="input-label">관리자 메모</label><textarea id="edit-memo" rows="2" placeholder="참고사항 입력" class="input-field resize-y"></textarea></div>
-                        </div>
-                    </div>
-
-                    <div class="form-section shadow-sm bg-white !mb-0">
-                        <div class="form-title">대여 일정 및 방법</div>
-                        <div class="grid grid-cols-2 gap-4 mb-5">
-                            <div><label class="input-label">수령 예정일</label><input type="date" id="edit-start" class="input-field font-tnum cursor-pointer"></div>
-                            <div><label class="input-label">반납 예정일</label><input type="date" id="edit-end" class="input-field font-tnum cursor-pointer"></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="input-label mb-2">수령 방법</label>
-                                <div class="flex flex-wrap gap-2" id="delivery-method-list">
-                                    <button type="button" onclick="selectMethod('delivery', '택배')" class="method-chip" data-val="택배">택배</button>
-                                    <button type="button" onclick="selectMethod('delivery', '공연장')" class="method-chip" data-val="공연장">공연장</button>
-                                    <button type="button" onclick="selectMethod('delivery', '사무실')" class="method-chip" data-val="사무실">사무실</button>
-                                    <button type="button" onclick="selectMethod('delivery', '퀵')" class="method-chip" data-val="퀵">퀵</button>
-                                </div>
-                                <input type="hidden" id="edit-delivery">
-                            </div>
-                            <div>
-                                <label class="input-label mb-2">반납 방법</label>
-                                <div class="flex flex-wrap gap-2" id="return-method-list">
-                                    <button type="button" onclick="selectMethod('return', '택배')" class="method-chip" data-val="택배">택배</button>
-                                    <button type="button" onclick="selectMethod('return', '공연장')" class="method-chip" data-val="공연장">공연장</button>
-                                    <button type="button" onclick="selectMethod('return', '당일반납')" class="method-chip" data-val="당일반납">당일반납</button>
-                                    <button type="button" onclick="selectMethod('return', '사무실')" class="method-chip" data-val="사무실">사무실</button>
-                                </div>
-                                <input type="hidden" id="edit-return-way">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="p-6 border-t border-slate-200 flex gap-4 rounded-b-[20px] bg-white">
-                <button type="button" onclick="confirmDelete()" class="w-1/4 bg-white border-2 border-[#FEE2E2] text-[#DC2626] hover:bg-[#FEF2F2] font-bold py-4 rounded-xl transition-colors text-sm">목록에서 삭제</button>
-                <button type="button" onclick="submitUpdate(event)" id="save-btn" class="w-3/4 bg-[#0064FF] hover:bg-[#0052D4] text-white font-bold py-4 rounded-xl shadow-md transition-colors text-base">수정 완료 (즉시반영)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 커스텀 알림창 (z-index를 100000으로 높여서 무조건 맨 위에 오도록 수정) -->
-    <div id="app-modal" class="fixed inset-0 hidden flex items-center justify-center p-6" style="z-index: 100000;">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeAppModal()"></div>
-        <div id="app-modal-box" class="bg-white rounded-[24px] p-8 w-full max-w-sm relative z-10 shadow-2xl transform transition-all">
-            <div class="text-center mb-8">
-                <div id="modal-icon" class="text-5xl mb-5">🔔</div>
-                <h3 id="modal-title" class="text-xl font-black text-slate-900 mb-3">알림</h3>
-                <p id="modal-message" class="text-slate-600 text-sm font-medium leading-relaxed break-keep"></p>
-            </div>
-            <div id="modal-actions" class="flex flex-col gap-3"></div>
-        </div>
-    </div>
-
-    <!-- 송장 일괄 입력 모달 -->
-    <div id="bulk-tracking-modal" class="fixed inset-0 hidden flex items-center justify-center p-6" style="z-index: 9999;">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeBulkTrackingModal()"></div>
-        <div class="bg-white rounded-[24px] p-8 w-full max-w-md relative z-10 shadow-2xl flex flex-col transform transition-all">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">🚚 송장 엑셀 통째로 붙여넣기</h3>
-                <button onclick="closeBulkTrackingModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-            </div>
-            <p class="text-[13px] text-slate-500 font-medium mb-4 leading-relaxed break-keep">
-                체크박스로 선택한 <span id="bulk-tracking-count" class="font-bold text-blue-600">0</span>명의 리스트 <strong class="text-slate-700">위에서 아래 순서대로</strong> 송장번호가 매칭됩니다.<br>엑셀에서 세로로 여러 개를 복사(Ctrl+C)한 후, 아래 입력칸에 붙여넣기(Ctrl+V) 해주세요.
-            </p>
-            <textarea id="bulk-tracking-input" rows="8" class="w-full p-4 border border-slate-300 rounded-xl font-tnum text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 resize-none whitespace-pre leading-relaxed font-bold bg-slate-50 text-slate-800" placeholder="예시:&#10;123456789012&#10;987654321098&#10;... (엑셀에서 복사 후 바로 붙여넣기)"></textarea>
-            <div class="flex gap-3 mt-6">
-                <button onclick="closeBulkTrackingModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-colors">취소</button>
-                <button onclick="submitBulkTracking()" id="bulk-tracking-save-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm">다음 (검토하기)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- [NEW] 송장 매칭 검토 모달 -->
-    <div id="bulk-tracking-review-modal" class="fixed inset-0 hidden flex items-center justify-center p-6" style="z-index: 10000;">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closeBulkTrackingReviewModal()"></div>
-        <div class="bg-white rounded-[24px] p-6 w-full max-w-md relative z-10 shadow-2xl flex flex-col transform transition-all max-h-[85vh]">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">👀 매칭 내역 검토</h3>
-                <button onclick="closeBulkTrackingReviewModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-            </div>
-            <p class="text-[13px] text-slate-500 font-medium mb-4 leading-relaxed break-keep">
-                아래 고객에게 배정될 송장번호가 맞는지 최종 확인해주세요.<br/>문제가 없다면 <strong>'최종 등록하기'</strong>를 눌러주세요.
-            </p>
-            <div class="overflow-y-auto flex-1 bg-slate-50 rounded-xl border border-slate-200 p-2.5 mb-6 space-y-2" id="bulk-tracking-review-list">
-                <!-- JS에서 검토 리스트가 자동으로 생성됩니다 -->
-            </div>
-            <div class="flex gap-3 mt-auto pt-2">
-                <button onclick="backToBulkTrackingModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-colors">다시 수정</button>
-                <button onclick="confirmBulkTracking()" id="bulk-tracking-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm">최종 등록하기</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwAobfY64-gI1p1FmqP5kDJAAlnfn5t1mDJOKJZfz-bUJCyDrlwfP-e96pQvv14jwcIJQ/exec"; 
-        const MODEL_LIST = ['23U', '24U', '25U', '26U', '17P', '17PM'];
-        const STATUS_PRIORITY = { '예약신청': 1, '대기': 2, '확정': 3, '반납완료': 4, '취소': 5 };
-
-        let allData = [];
-        let currentlyFilteredList = []; // 현재 필터링된 리스트 (전체선택을 위함)
-        let selectedRows = []; // 다중 선택된 row ID 배열
-        let tempTrackingNumbers = []; // [NEW] 검토용 임시 송장번호 저장
-
-        let currentFilterStatus = 'all';
-        let currentModelFilter = 'all';
-        let currentDeliveryFilter = 'all';
-        let currentDeliverySubFilter = 'all';
-        let currentReturnFilter = 'all';
-        let selectedDates = []; 
-        let currentSortMode = 'latest'; // 정렬 모드 'latest'로 변경
-
-        window.onload = () => fetchData();
-
-        async function fetchData() {
-            toggleLoading(true);
-            try {
-                // [UPDATE] 리다이렉트(redirect: 'follow') 속성을 명시적으로 추가
-                const res = await fetch(`${API_URL}?type=admin_list`, {
-                    method: 'GET',
-                    redirect: 'follow',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const json = await res.json();
-                if(json.result === 'success') {
-                    // [수정] 데이터에 빈 값이 있거나 숫자로 변환된 경우를 방어하기 위해 String() 처리 추가
-                    const validData = json.data.filter(item => item.name || item.phone || (item.model && String(item.model).trim() !== ''));
-                    allData = validData.sort(sortLogic);
-                    renderDateFilters();
-                    filterData();
-                } else { showToast("데이터 로드 실패: " + (json.message || "")); }
-            } catch(e) { 
-                console.error("Fetch Error:", e);
-                showAppAlert(`앱에서 데이터를 처리하다가 오류가 났습니다.\n(숫자/날짜 형식 문제일 수 있습니다)\n\n상세오류: ${e.message}`, "🚨 데이터 로드 실패", "⚠️");
-            } 
-            finally { toggleLoading(false); }
-        }
-
-        function renderDateFilters() {
-            const container = document.getElementById('filter-group-date');
-            // [수정] 날짜 데이터가 숫자로 깨져들어와도 에러가 나지 않도록 String() 강제 변환
-            const dates = [...new Set(allData.map(item => String(item.startDate || '')).filter(d => d && d.includes('-')))].sort();
-            
-            let html = `<button onclick="setDateFilter('all')" class="chip-btn date-filter-item ${selectedDates.length === 0 ? 'active' : ''}" data-id="all">전체</button>`;
-            dates.forEach(date => {
-                const parts = date.split('-');
-                if(parts.length === 3) {
-                    const label = `${parseInt(parts[1])}/${parseInt(parts[2])}`;
-                    const isActive = selectedDates.includes(date) ? 'active' : '';
-                    html += `<button onclick="setDateFilter('${date}')" class="chip-btn date-filter-item ${isActive}" data-id="${date}">${label}</button>`;
-                }
-            });
-            container.innerHTML = html;
-        }
-
-        function setDateFilter(d) {
-            if (d === 'all') selectedDates = []; 
-            else {
-                const index = selectedDates.indexOf(d);
-                if (index > -1) selectedDates.splice(index, 1);
-                else selectedDates.push(d); 
-            }
-
-            document.querySelectorAll('.date-filter-item').forEach(b => {
-                if (b.dataset.id === 'all') b.classList.toggle('active', selectedDates.length === 0);
-                else b.classList.toggle('active', selectedDates.includes(b.dataset.id));
-            });
-
-            const clearBtn = document.getElementById('btn-clear-date');
-            if(clearBtn) {
-                if(selectedDates.length > 0) clearBtn.classList.remove('hidden');
-                else clearBtn.classList.add('hidden');
-            }
-
-            filterData();
-        }
-
-        function toggleSortMode() {
-            currentSortMode = currentSortMode === 'latest' ? 'model' : 'latest';
-            const btnText = document.getElementById('sort-mode-text');
-            if (btnText) {
-                btnText.innerText = currentSortMode === 'latest' ? '최신순' : '모델순';
-            }
-            filterData();
-        }
-
-        function sortLogic(a, b) {
-            if (currentSortMode === 'model') {
-                // [수정] 모델명이 숫자로 변환된 경우를 대비해 String() 추가
-                const modelA = String(a.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
-                const modelB = String(b.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim().toUpperCase();
-                
-                const comp = modelA.localeCompare(modelB, undefined, { numeric: true, sensitivity: 'base' });
-                if (comp !== 0) return comp;
-            }
-
-            // 최신순 정렬: 무조건 접수일시 기준 내림차순 (최근 접수가 맨 위로)
-            const timeA = new Date(a.orderTime).getTime();
-            const timeB = new Date(b.orderTime).getTime();
-            
-            if (!isNaN(timeA) && !isNaN(timeB)) {
-                if (timeA !== timeB) return timeB - timeA;
-            } else if (!isNaN(timeA)) {
-                return -1; // A만 시간 있으면 A를 위로
-            } else if (!isNaN(timeB)) {
-                return 1;  // B만 시간 있으면 B를 위로
-            }
-            
-            // 시간이 같거나 없을 경우 시트의 마지막에 추가된(row 번호가 큰) 데이터가 위로
-            return b.row - a.row;
-        }
-
-        function toggleLoading(show) {
-            const list = document.getElementById('list-container');
-            const loader = document.getElementById('loading');
-            const header = document.getElementById('list-header');
-            if(show) { 
-                if(list) list.innerHTML = ''; 
-                if(loader) loader.classList.remove('hidden'); 
-                if(header) { header.classList.add('hidden'); header.classList.remove('flex'); }
-            }
-            else { 
-                if(loader) loader.classList.add('hidden'); 
-                if(header) { header.classList.add('flex'); header.classList.remove('hidden'); }
-            }
-        }
-
-        function filterData() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            
-            const counts = { 
-                date: { 'all': 0 },
-                model: { 'all': 0, '23U': 0, '24U': 0, '25U': 0, '26U': 0, '17P': 0, '17PM': 0, '백업': 0, '연장': 0 },
-                delivery: { 'all': 0, '택배': 0, '공연장': 0, '사무실': 0 },
-                deliverySub: { 'all': 0, 'remaining': 0, 'pickedup': 0 },
-                return: { 'all': 0, '택배': 0, '당일': 0, '사무실': 0 }
-            };
-
-            document.querySelectorAll('.date-filter-item').forEach(b => {
-                if(b.dataset.id !== 'all') counts.date[b.dataset.id] = 0;
-            });
-
-            const filtered = allData.filter(item => {
-                // [수정] 엑셀의 자동 변환(숫자, 날짜 포맷)으로 인한 앱 크래시 방지를 위해 모두 텍스트로 강제 변환
-                const name = String(item.name || '').toLowerCase();
-                const phone = String(item.phone || '').toLowerCase();
-                const model = String(item.model || '').toUpperCase();
-                const delivery = String(item.delivery || '');
-                const status = String(item.status || '');
-                const startDateStr = String(item.startDate || '');
-                
-                const cleanModel = model.replace(/\s*\+?\s*보조배터리/g, '').trim();
-                const isAssigned = /\d$/.test(cleanModel);
-
-                // [NEW] 카테고리, 모델명, 메모 등 어디에든 백업/연장이 포함되어 있으면 카운팅하도록 강화
-                const isBackup = String(item.category).includes('백업') || model.includes('백업') || String(item.dataBackup).includes('신청') || String(item.memo).includes('백업');
-                const isExtension = String(item.category).includes('연장') || model.includes('연장') || String(item.memo).includes('연장');
-
-                const matchQuery = name.includes(query) || phone.includes(query) || model.includes(query);
-                const matchDate = selectedDates.length === 0 || selectedDates.includes(startDateStr);
-
-                if (matchQuery) {
-                    counts.date['all']++;
-                    if (startDateStr && counts.date[startDateStr] !== undefined) counts.date[startDateStr]++;
-                }
-
-                if (matchDate && matchQuery) {
-                    counts.model.all++;
-                    MODEL_LIST.forEach(m => { if(model.includes(m)) counts.model[m]++; });
-                    if (isBackup) counts.model['백업']++;
-                    if (isExtension) counts.model['연장']++;
-
-                    counts.delivery.all++;
-                    if (delivery.includes('택배')) counts.delivery['택배']++;
-                    if (delivery.includes('공연') || delivery.includes('현장')) counts.delivery['공연장']++;
-                    if (delivery.includes('사무실')) counts.delivery['사무실']++;
-
-                    const matchCurrentDelivery = (currentDeliveryFilter === 'all') || delivery.includes(currentDeliveryFilter);
-                    if (matchCurrentDelivery) {
-                        counts.deliverySub.all++;
-                        if (!isAssigned) counts.deliverySub.remaining++; 
-                        else counts.deliverySub.pickedup++; 
-                    }
-
-                    counts.return.all++;
-                    if (item.returnWay && item.returnWay.includes('택배')) counts.return['택배']++;
-                    if (item.returnWay && item.returnWay.includes('당일')) counts.return['당일']++;
-                    if (item.returnWay && item.returnWay.includes('사무실')) counts.return['사무실']++;
-                }
-
-                if (currentFilterStatus !== 'all' && status !== currentFilterStatus) return false;
-
-                const matchModel = (currentModelFilter === 'all') || 
-                                   (currentModelFilter === '백업' ? isBackup : 
-                                   (currentModelFilter === '연장' ? isExtension : 
-                                   model.includes(currentModelFilter.toUpperCase())));
-                
-                const matchDelivery = (currentDeliveryFilter === 'all') || delivery.includes(currentDeliveryFilter);
-                const matchReturn = (currentReturnFilter === 'all') || (item.returnWay || '').includes(currentReturnFilter);
-
-                let matchDeliverySub = true;
-                if (currentDeliveryFilter !== 'all') { 
-                     if (currentDeliverySubFilter === 'remaining' && isAssigned) matchDeliverySub = false;
-                     if (currentDeliverySubFilter === 'pickedup' && !isAssigned) matchDeliverySub = false;
-                }
-
-                return matchQuery && matchDate && matchModel && matchDelivery && matchReturn && matchDeliverySub;
-            });
-
-            updateFilterUI(counts);
-            filtered.sort(sortLogic);
-            currentlyFilteredList = filtered; // 필터링 결과 저장 (전체선택 용도)
-            renderList(filtered); 
-            updateBulkActionBar(); // UI 갱신 시 바 상태도 함께 체크
-        }
-
-        function updateFilterUI(counts) {
-            const updateTabCounts = (groupId, countObj, isDate = false) => {
-                document.querySelectorAll(`#${groupId} button`).forEach(btn => {
-                    const id = btn.getAttribute('data-id');
-                    if(countObj[id] !== undefined) {
-                        const count = countObj[id];
-                        let baseText = id;
-                        if(id === 'all') baseText = '전체';
-                        else if(id === 'remaining') baseText = '남은인원';
-                        else if(id === 'pickedup') baseText = '수령완료';
-                        else if(isDate && id !== 'all') {
-                            const parts = id.split('-');
-                            if(parts.length === 3) baseText = `${parseInt(parts[1])}/${parseInt(parts[2])}`;
-                        }
+                    return (
+                      <div key={field.id} className="flex flex-col">
+                        <label className={`text-xs font-bold ${style.label} mb-1 ${isDisabled ? 'opacity-40' : ''}`}>
+                          {field.label}
+                        </label>
                         
-                        btn.innerText = `${baseText} (${count})`;
-                        if (id !== 'all' && count === 0) btn.style.display = 'none';
-                        else btn.style.display = '';
-                    }
-                });
-            };
-            
-            updateTabCounts('filter-group-date', counts.date, true);
-            updateTabCounts('filter-group-model', counts.model);
-            updateTabCounts('filter-group-delivery', counts.delivery);
-            updateTabCounts('sub-filter-group-delivery', counts.deliverySub); 
-            updateTabCounts('filter-group-return', counts.return);
-            
-            const backupBtn = document.getElementById('btn-quick-backup');
-            const backupCount = document.getElementById('quick-backup-count');
-            if(backupBtn) {
-                if(backupCount) backupCount.innerText = counts.model['백업'] || 0;
-                if (counts.model['백업'] === 0) backupBtn.classList.add('hidden');
-                else {
-                    backupBtn.classList.remove('hidden');
-                    if(currentModelFilter === '백업') backupBtn.classList.add('bg-blue-100', 'border-blue-300');
-                    else backupBtn.classList.remove('bg-blue-100', 'border-blue-300');
-                }
-            }
-
-            const extensionBtn = document.getElementById('btn-quick-extension');
-            const extensionCount = document.getElementById('quick-extension-count');
-            if(extensionBtn) {
-                if(extensionCount) extensionCount.innerText = counts.model['연장'] || 0;
-                if (counts.model['연장'] === 0) extensionBtn.classList.add('hidden');
-                else {
-                    extensionBtn.classList.remove('hidden');
-                    if(currentModelFilter === '연장') extensionBtn.classList.add('bg-emerald-100', 'border-emerald-300');
-                    else extensionBtn.classList.remove('bg-emerald-100', 'border-emerald-300');
-                }
-            }
-        }
-
-        function toggleBackupFilter() { setModelFilter(currentModelFilter === '백업' ? 'all' : '백업'); }
-        function toggleExtensionFilter() { setModelFilter(currentModelFilter === '연장' ? 'all' : '연장'); }
-        function setModelFilter(m) { currentModelFilter = m; document.querySelectorAll('.model-filter-item').forEach(b => b.classList.toggle('active', b.dataset.id === m)); filterData(); }
-        
-        function setDeliveryFilter(d) { 
-            currentDeliveryFilter = d; currentDeliverySubFilter = 'all'; 
-            document.querySelectorAll('.delivery-filter-item').forEach(b => b.classList.toggle('active', b.dataset.id === d)); 
-            const subGroup = document.getElementById('sub-filter-group-delivery');
-            if (d === 'all') { subGroup.classList.add('hidden'); subGroup.classList.remove('flex'); } 
-            else { subGroup.classList.remove('hidden'); subGroup.classList.add('flex'); }
-            document.querySelectorAll('.delivery-sub-filter-item').forEach(b => b.classList.toggle('active', b.dataset.id === 'all'));
-            filterData(); 
-        }
-
-        function setDeliverySubFilter(sub) { currentDeliverySubFilter = sub; document.querySelectorAll('.delivery-sub-filter-item').forEach(b => b.classList.toggle('active', b.dataset.id === sub)); filterData(); }
-        function setReturnFilter(r) { currentReturnFilter = r; document.querySelectorAll('.return-filter-item').forEach(b => b.classList.toggle('active', b.dataset.id === r)); filterData(); }
-
-        // --- 다중 선택 로직 시작 ---
-        function toggleRowSelection(e, rowId) {
-            e.stopPropagation(); // 카드 클릭(모달 팝업) 이벤트 방지
-            rowId = String(rowId);
-            const index = selectedRows.indexOf(rowId);
-            if (index > -1) selectedRows.splice(index, 1);
-            else selectedRows.push(rowId);
-            
-            // 시각적 업데이트 최적화 (전체 재렌더링 대신 체크박스와 배경만 변경)
-            const checkbox = e.currentTarget.querySelector('input');
-            const card = e.currentTarget.closest('.list-row');
-            if(checkbox) checkbox.checked = index === -1;
-            if(card) {
-                if(index === -1) card.classList.add('selected');
-                else card.classList.remove('selected');
-            }
-            
-            updateBulkActionBar();
-        }
-
-        function toggleSelectAll(e) {
-            const isChecked = e.target.checked;
-            if (isChecked) selectedRows = currentlyFilteredList.map(item => String(item.row));
-            else selectedRows = [];
-            
-            renderList(currentlyFilteredList);
-            updateBulkActionBar();
-        }
-
-        function clearSelection() {
-            selectedRows = [];
-            document.getElementById('selectAllCheckbox').checked = false;
-            renderList(currentlyFilteredList);
-            updateBulkActionBar();
-        }
-
-        function updateBulkActionBar() {
-            const bar = document.getElementById('bulk-action-bar');
-            const count = document.getElementById('bulk-count');
-            const selectAll = document.getElementById('selectAllCheckbox');
-
-            if (selectedRows.length > 0) {
-                count.innerText = selectedRows.length;
-                bar.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
-                if(selectAll) selectAll.checked = selectedRows.length === currentlyFilteredList.length;
-            } else {
-                bar.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
-                if(selectAll) selectAll.checked = false;
-            }
-        }
-
-        async function bulkUpdateStatus(newStatus) {
-            if (selectedRows.length === 0) return;
-
-            // 1. 실패 시 복구를 위한 원본 데이터 백업
-            const originalDataBackup = [];
-            const rowsToUpdate = [...selectedRows]; // 배열 복사
-            
-            rowsToUpdate.forEach(rowId => {
-                const targetIndex = allData.findIndex(item => String(item.row) === rowId);
-                if (targetIndex !== -1) {
-                    originalDataBackup.push({ index: targetIndex, data: { ...allData[targetIndex] } });
-                    allData[targetIndex].status = newStatus; // 상태 즉시 변경
-                }
-            });
-
-            // 2. 낙관적 UI 업데이트 (빠른 반영)
-            clearSelection();
-            filterData();
-            showAppAlert(`${rowsToUpdate.length}건의 상태를 '${newStatus}'(으)로 일괄 변경했습니다.`, "일괄 변경 완료", "✅");
-
-            // 3. 백그라운드 일괄 통신
-            try {
-                // 구글 시트 특성상 한번에 하나씩 저장 API 호출 (Promise.all로 병렬 통신)
-                const promises = rowsToUpdate.map(rowId => {
-                    const item = allData.find(i => String(i.row) === rowId);
-                    if (!item) return Promise.resolve();
-
-                    const payload = {
-                        type: 'update', row: item.row, sheetName: item.sheetName || '예약내역',
-                        name: item.name || '', phone: item.phone || '',
-                        zipCode: item.zipCode || '', address: item.address || '',
-                        startDate: item.startDate || '', endDate: item.endDate || '', 
-                        delivery: item.delivery || '', returnWay: item.returnWay || '', 
-                        status: newStatus, tracking: item.trackingNumber || '',
-                        model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
-                    };
-                    
-                    // [UPDATE] 리다이렉트 허용 및 헤더 강화
-                    return fetch(API_URL, { 
-                        method: 'POST', 
-                        redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload) 
-                    })
-                    .then(res => res.json())
-                    .then(data => { if(data.result !== 'success') throw new Error("서버에서 처리를 실패했습니다."); });
-                });
-
-                await Promise.all(promises);
-            } catch (err) {
-                console.error("일괄 저장 실패", err);
-                // 에러 발생 시 원본 데이터로 다시 롤백
-                originalDataBackup.forEach(backup => { allData[backup.index] = backup.data; });
-                filterData();
-                showAppAlert("인터넷 연결 불안정으로 일부 변경사항이 저장되지 않아 원상복구 되었습니다. 다시 시도해 주세요.", "🚨 저장 실패", "⚠️");
-            }
-        }
-
-        // --- 우체국 배송등록 복사 로직 (NEW) ---
-        function copyForPostOffice() {
-            if (selectedRows.length === 0) return;
-
-            // 화면에 보이는 순서(위에서 아래)대로 정렬
-            const sortedSelectedRows = [...selectedRows].sort((a, b) => {
-                const idxA = currentlyFilteredList.findIndex(item => String(item.row) === String(a));
-                const idxB = currentlyFilteredList.findIndex(item => String(item.row) === String(b));
-                return idxA - idxB;
-            });
-
-            let copyText = "";
-            sortedSelectedRows.forEach(rowId => {
-                const item = allData.find(i => String(i.row) === String(rowId));
-                if (item) {
-                    // 1. 고객이 입력한 주소나 이름에 포함된 엔터(줄바꿈)를 전부 공백으로 치환하여 엑셀이 밀리는 현상 완벽 방지
-                    const clean = (str) => (str || '').toString().replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
-                    
-                    const model = clean(item.model);
-                    const name = clean(item.name);
-                    const zipCode = clean(item.zipCode);
-                    const address = clean(item.address);
-                    
-                    // 2. 엑셀에서 가독성 좋게 연락처 하이픈(-) 자동 추가 정렬
-                    let phone = clean(item.phone);
-                    let phoneNum = phone.replace(/[^0-9]/g, '');
-                    if (phoneNum.length === 11) phone = `${phoneNum.slice(0,3)}-${phoneNum.slice(3,7)}-${phoneNum.slice(7)}`;
-                    else if (phoneNum.length === 10) phone = `${phoneNum.slice(0,3)}-${phoneNum.slice(3,6)}-${phoneNum.slice(6)}`;
-                    
-                    // 엑셀 셀 이동에 맞게 탭(\t) 문자로 항목들을 구분
-                    copyText += `${model}\t${name}\t${zipCode}\t${address}\t${phone}\n`;
-                }
-            });
-
-            // 클립보드에 복사
-            const t = document.createElement('textarea');
-            t.value = copyText;
-            document.body.appendChild(t);
-            t.select();
-            document.execCommand('copy');
-            document.body.removeChild(t);
-
-            showAppAlert(`${selectedRows.length}건의 정보가 엑셀용으로 복사되었습니다.`, "우체국 배송등록", "📦");
-        }
-
-        // --- 송장번호 엑셀 일괄 붙여넣기 로직 ---
-        function openBulkTrackingModal() {
-            if (selectedRows.length === 0) return;
-            document.getElementById('bulk-tracking-count').innerText = selectedRows.length;
-            document.getElementById('bulk-tracking-input').value = '';
-            document.getElementById('bulk-tracking-save-btn').innerText = '다음 (검토하기)';
-            document.getElementById('bulk-tracking-save-btn').disabled = false;
-            
-            const modal = document.getElementById('bulk-tracking-modal');
-            modal.classList.remove('hidden');
-            setTimeout(() => document.getElementById('bulk-tracking-input').focus(), 100);
-        }
-
-        function closeBulkTrackingModal() {
-            document.getElementById('bulk-tracking-modal').classList.add('hidden');
-        }
-
-        function submitBulkTracking() {
-            const inputVal = document.getElementById('bulk-tracking-input').value;
-            // 줄바꿈으로 나누고, 숫자와 하이픈만 남기기 (빈 줄 제외)
-            let trackingNumbers = inputVal.split('\n').map(s => s.trim().replace(/[^0-9\-]/g, '')).filter(s => s !== '');
-
-            if (trackingNumbers.length === 0) {
-                showToast("입력된 송장번호가 없습니다.");
-                return;
-            }
-
-            tempTrackingNumbers = trackingNumbers; // 임시 저장
-
-            // 개수가 다를 경우 기본 confirm 대신 커스텀 모달 사용
-            if (trackingNumbers.length !== selectedRows.length) {
-                showAppConfirm(
-                    `체크된 고객은 ${selectedRows.length}명인데, 붙여넣은 송장번호는 ${trackingNumbers.length}개입니다.\n(위에서부터 순서대로 빈틈없이 배정됩니다) 계속 진행할까요?`, 
-                    () => openBulkTrackingReviewModal(trackingNumbers), 
-                    "개수 불일치 안내", 
-                    "검토 화면으로", 
-                    "bg-emerald-600", 
-                    "⚠️"
-                );
-            } else {
-                openBulkTrackingReviewModal(trackingNumbers);
-            }
-        }
-
-        // [NEW] 검토 모달 열기 및 리스트 생성
-        function openBulkTrackingReviewModal(trackingNumbers) {
-            closeBulkTrackingModal(); // 입력 모달 닫기
-            const reviewList = document.getElementById('bulk-tracking-review-list');
-            reviewList.innerHTML = ''; 
-
-            // 화면상 보이는 순서대로 정렬
-            const sortedSelectedRows = [...selectedRows].sort((a, b) => {
-                const idxA = currentlyFilteredList.findIndex(item => String(item.row) === String(a));
-                const idxB = currentlyFilteredList.findIndex(item => String(item.row) === String(b));
-                return idxA - idxB;
-            });
-
-            // 고객 수와 송장번호 수 중 더 많은 것에 맞춤 (누락되거나 남는 송장도 보여주기 위함)
-            const limit = Math.max(selectedRows.length, trackingNumbers.length);
-
-            for (let i = 0; i < limit; i++) {
-                const rowId = sortedSelectedRows[i];
-                const item = rowId ? allData.find(it => String(it.row) === String(rowId)) : null;
-                const tracking = trackingNumbers[i] || '<span class="text-red-500 font-bold text-[11px]">송장 누락</span>';
-                
-                const card = document.createElement('div');
-                card.className = "flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm";
-                
-                let customerInfo = '<span class="text-slate-400 text-xs font-bold">고객 정보 부족 (송장 남음)</span>';
-                if (item) {
-                    const displayModel = String(item.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim();
-                    customerInfo = `
-                        <div class="flex flex-col min-w-0 pr-2">
-                            <span class="text-[13px] font-black text-slate-800 truncate">${item.name} <span class="text-slate-400 font-bold text-[11px]">(${item.phone || '-'})</span></span>
-                            <span class="text-[11px] text-blue-600 font-bold mt-0.5 truncate">${displayModel || '기종미정'}</span>
-                        </div>
-                    `;
-                }
-
-                card.innerHTML = `
-                    <div class="flex-1 overflow-hidden">
-                        ${customerInfo}
-                    </div>
-                    <div class="shrink-0 flex items-center justify-end">
-                        <span class="text-sm text-slate-300 mx-2">➔</span>
-                        <span class="text-[13px] font-extrabold ${trackingNumbers[i] ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} px-2 py-1 rounded-lg border font-tnum break-all text-center max-w-[120px]">${tracking}</span>
-                    </div>
-                `;
-                reviewList.appendChild(card);
-            }
-
-            document.getElementById('bulk-tracking-review-modal').classList.remove('hidden');
-        }
-
-        // [NEW] 검토 모달 닫기
-        function closeBulkTrackingReviewModal() {
-            document.getElementById('bulk-tracking-review-modal').classList.add('hidden');
-        }
-
-        // [NEW] 다시 수정하기 (입력 모달로 돌아가기)
-        function backToBulkTrackingModal() {
-            closeBulkTrackingReviewModal();
-            document.getElementById('bulk-tracking-modal').classList.remove('hidden');
-        }
-
-        // [NEW] 검토 후 최종 등록 실행
-        function confirmBulkTracking() {
-            closeBulkTrackingReviewModal();
-            executeBulkTracking(tempTrackingNumbers);
-        }
-
-        async function executeBulkTracking(trackingNumbers) {
-            const btn = document.getElementById('bulk-tracking-save-btn');
-            btn.innerText = '저장 중...'; btn.disabled = true;
-
-            const originalDataBackup = [];
-            const rowsToUpdate = [];
-            const limit = Math.min(selectedRows.length, trackingNumbers.length);
-
-            // 화면에 보이는 순서(위에서 아래)대로 매칭하기 위해 선택된 행들을 리스트 순서에 맞게 정렬
-            const sortedSelectedRows = [...selectedRows].sort((a, b) => {
-                const idxA = currentlyFilteredList.findIndex(item => String(item.row) === String(a));
-                const idxB = currentlyFilteredList.findIndex(item => String(item.row) === String(b));
-                return idxA - idxB;
-            });
-
-            for (let i = 0; i < limit; i++) {
-                const rowId = sortedSelectedRows[i];
-                const targetIndex = allData.findIndex(item => String(item.row) === String(rowId));
-                if (targetIndex !== -1) {
-                    originalDataBackup.push({ index: targetIndex, data: { ...allData[targetIndex] } });
-                    allData[targetIndex].trackingNumber = trackingNumbers[i]; // 낙관적 업데이트
-                    rowsToUpdate.push({ rowId: rowId, newTracking: trackingNumbers[i], item: allData[targetIndex] });
-                }
-            }
-
-            closeBulkTrackingModal();
-            clearSelection();
-            filterData();
-            showAppAlert(`${rowsToUpdate.length}건의 송장번호를 일괄 배정했습니다.`, "일괄 배정 완료", "✅");
-
-            try {
-                // 병렬 비동기 통신
-                const promises = rowsToUpdate.map(updateInfo => {
-                    const item = updateInfo.item;
-                    const payload = {
-                        type: 'update', row: item.row, sheetName: item.sheetName || '예약내역',
-                        name: item.name || '', phone: item.phone || '', zipCode: item.zipCode || '', address: item.address || '',
-                        startDate: item.startDate || '', endDate: item.endDate || '', delivery: item.delivery || '', returnWay: item.returnWay || '',
-                        status: item.status || '', tracking: updateInfo.newTracking, model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
-                    };
-                    
-                    // [UPDATE] 리다이렉트 허용 및 헤더 강화
-                    return fetch(API_URL, { 
-                        method: 'POST', 
-                        redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload) 
-                    })
-                    .then(res => res.json())
-                    .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); });
-                });
-                await Promise.all(promises);
-            } catch (err) {
-                console.error("송장 일괄 저장 실패", err);
-                // 실패 시 백업해둔 데이터로 복구
-                originalDataBackup.forEach(backup => { allData[backup.index] = backup.data; });
-                filterData();
-                showAppAlert("인터넷 연결 불안정으로 일부 송장번호가 저장되지 않았습니다.", "🚨 저장 실패", "⚠️");
-            }
-        }
-        // --- 다중 선택 일괄 처리 로직 끝 ---
-
-        function renderList(list) {
-            const container = document.getElementById('list-container');
-            container.innerHTML = '';
-            if(!list.length) { container.innerHTML = `<div class="py-20 text-center text-slate-500 font-bold bg-white rounded-xl border border-dashed border-slate-300">검색 조건에 맞는 예약 내역이 없습니다.</div>`; return; }
-            
-            list.forEach(item => {
-                const isSelected = selectedRows.includes(String(item.row));
-                let accentColor = 'bg-slate-300';
-                if(item.status === '예약신청') accentColor = 'bg-orange-400';
-                else if(item.status === '확정') accentColor = 'bg-blue-600';
-                else if(item.status === '반납완료') accentColor = 'bg-slate-500';
-                else if(item.status === '대기') accentColor = 'bg-purple-500';
-                else if(item.status === '취소') accentColor = 'bg-red-500';
-
-                let badgeClass = 'status-wait', badgeText = '신청';
-                if(item.status === '확정') { badgeClass = 'status-confirm'; badgeText = '확정'; }
-                else if(item.status === '반납완료') { badgeClass = 'status-return'; badgeText = '반납'; }
-                else if(item.status === '대기') { badgeClass = 'status-hold'; badgeText = '대기'; }
-                else if(item.status === '취소') { badgeClass = 'status-cancel'; badgeText = '취소'; }
-
-                const time = formatTime(item.orderTime);
-                const price = (parseInt(String(item.totalPrice||0).replace(/[^0-9]/g, '')) || 0).toLocaleString() + '원';
-                const formatMD = (d) => { if(!d) return '-'; const p = String(d).split('-'); return p.length >= 3 ? `${parseInt(p[1])}/${parseInt(p[2])}` : String(d); };
-                const start = formatMD(item.startDate);
-                const end = formatMD(item.endDate);
-                const displayModel = String(item.model || '').replace(/\r?\n|\r/g, ' ').replace(/\s*\+?\s*보조배터리/g, '').trim();
-                const battery = String(item.model || '').includes('보조배터리') ? '⚡' : '';
-                const trackingDisplay = item.trackingNumber ? item.trackingNumber : '입력';
-                const memo = item.memo ? '📝' : '';
-                
-                // [NEW] 백업 여부 확인 및 클래스/뱃지 생성
-                const isBackup = String(item.category).includes('백업') || String(item.model).includes('백업') || String(item.dataBackup).includes('신청') || String(item.memo).includes('백업');
-                const backupBorderClass = isBackup ? '!border-2 !border-yellow-400 !bg-yellow-50/40' : '';
-                const backupBadge = isBackup ? `<span class="bg-yellow-400 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap shrink-0 ml-1">💾 백업</span>` : '';
-
-                let fullAddress = '';
-                // 화면 리스트 UI에서도 주소가 2줄로 넘어가지 않도록 엔터(줄바꿈) 원천 차단
-                if(item.zipCode) fullAddress += `[${item.zipCode}] `;
-                if(item.address) fullAddress += String(item.address).replace(/\r?\n|\r/g, ' ');
-
-                const rawPay = String(item.paymentMethod || ''); 
-                let payShort = rawPay;
-                let payBadgeClass = 'bg-slate-100 text-slate-600'; 
-                if(rawPay.includes('계좌이체')) { payShort = '이체'; payBadgeClass = 'bg-blue-100 text-blue-700 border border-blue-200'; } 
-                else if(rawPay.includes('네이버스토어결제') || rawPay.includes('카드')) { payShort = '카드'; payBadgeClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200'; } 
-                else if(rawPay === '') { payShort = '-'; }
-
-                const card = document.createElement('div');
-                card.className = `list-row relative overflow-hidden flex items-center px-4 py-4 gap-3 ${isSelected ? 'selected' : ''} ${backupBorderClass}`;
-                card.onclick = () => openModal(item);
-                
-                card.innerHTML = `
-                    <div class="absolute left-0 top-0 bottom-0 w-1.5 ${accentColor}"></div>
-                    
-                    <div class="w-8 text-center shrink-0 flex items-center justify-center pl-1 hover:scale-110 transition-transform" onclick="toggleRowSelection(event, '${item.row}')">
-                        <input type="checkbox" ${isSelected ? 'checked' : ''} class="checkbox-custom pointer-events-none">
-                    </div>
-
-                    <div class="w-14 text-center shrink-0">
-                        <span class="status-badge ${badgeClass} w-full py-1.5 text-[11px]">${badgeText}</span>
-                    </div>
-
-                    <div class="w-20 shrink-0 text-center text-[11px] leading-tight text-slate-400 font-bold font-tnum">
-                        ${time}
-                    </div>
-
-                    <div class="w-32 shrink-0 flex flex-col gap-1 justify-center">
-                        <div class="flex items-center gap-1.5" onclick="event.stopPropagation()" title="클릭하여 기기 바로 배정 (엔터 누르면 다음 줄로 이동)">
-                            <div id="model-display-${item.row}" class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-md font-extrabold text-[12px] border border-slate-200 cursor-pointer hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-colors truncate min-w-[70px]" onclick="enableInlineEdit(event, '${item.row}')">📱 ${displayModel || '미정'}</div>
-                            <span class="text-xs shrink-0">${battery}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1 shrink-0 flex flex-col justify-center min-w-0 pr-2">
-                        <div class="flex items-center gap-1">
-                            <span class="text-base font-black text-slate-900 truncate">${item.name}</span>
-                            ${backupBadge}
-                            <span class="text-sm shrink-0">${memo}</span>
-                        </div>
-                        <div class="flex items-center mt-0.5 text-slate-500 font-bold text-[13px] font-tnum whitespace-nowrap">
-                            <span>${item.phone || '-'}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="w-48 shrink-0 flex flex-col justify-center px-2 min-w-0">
-                        ${fullAddress.trim() ? `
-                            <div class="flex items-center gap-1 mb-0.5">
-                                <span class="text-[10px] font-black bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-tnum border border-slate-200">${item.zipCode || '우편번호 없음'}</span>
-                            </div>
-                            <div class="text-[13px] font-bold text-slate-700 truncate w-full" title="${item.address || ''}">
-                                ${item.address || '-'}
-                            </div>
-                        ` : `<span class="text-[12px] text-slate-300 font-bold">-</span>`}
-                    </div>
-                    
-                    <div class="w-64 shrink-0 flex flex-col justify-center gap-1.5">
-                        <div class="flex items-center text-[13.5px] font-black text-slate-800 font-tnum tracking-tight">
-                            <span>${start} <span class="text-blue-600 font-bold text-[12px]">(${item.delivery || '-'})</span></span>
-                            <span class="mx-1.5 text-slate-300">➔</span>
-                            <span>${end} <span class="text-emerald-600 font-bold text-[12px]">(${item.returnWay || '-'})</span></span>
-                        </div>
-                        <div class="text-[12px] font-bold text-slate-600 truncate bg-slate-50 px-2 py-0.5 rounded border border-slate-100 inline-block w-max max-w-full">
-                            🎟️ ${item.scheduleName || '행사명 미상'}
-                        </div>
-                    </div>
-                    
-                    <div class="w-[72px] shrink-0 flex flex-col justify-center items-start">
-                        <div class="text-[13px] font-black text-slate-900 font-tnum truncate w-full">${price}</div>
-                        <div class="text-[11px] font-bold px-1.5 py-0.5 rounded mt-0.5 ${payBadgeClass}">${payShort}</div>
-                    </div>
-
-                    <div class="w-24 shrink-0 flex flex-col justify-center items-center pl-2 border-l border-slate-100 border-dashed">
-                        <div class="text-[11px] font-bold text-slate-500 mb-1 whitespace-nowrap">송장 입력</div>
-                        <div class="w-full flex items-center justify-center" onclick="event.stopPropagation()" title="클릭하여 송장번호 바로 입력 (엔터 누르면 다음 줄로 이동)">
-                            <div id="tracking-display-${item.row}" class="bg-white px-1.5 py-1.5 rounded-lg border border-slate-200 shadow-sm text-slate-700 cursor-pointer hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-colors truncate w-full text-center font-tnum text-[12px]" onclick="enableTrackingInlineEdit(event, '${item.row}')">
-                                ${item.trackingNumber ? item.trackingNumber : '<span class="text-slate-300 text-[11px]">입력</span>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function formatTime(str) {
-            if(!str) return '';
-            const s = String(str);
-            const result = s.replace(/(\d{1,2}\.?)\s+(오전|오후|\d{1,2}:)/, '$1<br>$2');
-            if (result === s) {
-                const d = new Date(str);
-                if(!isNaN(d.getTime())) return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.<br>${d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-            }
-            return result;
-        }
-
-        // --- 엑셀식 인라인(빠른) 편집 기능 ---
-        let currentInlineEditRow = null;
-
-        function enableInlineEdit(e, rowId) {
-            if(e) e.stopPropagation();
-            if(currentInlineEditRow === rowId) return;
-
-            const item = allData.find(i => String(i.row) === String(rowId));
-            if(!item) return;
-
-            const container = document.getElementById(`model-display-${rowId}`);
-            if(!container) return;
-
-            const displayModel = String(item.model || '').replace(/\s*\+?\s*보조배터리/g, '').trim();
-            currentInlineEditRow = rowId;
-
-            // 라벨을 입력 폼(Input)으로 변경
-            container.innerHTML = `<input type="text" id="inline-input-${rowId}" class="w-full px-1 py-0.5 text-[12px] font-extrabold border-2 border-blue-500 rounded outline-none font-tnum bg-white text-slate-900 shadow-sm" value="${displayModel}">`;
-            container.className = "w-[130px]"; // 입력 중 흔들리지 않게 너비 고정
-
-            const input = document.getElementById(`inline-input-${rowId}`);
-            input.focus();
-            input.selectionStart = input.selectionEnd = input.value.length; // 커서를 맨 끝으로
-
-            let isSaved = false;
-            const saveAndNext = (focusNext) => {
-                if(isSaved) return;
-                isSaved = true;
-                currentInlineEditRow = null;
-                saveInlineEdit(rowId, input.value, focusNext);
-            };
-
-            // 키보드 이벤트 (엔터 시 저장 후 다음 줄로 이동)
-            input.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    saveAndNext(true); 
-                } else if (event.key === 'Escape') {
-                    event.preventDefault();
-                    isSaved = true;
-                    currentInlineEditRow = null;
-                    filterData(); // 취소 시 원래대로 복구
-                }
-            });
-            
-            // 바깥쪽을 클릭하면 그냥 저장만
-            input.addEventListener('blur', () => saveAndNext(false));
-        }
-
-        function saveInlineEdit(rowId, newValue, focusNext) {
-            const itemIndex = allData.findIndex(i => String(i.row) === String(rowId));
-            if (itemIndex === -1) return;
-
-            const item = allData[itemIndex];
-            const oldModel = String(item.model || '');
-            const hasBattery = oldModel.includes('보조배터리');
-            const oldDisplayModel = oldModel.replace(/\s*\+?\s*보조배터리/g, '').trim();
-
-            let finalModel = newValue.trim();
-            if (hasBattery && !finalModel.includes('보조배터리')) finalModel += (finalModel ? ' ' : '') + '+보조배터리';
-
-            // 엔터를 쳤을 때 다음 줄의 ID 찾기
-            let nextRowId = null;
-            if (focusNext) {
-                const visibleRows = Array.from(document.querySelectorAll('.list-row'));
-                const currentIndex = visibleRows.findIndex(row => row.querySelector(`#model-display-${rowId}`));
-                if (currentIndex !== -1 && currentIndex + 1 < visibleRows.length) {
-                    const nextDisplay = visibleRows[currentIndex + 1].querySelector('[id^="model-display-"]');
-                    if(nextDisplay) nextRowId = nextDisplay.id.replace('model-display-', '');
-                }
-            }
-
-            // 값이 변경되었을 때만 서버에 저장
-            if (oldDisplayModel !== newValue.trim()) {
-                allData[itemIndex].model = finalModel; // 낙관적 업데이트
-                
-                const payload = {
-                    type: 'update', row: item.row, sheetName: item.sheetName || '예약내역',
-                    name: item.name || '', phone: item.phone || '', zipCode: item.zipCode || '', address: item.address || '',
-                    startDate: item.startDate || '', endDate: item.endDate || '', delivery: item.delivery || '', returnWay: item.returnWay || '',
-                    status: item.status || '', tracking: item.trackingNumber || '', model: finalModel, memo: item.memo || '', totalPrice: item.totalPrice || 0
-                };
-
-                // [UPDATE] 리다이렉트 허용 및 헤더 강화
-                fetch(API_URL, { 
-                    method: 'POST', 
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) 
-                })
-                .then(res => res.json())
-                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                .catch(err => {
-                    allData[itemIndex].model = oldModel; filterData();
-                    showToast("인터넷 연결 불안정으로 기기 배정이 취소되었습니다.");
-                });
-            }
-
-            filterData(); // 화면 즉시 갱신
-            
-            // 엔터를 친 경우 다음 칸 편집 모드 자동 활성화
-            if (focusNext && nextRowId) setTimeout(() => enableInlineEdit(null, nextRowId), 10);
-        }
-
-        // --- 송장번호 엑셀식 인라인(빠른) 편집 기능 ---
-        let currentTrackingInlineEditRow = null;
-
-        function enableTrackingInlineEdit(e, rowId) {
-            if(e) e.stopPropagation();
-            if(currentTrackingInlineEditRow === rowId) return;
-
-            const item = allData.find(i => String(i.row) === String(rowId));
-            if(!item) return;
-
-            const container = document.getElementById(`tracking-display-${rowId}`);
-            if(!container) return;
-
-            const currentTracking = String(item.trackingNumber || '');
-            currentTrackingInlineEditRow = rowId;
-
-            // 라벨을 입력 폼(Input)으로 변경
-            container.innerHTML = `<input type="text" id="inline-tracking-${rowId}" class="w-full px-1 py-0.5 text-[11px] font-extrabold border-2 border-blue-500 rounded outline-none font-tnum bg-white text-slate-900 shadow-sm" placeholder="송장" value="${currentTracking}">`;
-            container.className = "w-full max-w-[85px]"; // 입력 중 흔들리지 않게 너비 고정
-
-            const input = document.getElementById(`inline-tracking-${rowId}`);
-            input.focus();
-            input.select(); // 기존 번호 전체 선택 (Ctrl+V 시 바로 덮어씌워짐)
-
-            let isSaved = false;
-            const saveAndNext = (focusNext) => {
-                if(isSaved) return;
-                isSaved = true;
-                currentTrackingInlineEditRow = null;
-                saveTrackingInlineEdit(rowId, input.value, focusNext);
-            };
-
-            // 키보드 이벤트 (엔터 시 저장 후 다음 줄로 이동)
-            input.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    saveAndNext(true); 
-                } else if (event.key === 'Escape') {
-                    event.preventDefault();
-                    isSaved = true;
-                    currentTrackingInlineEditRow = null;
-                    filterData(); // 취소 시 원래대로 복구
-                }
-            });
-            
-            // 바깥쪽을 클릭하면 그냥 저장만
-            input.addEventListener('blur', () => saveAndNext(false));
-        }
-
-        function saveTrackingInlineEdit(rowId, newValue, focusNext) {
-            const itemIndex = allData.findIndex(i => String(i.row) === String(rowId));
-            if (itemIndex === -1) return;
-
-            const item = allData[itemIndex];
-            const oldTracking = String(item.trackingNumber || '');
-            const newTracking = String(newValue).trim().replace(/[^0-9\-]/g, '');
-
-            // 엔터를 쳤을 때 다음 줄의 ID 찾기
-            let nextRowId = null;
-            if (focusNext) {
-                const visibleRows = Array.from(document.querySelectorAll('.list-row'));
-                const currentIndex = visibleRows.findIndex(row => row.querySelector(`#tracking-display-${rowId}`));
-                if (currentIndex !== -1 && currentIndex + 1 < visibleRows.length) {
-                    const nextDisplay = visibleRows[currentIndex + 1].querySelector('[id^="tracking-display-"]');
-                    if(nextDisplay) nextRowId = nextDisplay.id.replace('tracking-display-', '');
-                }
-            }
-
-            // 값이 변경되었을 때만 서버에 저장
-            if (oldTracking !== newTracking) {
-                allData[itemIndex].trackingNumber = newTracking; // 낙관적 업데이트
-                
-                const payload = {
-                    type: 'update', row: item.row, sheetName: item.sheetName || '예약내역',
-                    name: item.name || '', phone: item.phone || '', zipCode: item.zipCode || '', address: item.address || '',
-                    startDate: item.startDate || '', endDate: item.endDate || '', delivery: item.delivery || '', returnWay: item.returnWay || '',
-                    status: item.status || '', tracking: newTracking, model: item.model || '', memo: item.memo || '', totalPrice: item.totalPrice || 0
-                };
-
-                // [UPDATE] 리다이렉트 허용 및 헤더 강화
-                fetch(API_URL, { 
-                    method: 'POST', 
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload) 
-                })
-                .then(res => res.json())
-                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                .catch(err => {
-                    allData[itemIndex].trackingNumber = oldTracking; filterData();
-                    showToast("인터넷 연결 불안정으로 송장번호 입력이 취소되었습니다.");
-                });
-            }
-
-            filterData(); // 화면 즉시 갱신
-            
-            // 엔터를 친 경우 다음 칸 편집 모드 자동 활성화
-            if (focusNext && nextRowId) setTimeout(() => enableTrackingInlineEdit(null, nextRowId), 10);
-        }
-
-        function setEditStatus(status) {
-            document.getElementById('edit-status-val').value = status;
-            ['wait','confirm','return','cancel','hold'].forEach(k => {
-                const btn = document.getElementById(`btn-status-${k}`);
-                if(btn) { btn.className = "status-btn"; btn.style = ""; }
-            });
-            const map = { '예약신청':'wait', '확정':'confirm', '반납완료':'return', '취소':'cancel', '대기':'hold' };
-            const activeBtn = document.getElementById(`btn-status-${map[status]}`);
-            if(activeBtn) {
-                if(status === '예약신청') { activeBtn.style.backgroundColor = '#FFF7ED'; activeBtn.style.color = '#C2410C'; activeBtn.style.borderColor = '#FDBA74'; }
-                else if(status === '확정') { activeBtn.style.backgroundColor = '#0064FF'; activeBtn.style.color = 'white'; activeBtn.style.borderColor = '#0064FF'; }
-                else if(status === '반납완료') { activeBtn.style.backgroundColor = '#4B5563'; activeBtn.style.color = 'white'; activeBtn.style.borderColor = '#4B5563'; }
-                else if(status === '취소') { activeBtn.style.backgroundColor = '#DC2626'; activeBtn.style.color = 'white'; activeBtn.style.borderColor = '#DC2626'; }
-                else if(status === '대기') { activeBtn.style.backgroundColor = '#F5F3FF'; activeBtn.style.color = '#7C3AED'; activeBtn.style.borderColor = '#DDD6FE'; }
-            }
-        }
-
-        function selectMethod(type, value) {
-            let finalValue = value;
-            if (type === 'delivery' && !finalValue.includes('수령')) finalValue += '수령';
-            if (type === 'return' && !finalValue.includes('반납')) finalValue += '반납';
-
-            document.getElementById(`edit-${type === 'delivery' ? 'delivery' : 'return-way'}`).value = finalValue;
-            const containerId = type === 'delivery' ? 'delivery-method-list' : 'return-method-list';
-            document.querySelectorAll(`#${containerId} .method-chip`).forEach(btn => btn.classList.toggle('active', btn.dataset.val === value));
-        }
-
-        function openModal(item) {
-            const root = document.getElementById('modal-root');
-            if(!root) return;
-            document.getElementById('edit-row').value = item.row;
-            document.getElementById('edit-sheet-name').value = item.sheetName || '예약내역'; 
-            document.getElementById('display-order-time').innerHTML = "접수: " + (formatTime(item.orderTime).replace('<br>', ' ') || '-');
-            document.getElementById('edit-name').value = item.name || '';
-            document.getElementById('edit-phone').value = item.phone || '';
-            document.getElementById('edit-zipcode').value = item.zipCode || ''; 
-            document.getElementById('edit-address').value = item.address || '';  
-            document.getElementById('edit-start').value = item.startDate || '';
-            document.getElementById('edit-end').value = item.endDate || '';
-            document.getElementById('edit-delivery').value = item.delivery || '';
-            document.getElementById('edit-return-way').value = item.returnWay || '';
-            document.getElementById('edit-tracking').value = item.trackingNumber || '';
-            document.getElementById('edit-memo').value = item.memo || '';
-            document.getElementById('edit-price').value = (item.totalPrice || 0);
-
-            const deliveryVal = String(item.delivery || '');
-            let selectedDelivery = '';
-            if(deliveryVal.includes('택배')) selectedDelivery = '택배';
-            else if(deliveryVal.includes('공연장') || deliveryVal.includes('현장')) selectedDelivery = '공연장';
-            else if(deliveryVal.includes('사무실')) selectedDelivery = '사무실';
-            else if(deliveryVal.includes('퀵')) selectedDelivery = '퀵';
-            selectMethod('delivery', selectedDelivery);
-            document.getElementById('edit-delivery').value = deliveryVal; 
-
-            const returnVal = String(item.returnWay || '');
-            let selectedReturn = '';
-            if(returnVal.includes('택배')) selectedReturn = '택배';
-            else if(returnVal.includes('공연장') || returnVal.includes('현장')) selectedReturn = '공연장';
-            else if(returnVal.includes('당일')) selectedReturn = '당일반납';
-            else if(returnVal.includes('사무실')) selectedReturn = '사무실'; 
-            selectMethod('return', selectedReturn);
-            document.getElementById('edit-return-way').value = returnVal; 
-
-            let rawModel = String(item.model || '');
-            const hasBattery = rawModel.includes('보조배터리');
-            rawModel = rawModel.replace(/\+?\s*보조배터리/g, '').trim();
-            let matchedModel = '기타', deviceId = rawModel;
-            const models = ['23U', '24U', '25U', '26U', '17P', '17PM'];
-            for (const m of models) { if (rawModel.toUpperCase().includes(m)) { matchedModel = m; deviceId = rawModel.replace(new RegExp(m, 'i'), '').trim(); break; } }
-            selectEditModel(matchedModel);
-            document.getElementById('edit-device-id').value = deviceId;
-            document.getElementById('edit-battery').checked = hasBattery;
-            updateBatteryUI(hasBattery);
-            setEditStatus(item.status || '예약신청');
-            
-            root.style.display = 'flex';
-            setTimeout(() => root.classList.add('active'), 10);
-            document.body.classList.add('modal-open');
-        }
-
-        function closeModal() {
-            const root = document.getElementById('modal-root');
-            if(!root) root.classList.remove('active');
-            setTimeout(() => { if(root) root.style.display = 'none'; document.body.classList.remove('modal-open'); }, 300);
-        }
-
-        function showAppAlert(msg, title = "알림", icon = "✨") {
-            setupModal(title, msg, icon, `<button onclick="closeAppModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl text-base transition-colors">확인</button>`);
-        }
-        function showAppConfirm(msg, onConfirm, title="확인", btnText="확인", btnColor="bg-[#0064FF]", icon="🤔") {
-            setupModal(title, msg, icon, `
-                <div class="flex gap-3 mt-2">
-                    <button onclick="closeAppModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl text-base transition-colors">취소</button>
-                    <button id="confirm-exec-btn" class="flex-1 ${btnColor} hover:opacity-90 text-white font-bold py-3.5 rounded-xl text-base transition-all">${btnText}</button>
+                        {/* select 타입 처리 */}
+                        {field.type === 'select' ? (
+                          <select
+                            name={field.id}
+                            value={formData[field.id] || ''}
+                            onChange={handleChange}
+                            className={`w-full bg-white border ${style.inputBorder} rounded-lg px-2.5 py-2 text-sm font-bold text-gray-800 ${style.focus} outline-none transition-shadow`}
+                          >
+                            {field.options.map(opt => (
+                              <option key={opt} value={opt === '선택 안함' ? '' : opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            name={field.id}
+                            value={formData[field.id] || ''}
+                            onChange={handleChange}
+                            disabled={isDisabled}
+                            placeholder={isDisabled ? "해당 없음" : "입력..."}
+                            className={`w-full border ${style.inputBorder} rounded-lg px-2.5 py-2 text-sm font-bold ${
+                              isDisabled 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60' 
+                                : 'bg-white text-gray-800'
+                            } ${style.focus} outline-none transition-shadow`}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-            `);
-            document.getElementById('confirm-exec-btn').onclick = () => { closeAppModal(); onConfirm(); };
-        }
-        function setupModal(title, msg, icon, buttons) {
-            const m = document.getElementById('app-modal');
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = msg;
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('modal-actions').innerHTML = buttons;
-            m.classList.remove('hidden');
-        }
-        function closeAppModal() { document.getElementById('app-modal').classList.add('hidden'); }
+              </div>
+            );
+          })}
+        </form>
+        
+        <div className="p-4 border-t border-gray-100 bg-white">
+          <button 
+            type="submit"
+            form="newTaskForm"
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all disabled:bg-blue-300"
+          >
+            {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+            {isSubmitting ? '저장 중...' : (initialData ? '수정 내용 저장' : '작업 저장하기')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-        document.getElementById('edit-battery').onchange = function() { updateBatteryUI(this.checked); };
-        function updateBatteryUI(checked) {
-            const box = document.getElementById('battery-box-ui');
-            if(box) box.className = checked ? "w-full h-full border-2 border-blue-500 rounded-lg flex items-center justify-center bg-blue-50 text-blue-700 transition-all font-black text-sm shadow-sm" : "w-full h-full border border-slate-300 rounded-lg flex items-center justify-center bg-white text-slate-500 hover:bg-slate-50 transition-all font-bold text-sm cursor-pointer";
-        }
+// ----------------------------------------------------
+// 메인 App 컴포넌트
+// ----------------------------------------------------
+export default function App() {
+  const [tasks, setTasks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // 모달 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingTask, setEditingTask] = useState(null); 
 
-        function selectEditModel(modelName) {
-            document.getElementById('edit-model-type').value = modelName;
-            document.querySelectorAll('.model-select-chip').forEach(btn => btn.classList.toggle('active', btn.dataset.val === modelName));
-        }
+  const fetchSheetData = async () => {
+    try {
+      setIsLoading(true);
+      if (GOOGLE_SHEET_API_URL === 'YOUR_GOOGLE_WEB_APP_URL_HERE' || GOOGLE_SHEET_API_URL === '') {
+        setTasks(mockExtrusionData); 
+        setIsLoading(false);
+        return;
+      }
+      const response = await fetch(GOOGLE_SHEET_API_URL);
+      const data = await response.json();
+      setTasks(data);
+    } catch (err) {
+      console.error(err);
+      setError("데이터를 불러올 수 없습니다. 인터넷 연결이나 URL을 확인해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        async function submitUpdate(e) {
-            if(e) e.preventDefault();
-            const btn = document.getElementById('save-btn');
-            btn.innerText = '저장 중...'; btn.disabled = true;
-            
-            const rowId = document.getElementById('edit-row').value;
-            const modelType = document.getElementById('edit-model-type').value;
-            const deviceId = document.getElementById('edit-device-id').value.trim();
-            const isBattery = document.getElementById('edit-battery').checked;
-            let finalModel = (modelType === '기타' ? deviceId : modelType + deviceId) + (isBattery ? "+보조배터리" : "");
-            
-            const payload = {
-                type: 'update', row: rowId, sheetName: document.getElementById('edit-sheet-name').value,
-                name: document.getElementById('edit-name').value, phone: document.getElementById('edit-phone').value,
-                zipCode: document.getElementById('edit-zipcode').value, address: document.getElementById('edit-address').value,
-                startDate: document.getElementById('edit-start').value, endDate: document.getElementById('edit-end').value, 
-                delivery: document.getElementById('edit-delivery').value, returnWay: document.getElementById('edit-return-way').value, 
-                status: document.getElementById('edit-status-val').value, tracking: document.getElementById('edit-tracking').value,
-                model: finalModel, memo: document.getElementById('edit-memo').value, totalPrice: document.getElementById('edit-price').value
-            };
+  useEffect(() => {
+    fetchSheetData();
+  }, []);
 
-            const targetIndex = allData.findIndex(item => String(item.row) === String(rowId));
-            let originalData = null;
-            if(targetIndex !== -1) {
-                originalData = { ...allData[targetIndex] };
-                allData[targetIndex] = { ...allData[targetIndex], name: payload.name, phone: payload.phone, zipCode: payload.zipCode, address: payload.address, startDate: payload.startDate, endDate: payload.endDate, delivery: payload.delivery, returnWay: payload.returnWay, status: payload.status, trackingNumber: payload.tracking, model: payload.model, memo: payload.memo, totalPrice: payload.totalPrice };
-            }
+  const handleSaveTask = async (formData) => {
+    const isEdit = !!formData.id; 
 
-            filterData();
-            closeModal();
-            showAppAlert("수정 내역이 화면에 즉시 반영되었습니다.", "완료", "✅"); 
-            btn.innerText = '수정 완료 (즉시반영)'; btn.disabled = false;
+    if (GOOGLE_SHEET_API_URL === 'YOUR_GOOGLE_WEB_APP_URL_HERE' || GOOGLE_SHEET_API_URL === '') {
+      alert("구글 시트 URL이 연결되지 않아 임시로 화면에만 반영합니다.");
+      if (isEdit) {
+        setTasks(tasks.map(t => t.id === formData.id ? { ...t, ...formData } : t));
+      } else {
+        const newTask = { ...formData, id: '신규-' + Date.now(), currentProcess: '압출', status: '대기중', registeredAt: new Date().toLocaleString() };
+        setTasks([newTask, ...tasks]);
+      }
+      setIsModalOpen(false);
+      return;
+    }
 
-            // [UPDATE] 리다이렉트 허용 및 헤더 강화
-            fetch(API_URL, { 
-                method: 'POST', 
-                redirect: 'follow',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload) 
-            })
-            .then(res => res.json())
-            .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-            .catch(err => {
-                if(targetIndex !== -1 && originalData) {
-                    allData[targetIndex] = originalData; filterData(); 
-                    showAppAlert("인터넷 연결이 불안정하여 원상복구 되었습니다.", "🚨 저장 실패", "⚠️");
-                }
-            });
-        }
+    try {
+      setIsSubmitting(true);
+      const payload = { ...formData, action: isEdit ? 'edit' : 'create' };
 
-        function confirmDelete() {
-            showAppConfirm("목록에서 완전히 삭제(이동)하시겠습니까?", () => {
-                const rowId = document.getElementById('edit-row').value;
-                const targetItem = allData.find(item => String(item.row) === String(rowId));
-                allData = allData.filter(item => String(item.row) !== String(rowId));
-                
-                filterData();
-                closeModal();
-                showAppAlert("삭제 처리되었습니다.", "완료", "🗑️");
-                
-                // [UPDATE] 리다이렉트 허용 및 헤더 강화
-                fetch(API_URL, { 
-                    method: 'POST', 
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ type: 'delete', row: rowId, sheetName: document.getElementById('edit-sheet-name').value }) 
-                })
-                .then(res => res.json())
-                .then(data => { if(data.result !== 'success') throw new Error("서버 오류"); })
-                .catch(err => {
-                    if(targetItem) {
-                        allData.push(targetItem); filterData(); 
-                        showAppAlert("네트워크 오류로 삭제가 취소되었습니다.", "🚨 삭제 실패", "⚠️");
-                    }
-                });
-            }, "데이터 삭제", "삭제하기", "bg-[#DC2626]", "🗑️");
-        }
+      const response = await fetch(GOOGLE_SHEET_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        setIsModalOpen(false);
+        fetchSheetData(); 
+      } else {
+        alert("저장에 실패했습니다: " + result.message);
+      }
+    } catch(err) {
+      alert("서버 오류로 인해 저장에 실패했습니다.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-        function showToast(msg) {
-            const toast = document.createElement('div'); toast.className = 'toast-msg'; toast.innerText = msg; document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-    </script>
-</body>
-</html>
+  const filteredTasks = tasks.filter(task => {
+    const isExtrusion = task.currentProcess === '압출';
+    
+    // 검색어가 없으면 압출 공정 데이터만 모두 보여줌
+    if (!searchQuery) return isExtrusion;
+
+    // 검색어를 소문자로 변환하여 대소문자 구분 없이 검색
+    const lowerQuery = searchQuery.toLowerCase();
+    
+    // task 객체의 모든 값(value)들을 검사하여 하나라도 검색어를 포함하면 true 반환
+    const matchesSearch = Object.values(task).some(value => 
+      value && String(value).toLowerCase().includes(lowerQuery)
+    );
+
+    return isExtrusion && matchesSearch;
+  });
+
+  return (
+    <div className="max-w-md mx-auto h-screen bg-gray-100 flex flex-col font-sans overflow-hidden shadow-2xl relative">
+      <header className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shadow-md z-10 sticky top-0">
+        <div className="flex items-center gap-3">
+          <div className="bg-slate-800 p-2 rounded-lg"><Factory size={24} className="text-blue-400" /></div>
+          <div>
+            <h1 className="text-lg font-bold tracking-wide">세린실리콘 관리자</h1>
+            <p className="text-xs text-slate-400 font-medium">v1.0</p>
+          </div>
+        </div>
+        <button className="text-slate-300 hover:text-white transition-colors"><Menu size={24} /></button>
+      </header>
+
+      <div className="bg-white px-4 pt-4 pb-4 shadow-sm z-10 sticky top-[76px]">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Search size={16} className="text-gray-400" /></div>
+          <input
+            type="text"
+            className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
+            placeholder="모든 항목 검색 (업체명, 온도, 메모 등)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <main className="flex-1 overflow-y-auto p-4 space-y-5 pb-10">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-3 pb-20">
+            <Loader2 size={32} className="animate-spin text-blue-500" />
+            <p className="text-sm font-medium">데이터 로딩 중...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-full text-red-500 space-y-3 pb-20 text-center px-4">
+            <AlertTriangle size={32} /><p className="text-sm font-medium">{error}</p>
+          </div>
+        ) : filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <ExtrusionCard 
+              key={task.id} 
+              task={task} 
+              onEdit={(taskData) => { setEditingTask(taskData); setIsModalOpen(true); }} 
+            />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-40 text-gray-400 space-y-2">
+            <Factory size={40} className="text-gray-300 opacity-50" />
+            <p className="text-sm font-medium">압출 공정 데이터가 없습니다.</p>
+          </div>
+        )}
+      </main>
+
+      {/* 우측 하단 플로팅 버튼 (신규 추가) */}
+      <button
+        onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all z-40"
+      >
+        <Plus size={28} />
+      </button>
+
+      {/* 신규 등록 및 수정 통합 모달 */}
+      <NewTaskModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSubmit={handleSaveTask}
+        isSubmitting={isSubmitting}
+        initialData={editingTask}
+      />
+    </div>
+  );
+}
