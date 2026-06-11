@@ -3,626 +3,747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실리콘 제조 공정 관리</title>
-    <!-- Tailwind CSS (스타일링) -->
+    <title>실리콘 통합 관리 시스템 | 네이비 테마</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM (UI 렌더링) -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <!-- Babel (JSX 컴파일) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace']
+                    },
+                    colors: {
+                        navy: {
+                            main: '#1A365D',       // 메인 딥 네이비
+                            hover: '#112240',      // 호버용 다크 네이비
+                            light: '#F0F4F8',      // 연한 네이비 배경
+                            borderLight: '#D9E2EC', // 연한 네이비 보더
+                            red: '#E3003F',         // 경고/삭제용 레드 (유지)
+                            bg: '#F5F7F8',          // 전체 배경
+                            text: '#222222',        // 기본 텍스트
+                            muted: '#666666',       // 보조 텍스트
+                            border: '#E4E8EB'       // 기본 보더
+                        }
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'floating': '0 8px 24px rgba(26, 54, 93, 0.12)',
+                        'tab-active': '0 4px 12px rgba(26, 54, 93, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 부드러운 스크롤바 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* 호버 효과 */
+        tbody tr.main-row:hover td { background-color: #f8fafc !important; }
+        tbody tr.main-row.checked-row:hover td { background-color: #E2E8F0 !important; }
+        
+        /* 애니메이션 */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div id="root"></div>
+<body class="bg-navy-bg text-navy-text font-sans h-screen overflow-hidden flex flex-col">
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <!-- 상단 네비게이션 헤더 -->
+    <header class="bg-white border-b-2 border-navy-main px-6 py-4 flex justify-between items-center shadow-sm z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-navy-main p-1.5 rounded-md">
+                <i data-lucide="layers" class="h-5 w-5 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-navy-text tracking-tight">통합 제조 관리 시스템</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-navy-muted font-medium hidden sm:inline-block">관리자님, 환영합니다.</span>
+            <div class="h-8 w-8 rounded-full bg-navy-light border border-navy-borderLight flex items-center justify-center text-navy-main font-bold text-sm">
+                A
+            </div>
+        </div>
+    </header>
 
-        // 아이콘을 위한 내장 SVG 컴포넌트 (lucide-react 대체)
-        const Icon = ({ name, size = 24, className = '' }) => {
-            const paths = {
-                Factory: <><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></>,
-                Search: <><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>,
-                Menu: <><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>,
-                AlertTriangle: <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></>,
-                Loader2: <path d="M21 12a9 9 0 1 1-6.219-8.56"/>,
-                Plus: <><path d="M5 12h14"/><path d="M12 5v14"/></>,
-                X: <><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>,
-                Save: <><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></>,
-                Pencil: <><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></>
-            };
-            return (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {paths[name]}
-                </svg>
-            );
-        };
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-[1400px] mx-auto">
+        
+        <!-- 네비게이션 탭 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <!-- 오늘의 일정 탭 -->
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="bg-white p-5 shadow-card border-2 border-transparent rounded-xl flex items-center justify-between transition-all hover:shadow-md">
+                <div class="text-left">
+                    <p class="text-xs font-bold text-navy-muted mb-1 uppercase tracking-wider">Today's Tasks</p>
+                    <h3 class="text-xl font-black text-navy-text">오늘의 일정</h3>
+                </div>
+                <div class="p-3 rounded-full bg-gray-50 text-gray-400 transition-colors" id="icon-bg-schedule">
+                    <i data-lucide="calendar-check" class="h-7 w-7"></i>
+                </div>
+            </button>
+            
+            <!-- 제품 DB 탭 (기본 활성화) -->
+            <button onclick="switchTab('product')" id="tab-product" class="bg-white p-5 shadow-tab-active border-2 border-navy-main rounded-xl flex items-center justify-between transition-all hover:shadow-md">
+                <div class="text-left">
+                    <p class="text-xs font-bold text-navy-main mb-1 uppercase tracking-wider">Extrusion Log</p>
+                    <h3 class="text-xl font-black text-navy-text">제품 DB</h3>
+                </div>
+                <div class="p-3 rounded-full bg-navy-light text-navy-main transition-colors" id="icon-bg-product">
+                    <i data-lucide="database" class="h-7 w-7"></i>
+                </div>
+            </button>
+            
+            <!-- 재고 관리 탭 -->
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-white p-5 shadow-card border-2 border-transparent rounded-xl flex items-center justify-between transition-all hover:shadow-md">
+                <div class="text-left">
+                    <p class="text-xs font-bold text-navy-muted mb-1 uppercase tracking-wider">Stock Management</p>
+                    <h3 class="text-xl font-black text-navy-text">재고 관리</h3>
+                </div>
+                <div class="p-3 rounded-full bg-gray-50 text-gray-400 transition-colors" id="icon-bg-inventory">
+                    <i data-lucide="package" class="h-7 w-7"></i>
+                </div>
+            </button>
+        </div>
 
-        const GOOGLE_SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzQgGcPys6m3PRfdFLiIPhvYpwn8Rnydck5xcCnjfpmasiZ7NQx6o6wRPp9qYCmP_9G/exec';
+        <!-- ========================================== -->
+        <!-- VIEW 1: 제품 DB -->
+        <!-- ========================================== -->
+        <div id="view-product" class="fade-in block">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-navy-text">일일 생산 기록</h2>
+                    <p class="text-sm text-navy-muted mt-1">압출 공정의 상세 데이터를 조회하고 관리합니다.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-white border border-navy-border text-navy-text text-sm font-medium rounded-lg hover:bg-gray-50 flex items-center shadow-sm">
+                        <i data-lucide="download" class="h-4 w-4 mr-2 text-navy-muted"></i> 다운로드
+                    </button>
+                    <button onclick="openProductModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm">
+                        <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 생산 등록
+                    </button>
+                </div>
+            </div>
 
-        // 임시 데이터
-        const mockExtrusionData = [
-          {
-            id: "압출-1",
-            currentProcess: "압출",
-            client: "대한의료기기",
-            product: "의료용 실리콘 튜브",
-            registeredAt: "2026-04-14 09:30",
-            machineType: "큐텍스1",
-            machineNo: "1호기",
-            prodInner: "5.0mm",
-            prodOuter: "8.0mm",
-            prodLength: "2000M",
-            nogis: "7.95mm",
-            preShrink: "2010M",
-            moldInner: "4.8mm",
-            moldOuter: "8.2mm",
-            inputSpeed: "20",
-            massiveDecel: "적용",
-            reverseSpeed: "10",
-            singleSpeed: "5",
-            extruderTemp: "120℃",
-            extruderSpeed: "45 rpm",
-            cutterSpeed: "60",
-            cutterLength: "100mm",
-            tension1: "30",
-            tension2: "32",
-            qtex1Jig: "A형 지그",
-            qtex1Feed: "15",
-            qtex1Speed: "20",
-            qtex1Press: "0.5",
-            qtex2Jig: "B형 지그",
-            qtex2Feed: "15",
-            qtex2Speed: "20",
-            qtex2Press: "0.5",
-            status: "진행중",
-            note: "치수 공차 매우 중요, 클린룸 작업"
-          }
+            <!-- 선택 상세뷰 패널 -->
+            <div id="detailsPanel" class="hidden mb-4 bg-navy-light border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
+                <div class="bg-[#E8EFF5] px-5 py-3 border-b border-navy-borderLight flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i data-lucide="check-circle-2" class="h-5 w-5 text-navy-main mr-2"></i>
+                        <h3 class="text-sm font-bold text-navy-hover">선택 데이터 상세 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[11px] rounded-full">0</span></h3>
+                    </div>
+                    <button onclick="clearSelection()" class="text-xs font-medium text-navy-hover hover:text-navy-main underline underline-offset-2">선택 해제</button>
+                </div>
+                <div class="overflow-x-auto bg-white/50 p-2">
+                    <table class="min-w-full divide-y divide-navy-borderLight/50">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">품번</th>
+                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">제품 규격</th>
+                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-main border-b border-navy-borderLight/50">실측 측정값</th>
+                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-blue-700 border-b border-navy-borderLight/50">레이저값</th>
+                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">배합</th>
+                                <th scope="col" class="px-4 py-2.5 text-right text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">수축률(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-navy-borderLight/30" id="detailsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 데이터 그리드 -->
+            <div class="bg-white border border-navy-border rounded-xl shadow-card flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-navy-border flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center text-sm text-navy-text font-bold">전체 목록</div>
+                    <div class="relative w-full sm:max-w-md">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchProduct" placeholder="품번, 규격, 회사명 검색" class="block w-full pl-10 pr-4 py-2 text-sm border border-navy-border rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main bg-gray-50 focus:bg-white transition-all">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 border-b border-navy-border">
+                            <tr>
+                                <th class="px-5 py-3.5 w-12 text-center"><input type="checkbox" id="selectAllCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer"></th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">생산일자</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">구분</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">품번</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">제품 규격</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">회사명</th>
+                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: 오늘의 일정 -->
+        <!-- ========================================== -->
+        <div id="view-schedule" class="hidden fade-in">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-navy-text">오늘의 일정 관리</h2>
+                    <p class="text-sm text-navy-muted mt-1">공정 라인 점검 및 생산 스케줄을 기록합니다.</p>
+                </div>
+                <button onclick="openScheduleModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm">
+                    <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 새 일정 등록
+                </button>
+            </div>
+
+            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
+                <div class="p-4 border-b border-navy-border bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-bold text-navy-text text-sm">일정 목록</h3>
+                    <span id="dateDisplay" class="text-xs font-bold text-navy-muted bg-white px-3 py-1 rounded-full border border-gray-200"></span>
+                </div>
+                <ul id="scheduleList" class="divide-y divide-gray-100">
+                    <!-- JS Rendering -->
+                </ul>
+                <div id="emptySchedule" class="hidden py-16 text-center">
+                    <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
+                    <p class="text-sm font-bold text-navy-text">등록된 일정이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: 재고 관리 -->
+        <!-- ========================================== -->
+        <div id="view-inventory" class="hidden fade-in">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-navy-text">실시간 재고 관리</h2>
+                    <p class="text-sm text-navy-muted mt-1">원자재 및 부자재의 재고 현황을 기록합니다.</p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="relative w-full sm:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchInventory" placeholder="품목 검색" class="block w-full pl-10 pr-3 py-2 text-sm border border-navy-border rounded-lg bg-white">
+                    </div>
+                    <button onclick="openInventoryModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm shrink-0">
+                        <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 재고 등록
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 border-b border-navy-border">
+                            <tr>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">카테고리</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">품목명 (자재명)</th>
+                                <th class="px-5 py-3.5 text-right text-xs font-bold text-navy-muted whitespace-nowrap">현재 수량</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">단위</th>
+                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap">최종 업데이트</th>
+                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap w-24">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="inventoryTableBody">
+                            <!-- JS Rendering -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyInventory" class="hidden py-16 text-center">
+                    <i data-lucide="package-open" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
+                    <p class="text-sm font-bold text-navy-text">등록된 재고 데이터가 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- [MODAL] 제품 DB -->
+    <div id="productModal" class="fixed inset-0 z-[60] hidden">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
+            <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="bg-white px-6 py-4 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 레코드 등록</span></h3>
+                    <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
+                </div>
+                <div class="px-6 py-5">
+                    <form id="productForm" class="space-y-5">
+                        <input type="hidden" id="p-id">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">일자</label><input type="date" id="p-date" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">구분</label><select id="p-type" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"><option>양산</option><option>샘플</option><option>시양산</option></select></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">품번</label><input type="text" id="p-code" required class="w-full border border-gray-300 rounded-lg p-2 text-sm uppercase focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">회사명</label><input type="text" id="p-company" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">제품 규격</label><input type="text" id="p-spec" required class="w-full border border-gray-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div><label class="block text-[13px] font-bold text-navy-main mb-1">측정값</label><input type="text" id="p-measured" class="w-full border border-navy-borderLight rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div><label class="block text-[13px] font-bold text-blue-600 mb-1">레이저값</label><input type="text" id="p-laser" class="w-full border border-blue-200 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"></div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">배합</label><input type="text" id="p-mixture" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">수축률(%)</label><input type="number" id="p-shrink" step="0.1" class="w-full border border-gray-300 rounded-lg p-2 text-sm text-right focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                    <button onclick="closeModal('productModal')" class="px-4 py-2 border bg-white rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveProduct()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [MODAL] 일정 등록 -->
+    <div id="scheduleModal" class="fixed inset-0 z-[60] hidden">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg text-navy-text" id="scheduleModalTitle">일정 추가</h3><button onclick="closeModal('scheduleModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="p-6">
+                    <form id="scheduleForm" class="space-y-4">
+                        <input type="hidden" id="s-id">
+                        <div>
+                            <label class="block text-sm font-bold mb-1 text-navy-text">작업 내용 <span class="text-navy-red">*</span></label>
+                            <input type="text" id="s-task" required placeholder="예: 1호기 실린더 청소" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1 text-navy-text">상태</label>
+                            <select id="s-status" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                <option value="pending">대기중 (Pending)</option>
+                                <option value="done">완료 (Done)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                    <button onclick="closeModal('scheduleModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveSchedule()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [MODAL] 재고 등록 -->
+    <div id="inventoryModal" class="fixed inset-0 z-[60] hidden">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('inventoryModal')"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg text-navy-text" id="inventoryModalTitle">재고 등록</h3><button onclick="closeModal('inventoryModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="p-6">
+                    <form id="inventoryForm" class="space-y-4">
+                        <input type="hidden" id="i-id">
+                        <div>
+                            <label class="block text-sm font-bold mb-1 text-navy-text">분류</label>
+                            <select id="i-category" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                <option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1 text-navy-text">품목명 <span class="text-navy-red">*</span></label>
+                            <input type="text" id="i-name" required placeholder="예: KCC-70U" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold mb-1 text-navy-text">수량 <span class="text-navy-red">*</span></label>
+                                <input type="number" id="i-qty" required class="w-full border border-gray-300 rounded-lg p-2 text-sm text-right focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                            </div>
+                            <div class="w-24">
+                                <label class="block text-sm font-bold mb-1 text-navy-text">단위</label>
+                                <select id="i-unit" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                    <option>Kg</option><option>EA</option><option>Box</option><option>L</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                    <button onclick="closeModal('inventoryModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveInventory()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [MODAL] 삭제 확인 -->
+    <div id="deleteModal" class="fixed inset-0 z-[70] hidden">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden text-center">
+                <div class="p-6 pt-8">
+                    <div class="mx-auto w-12 h-12 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-navy-text">데이터 삭제</h3>
+                    <p class="text-sm text-gray-500 mt-2">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex gap-2">
+                    <button onclick="closeDeleteModal()" class="flex-1 py-2 bg-white border border-gray-300 rounded-lg font-bold text-sm text-navy-text hover:bg-gray-50">취소</button>
+                    <button id="confirmDeleteBtn" class="flex-1 py-2 bg-navy-red text-white rounded-lg font-bold text-sm hover:bg-red-700">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+
+        // --- 데이터 관리 ---
+        let dbData = [
+            { id: 4, date: '2026-06-11', type: '양산', itemCode: 'SIL-X99', company: '대한정공(주)', productSpec: '15.0*20.0*50', measured: '14.8*19.8*49.5', laser: '14.9*19.8', mixture: 'KCC-70U + 경화제 2%', shrinkage: '2.5' },
+            { id: 3, date: '2026-06-11', type: '샘플', itemCode: 'SIL-W60', company: '(주)미래건설', productSpec: '10.5*15.0*100', measured: '10.3*14.9*99.0', laser: '10.4', mixture: 'KE-951U 100 + HC 1.5', shrinkage: '3.0' },
+            { id: 1, date: '2026-06-10', type: '양산', itemCode: 'SIL-T50', company: '대한정공(주)', productSpec: '8.0*10.0*500', measured: '7.9*9.9*498', laser: '8.0*10.0', mixture: '내열용 KCC-80U', shrinkage: '2.2' }
+        ];
+        
+        let scheduleData = [
+            { id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' },
+            { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' },
+            { id: 3, task: '오후 원자재(생고무) 입고 검수', status: 'pending' }
         ];
 
-        // 작은 정보 표시용 일반 아이템 컴포넌트
-        const DetailItem = ({ label, value }) => (
-          <div className="flex flex-col bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
-            <span className="text-sm text-gray-500 font-semibold mb-0.5">{label}</span>
-            <span className="font-bold text-gray-800 text-lg truncate">{value || '-'}</span>
-          </div>
-        );
+        let inventoryData = [
+            { id: 1, category: '원자재 (생고무)', name: 'KCC-70U (내열용)', qty: 450, unit: 'Kg', update: '2026-06-11' },
+            { id: 2, category: '첨가제/경화제', name: 'HC-1.5 경화제', qty: 25, unit: 'L', update: '2026-06-10' },
+            { id: 3, category: '포장재', name: '압출 롤 포장 박스', qty: 120, unit: 'Box', update: '2026-06-08' }
+        ];
 
-        // ----------------------------------------------------
-        // 1. 압출 전용 상세 카드 컴포넌트
-        // ----------------------------------------------------
-        const ExtrusionCard = ({ task, onEdit }) => {
-          const typeStr = task.machineType || '';
-          const showCutter = typeStr.includes('컷팅');
-          const showTension = typeStr.includes('인장');
-          const showQtex1 = typeStr.includes('큐텍스1');
-          const showQtex2 = typeStr.includes('큐텍스2');
+        // 상태 변수
+        let currentView = 'product'; // product, schedule, inventory
+        let deleteInfo = { type: null, id: null };
+        let selectedProductIds = new Set();
 
-          // 아이템 렌더링
-          const renderItems = (items) => {
-            const validItems = items.filter(item => item.value && String(item.value).trim() !== '' && item.value !== '-');
-            if (validItems.length === 0) return <p className="text-xs text-gray-400 py-1 pl-1">입력된 항목 없음</p>;
-            return (
-              <div className="grid grid-cols-2 gap-2.5">
-                {validItems.map((item, idx) => (
-                  <DetailItem key={idx} label={item.label} value={item.value} />
-                ))}
-              </div>
-            );
-          };
-
-          return (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-slate-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-200 rounded text-sm font-bold text-slate-700 shadow-sm">
-                  <Icon name="Factory" size={16} className="text-blue-500" />압출
-                </div>
-                <div className="flex items-center gap-2">
-                  {task.machineType && (
-                    <span className="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-md shadow-sm">
-                      기계 종류: {task.machineType}
-                    </span>
-                  )}
-                  <button 
-                    onClick={() => onEdit(task)}
-                    className="flex items-center gap-1 text-xs font-bold text-slate-600 bg-white hover:text-blue-600 hover:border-blue-300 border border-slate-200 px-2.5 py-1.5 rounded-md shadow-sm transition-all"
-                  >
-                    <Icon name="Pencil" size={12} /> 수정
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-4">
-                {/* 기본 정보 및 뱃지 */}
-                <div className="mb-5">
-                  <p className="text-sm font-bold text-blue-600 mb-0.5">
-                    {task.client} <span className="text-gray-400 font-normal ml-1">| {task.registeredAt}</span>
-                  </p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-2xl font-black text-gray-900 leading-tight">{task.product}</h3>
-                  </div>
-                </div>
-
-                {/* 세부 정보 목록 */}
-                <div className="space-y-4">
-                  
-                  {/* 1. 제품 규격 */}
-                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 shadow-sm">
-                    <h4 className="text-sm font-extrabold text-blue-800 mb-3 flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-blue-600"></div> 제품 규격
-                    </h4>
-                    <div className="grid grid-cols-3 gap-1 text-center divide-x divide-blue-200/60">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-blue-600 font-bold mb-1">내경</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.prodInner || '-'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-blue-600 font-bold mb-1">외경</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.prodOuter || '-'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-blue-600 font-bold mb-1">길이</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.prodLength || '-'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. 압출기 세팅 */}
-                  <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 shadow-sm">
-                     <h4 className="text-sm font-extrabold text-orange-800 mb-3 flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-orange-600"></div> 압출기 세팅
-                    </h4>
-                    <div className="grid grid-cols-3 gap-1 text-center divide-x divide-orange-200/60">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-orange-600 font-bold mb-1">번호</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.machineNo || '-'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-orange-600 font-bold mb-1">온도</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.extruderTemp || '-'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm text-orange-600 font-bold mb-1">속도</span>
-                        <span className="font-black text-gray-800 text-2xl truncate">{task.extruderSpeed || '-'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3. 금형 및 실측 규격 */}
-                  <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-sm">
-                     <h5 className="text-sm font-extrabold text-emerald-800 mb-3 flex items-center gap-1.5">
-                       <div className="w-2 h-2 rounded-full bg-emerald-600"></div> 금형 및 실측 규격
-                     </h5>
-                     <div className="grid grid-cols-4 gap-1 text-center divide-x divide-emerald-200/60">
-                       <div className="flex flex-col">
-                         <span className="text-xs text-emerald-600 font-bold mb-1">금형 내경</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.moldInner || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-emerald-600 font-bold mb-1">금형 외경</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.moldOuter || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-emerald-600 font-bold mb-1">노기스</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.nogis || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-emerald-600 font-bold mb-1">수축 전</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.preShrink || '-'}</span>
-                       </div>
-                     </div>
-                  </div>
-
-                  {/* 4. 회전 및 투입 세팅 */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-                     <h5 className="text-sm font-extrabold text-slate-700 mb-3 flex items-center gap-1.5">
-                       <div className="w-2 h-2 rounded-full bg-slate-500"></div> 회전 및 투입 세팅
-                     </h5>
-                     <div className="grid grid-cols-4 gap-1 text-center divide-x divide-slate-200/60">
-                       <div className="flex flex-col">
-                         <span className="text-xs text-slate-500 font-bold mb-1">투입속도</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.inputSpeed || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-slate-500 font-bold mb-1">다량감속</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.massiveDecel || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-slate-500 font-bold mb-1">역회전</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.reverseSpeed || '-'}</span>
-                       </div>
-                       <div className="flex flex-col">
-                         <span className="text-xs text-slate-500 font-bold mb-1">싱글속도</span>
-                         <span className="font-black text-gray-800 text-2xl tracking-tighter truncate">{task.singleSpeed || '-'}</span>
-                       </div>
-                     </div>
-                  </div>
-
-                  {/* 5. 조건부 노출 (컷팅기/인장기/큐텍스) */}
-                  {showCutter && (
-                     <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                       <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">✂️ 컷팅기 세팅</h5>
-                       {renderItems([
-                         { label: '컷팅기 속도', value: task.cutterSpeed },
-                         { label: '컷팅기 길이', value: task.cutterLength },
-                       ])}
-                     </div>
-                  )}
-
-                  {showTension && (
-                     <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                       <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">⛓️ 인장기 세팅</h5>
-                       {renderItems([
-                         { label: '1번 속도', value: task.tension1 },
-                         { label: '2번 속도', value: task.tension2 },
-                       ])}
-                     </div>
-                  )}
-
-                  {showQtex1 && (
-                     <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                       <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">🕹️ 큐텍스1 세팅</h5>
-                       <div className="grid grid-cols-2 gap-2.5">
-                         <DetailItem label="지그" value={task.qtex1Jig} />
-                         <DetailItem label="피딩 속도" value={task.qtex1Feed} />
-                         <DetailItem label="속도" value={task.qtex1Speed} />
-                         <DetailItem label="누름" value={task.qtex1Press} />
-                       </div>
-                     </div>
-                  )}
-
-                  {showQtex2 && (
-                     <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                       <h5 className="text-sm font-extrabold text-slate-700 mb-2.5 pl-1 border-b border-slate-200 pb-1.5">🕹️ 큐텍스2 세팅</h5>
-                       <div className="grid grid-cols-2 gap-2.5">
-                         <DetailItem label="지그" value={task.qtex2Jig} />
-                         <DetailItem label="피딩 속도" value={task.qtex2Feed} />
-                         <DetailItem label="속도" value={task.qtex2Speed} />
-                         <DetailItem label="누름" value={task.qtex2Press} />
-                       </div>
-                     </div>
-                  )}
-                </div>
-
-                {/* 메모 */}
-                {task.note && (
-                  <div className="flex items-start gap-2 mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm font-medium border border-red-100">
-                    <Icon name="AlertTriangle" size={16} className="shrink-0 mt-0.5" />
-                    <p className="leading-snug">{task.note}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        };
-
-        // ----------------------------------------------------
-        // 신규 작업 추가 및 수정 폼 (모달) 컴포넌트
-        // ----------------------------------------------------
-        const NewTaskModal = ({ isOpen, onClose, onSubmit, isSubmitting, initialData }) => {
-          const [formData, setFormData] = useState({});
-
-          useEffect(() => {
-            if (isOpen) {
-              setFormData(initialData || {});
-            }
-          }, [isOpen, initialData]);
-
-          if (!isOpen) return null;
-
-          const handleChange = (e) => {
-            setFormData({ ...formData, [e.target.name]: e.target.value });
-          };
-
-          const handleSubmit = (e) => {
-            e.preventDefault();
-            onSubmit(formData);
-          };
-
-          const themeStyles = {
-            slate: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-800', label: 'text-slate-600', inputBorder: 'border-slate-200', focus: 'focus:ring-slate-500 focus:border-slate-500' },
-            blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', label: 'text-blue-600', inputBorder: 'border-blue-200', focus: 'focus:ring-blue-500 focus:border-blue-500' },
-            orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', label: 'text-orange-600', inputBorder: 'border-orange-200', focus: 'focus:ring-orange-500 focus:border-orange-500' },
-            emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', label: 'text-emerald-600', inputBorder: 'border-emerald-200', focus: 'focus:ring-emerald-500 focus:border-emerald-500' },
-            gray: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', label: 'text-gray-600', inputBorder: 'border-gray-200', focus: 'focus:ring-gray-500 focus:border-gray-500' },
-            red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', label: 'text-red-600', inputBorder: 'border-red-200', focus: 'focus:ring-red-500 focus:border-red-500' }
-          };
-
-          // 모든 폼 항목 정의
-          const formGroups = [
-            { id: 'basic', title: '기본 정보', theme: 'slate', icon: null, gridCols: 'grid-cols-2', fields: [
-              {id:'client', label:'업체명', type: 'text'}, 
-              {id:'product', label:'품명', type: 'text'}, 
-              {id:'machineType', label:'기계 종류 (택1)', type: 'select', options: ['선택 안함', '컷팅기', '인장기1', '인장기2', '큐텍스1', '큐텍스2']}, 
-              {id:'machineNo', label:'압출기 번호', type: 'text'}
-            ] },
-            { id: 'specs', title: '제품 규격', theme: 'blue', icon: <div className="w-2 h-2 rounded-full bg-blue-600"></div>, gridCols: 'grid-cols-3', fields: [{id:'prodInner', label:'내경'}, {id:'prodOuter', label:'외경'}, {id:'prodLength', label:'길이'}] },
-            { id: 'extruder', title: '압출기 세팅', theme: 'orange', icon: <div className="w-2 h-2 rounded-full bg-orange-600"></div>, gridCols: 'grid-cols-2', fields: [{id:'extruderTemp', label:'온도'}, {id:'extruderSpeed', label:'속도'}] },
-            { id: 'mold', title: '금형 및 실측', theme: 'emerald', icon: <div className="w-2 h-2 rounded-full bg-emerald-600"></div>, gridCols: 'grid-cols-2', fields: [{id:'moldInner', label:'금형 내경'}, {id:'moldOuter', label:'금형 외경'}, {id:'nogis', label:'노기스'}, {id:'preShrink', label:'수축 전'}] },
-            { id: 'rotation', title: '회전 및 투입 세팅', theme: 'slate', icon: <div className="w-2 h-2 rounded-full bg-slate-500"></div>, gridCols: 'grid-cols-2', fields: [{id:'inputSpeed', label:'투입속도'}, {id:'massiveDecel', label:'다량감속'}, {id:'reverseSpeed', label:'역회전'}, {id:'singleSpeed', label:'싱글속도'}] },
-            { id: 'cutter', title: '✂️ 컷팅기 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'cutterSpeed', label:'속도'}, {id:'cutterLength', label:'길이'}] },
-            { id: 'tension', title: '⛓️ 인장기 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'tension1', label:'1번 속도'}, {id:'tension2', label:'2번 속도'}] },
-            { id: 'qtex1', title: '🕹️ 큐텍스1 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'qtex1Jig', label:'지그'}, {id:'qtex1Feed', label:'피딩속도'}, {id:'qtex1Speed', label:'속도'}, {id:'qtex1Press', label:'누름'}] },
-            { id: 'qtex2', title: '🕹️ 큐텍스2 세팅', theme: 'gray', icon: null, gridCols: 'grid-cols-2', fields: [{id:'qtex2Jig', label:'지그'}, {id:'qtex2Feed', label:'피딩속도'}, {id:'qtex2Speed', label:'속도'}, {id:'qtex2Press', label:'누름'}] },
-            { id: 'memo', title: '메모 (비고)', theme: 'red', icon: <Icon name="AlertTriangle" size={14} className="text-red-600" />, gridCols: 'grid-cols-1', fields: [{id:'note', label:'특이사항 및 주의점 입력'}] }
-          ];
-
-          const currentMachineType = formData.machineType || '';
-
-          const visibleFormGroups = formGroups.filter(group => {
-            if (group.id === 'cutter') return currentMachineType.includes('컷팅');
-            if (group.id === 'tension') return currentMachineType.includes('인장'); 
-            if (group.id === 'qtex1') return currentMachineType.includes('큐텍스1');
-            if (group.id === 'qtex2') return currentMachineType.includes('큐텍스2');
-            return true; 
-          });
-
-          return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-              <div className="bg-white w-full max-w-md max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="flex justify-between items-center px-5 py-4 bg-slate-900 text-white">
-                  <h2 className="text-lg font-bold flex items-center gap-2">
-                    {initialData ? <Icon name="Pencil" size={20} /> : <Icon name="Plus" size={20} />} 
-                    {initialData ? '작업 수정' : '신규 작업 등록'}
-                  </h2>
-                  <button onClick={onClose} disabled={isSubmitting} className="text-slate-300 hover:text-white"><Icon name="X" size={24} /></button>
-                </div>
-                
-                <form id="newTaskForm" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {visibleFormGroups.map((group) => {
-                    const style = themeStyles[group.theme];
-                    return (
-                      <div key={group.id} className={`${style.bg} p-4 rounded-xl border ${style.border} shadow-sm`}>
-                        <h3 className={`text-sm font-extrabold ${style.text} mb-3 flex items-center gap-1.5 border-b ${style.border} pb-2`}>
-                          {group.icon} {group.title}
-                        </h3>
-                        <div className={`grid ${group.gridCols} gap-2.5`}>
-                          {group.fields.map(field => {
-                            let isDisabled = false;
-                            if (currentMachineType === '인장기1' && field.id === 'tension2') isDisabled = true;
-                            if (currentMachineType === '인장기2' && field.id === 'tension1') isDisabled = true;
-
-                            return (
-                              <div key={field.id} className="flex flex-col">
-                                <label className={`text-xs font-bold ${style.label} mb-1 ${isDisabled ? 'opacity-40' : ''}`}>
-                                  {field.label}
-                                </label>
-                                
-                                {field.type === 'select' ? (
-                                  <select
-                                    name={field.id}
-                                    value={formData[field.id] || ''}
-                                    onChange={handleChange}
-                                    className={`w-full bg-white border ${style.inputBorder} rounded-lg px-2.5 py-2 text-sm font-bold text-gray-800 ${style.focus} outline-none transition-shadow`}
-                                  >
-                                    {field.options.map(opt => (
-                                      <option key={opt} value={opt === '선택 안함' ? '' : opt}>{opt}</option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    type="text"
-                                    name={field.id}
-                                    value={formData[field.id] || ''}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    placeholder={isDisabled ? "해당 없음" : "입력..."}
-                                    className={`w-full border ${style.inputBorder} rounded-lg px-2.5 py-2 text-sm font-bold ${
-                                      isDisabled 
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60' 
-                                        : 'bg-white text-gray-800'
-                                    } ${style.focus} outline-none transition-shadow`}
-                                  />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </form>
-                
-                <div className="p-4 border-t border-gray-100 bg-white">
-                  <button 
-                    type="submit"
-                    form="newTaskForm"
-                    disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all disabled:bg-blue-300"
-                  >
-                    {isSubmitting ? <Icon name="Loader2" size={20} className="animate-spin" /> : <Icon name="Save" size={20} />}
-                    {isSubmitting ? '저장 중...' : (initialData ? '수정 내용 저장' : '작업 저장하기')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        };
-
-        // ----------------------------------------------------
-        // 메인 App 컴포넌트
-        // ----------------------------------------------------
-        function App() {
-          const [tasks, setTasks] = useState([]);
-          const [searchQuery, setSearchQuery] = useState('');
-          const [isLoading, setIsLoading] = useState(true);
-          const [error, setError] = useState(null);
-          
-          const [isModalOpen, setIsModalOpen] = useState(false);
-          const [isSubmitting, setIsSubmitting] = useState(false);
-          const [editingTask, setEditingTask] = useState(null); 
-
-          const fetchSheetData = async () => {
-            try {
-              setIsLoading(true);
-              if (GOOGLE_SHEET_API_URL === 'YOUR_GOOGLE_WEB_APP_URL_HERE' || GOOGLE_SHEET_API_URL === '') {
-                setTasks(mockExtrusionData); 
-                setIsLoading(false);
-                return;
-              }
-              const response = await fetch(GOOGLE_SHEET_API_URL);
-              const data = await response.json();
-              setTasks(data);
-            } catch (err) {
-              console.error(err);
-              setError("데이터를 불러올 수 없습니다. 인터넷 연결이나 URL을 확인해주세요.");
-            } finally {
-              setIsLoading(false);
-            }
-          };
-
-          useEffect(() => {
-            fetchSheetData();
-          }, []);
-
-          const handleSaveTask = async (formData) => {
-            const isEdit = !!formData.id; 
-
-            if (GOOGLE_SHEET_API_URL === 'YOUR_GOOGLE_WEB_APP_URL_HERE' || GOOGLE_SHEET_API_URL === '') {
-              alert("구글 시트 URL이 연결되지 않아 임시로 화면에만 반영합니다.");
-              if (isEdit) {
-                setTasks(tasks.map(t => t.id === formData.id ? { ...t, ...formData } : t));
-              } else {
-                const newTask = { ...formData, id: '신규-' + Date.now(), currentProcess: '압출', status: '대기중', registeredAt: new Date().toLocaleString() };
-                setTasks([newTask, ...tasks]);
-              }
-              setIsModalOpen(false);
-              return;
-            }
-
-            try {
-              setIsSubmitting(true);
-              const payload = { ...formData, action: isEdit ? 'edit' : 'create' };
-
-              const response = await fetch(GOOGLE_SHEET_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-              });
-              const result = await response.json();
-              
-              if (result.status === 'success') {
-                setIsModalOpen(false);
-                fetchSheetData(); 
-              } else {
-                alert("저장에 실패했습니다: " + result.message);
-              }
-            } catch(err) {
-              alert("서버 오류로 인해 저장에 실패했습니다.");
-              console.error(err);
-            } finally {
-              setIsSubmitting(false);
-            }
-          };
-
-          const filteredTasks = tasks.filter(task => {
-            const isExtrusion = task.currentProcess === '압출';
+        // --- 탭 전환 로직 ---
+        function switchTab(view) {
+            currentView = view;
+            const views = ['product', 'schedule', 'inventory'];
             
-            if (!searchQuery) return isExtrusion;
-
-            const lowerQuery = searchQuery.toLowerCase();
-            
-            // 1. 기본 전체 항목 검색
-            let matchesSearch = Object.values(task).some(value => 
-              value && String(value).toLowerCase().includes(lowerQuery)
-            );
-
-            // 2. 내경*외경*길이 특수 검색
-            if (!matchesSearch && task.prodInner && task.prodOuter) {
-              const i = parseFloat(task.prodInner);
-              const o = parseFloat(task.prodOuter);
-              const l = parseFloat(task.prodLength);
-              
-              if (!isNaN(i) && !isNaN(o)) {
-                const normalizedQuery = lowerQuery.trim().replace(/\s+/g, '*');
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                const tab = document.getElementById(`tab-${v}`);
+                const iconBg = document.getElementById(`icon-bg-${v}`);
                 
-                const target1 = `${i}*${o}`;
-                const target2 = !isNaN(l) ? `${i}*${o}*${l}` : "";
-
-                if (target1.includes(normalizedQuery) || (target2 && target2.includes(normalizedQuery))) {
-                  matchesSearch = true;
+                if (v === view) {
+                    el.classList.remove('hidden');
+                    // 탭 활성화 스타일 (네이비 스타일)
+                    tab.classList.add('border-navy-main', 'shadow-tab-active');
+                    tab.classList.remove('border-transparent', 'shadow-card');
+                    tab.querySelector('h3').classList.add('text-navy-text');
+                    tab.querySelector('p').classList.add('text-navy-main');
+                    tab.querySelector('p').classList.remove('text-navy-muted');
+                    iconBg.classList.add('bg-navy-light', 'text-navy-main');
+                    iconBg.classList.remove('bg-gray-50', 'text-gray-400');
+                } else {
+                    el.classList.add('hidden');
+                    // 탭 비활성화 스타일
+                    tab.classList.remove('border-navy-main', 'shadow-tab-active');
+                    tab.classList.add('border-transparent', 'shadow-card');
+                    tab.querySelector('p').classList.remove('text-navy-main');
+                    tab.querySelector('p').classList.add('text-navy-muted');
+                    iconBg.classList.remove('bg-navy-light', 'text-navy-main');
+                    iconBg.classList.add('bg-gray-50', 'text-gray-400');
                 }
-              }
-            }
+            });
 
-            return isExtrusion && matchesSearch;
-          });
-
-          return (
-            <div className="max-w-md mx-auto h-screen bg-gray-100 flex flex-col font-sans overflow-hidden shadow-2xl relative">
-              <header className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shadow-md z-10 sticky top-0">
-                <div className="flex items-center gap-3">
-                  <div className="bg-slate-800 p-2 rounded-lg"><Icon name="Factory" size={24} className="text-blue-400" /></div>
-                  <div>
-                    <h1 className="text-lg font-bold tracking-wide">세린실리콘 관리자</h1>
-                    <p className="text-xs text-slate-400 font-medium">v1.0</p>
-                  </div>
-                </div>
-                <button className="text-slate-300 hover:text-white transition-colors"><Icon name="Menu" size={24} /></button>
-              </header>
-
-              <div className="bg-white px-4 pt-4 pb-4 shadow-sm z-10 sticky top-[76px]">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Icon name="Search" size={16} className="text-gray-400" /></div>
-                  <input
-                    type="text"
-                    className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
-                    placeholder="검색 (업체명, 5 8, 4 7 410 등)"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <main className="flex-1 overflow-y-auto p-4 space-y-5 pb-10">
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-3 pb-20">
-                    <Icon name="Loader2" size={32} className="animate-spin text-blue-500" />
-                    <p className="text-sm font-medium">데이터 로딩 중...</p>
-                  </div>
-                ) : error ? (
-                  <div className="flex flex-col items-center justify-center h-full text-red-500 space-y-3 pb-20 text-center px-4">
-                    <Icon name="AlertTriangle" size={32} /><p className="text-sm font-medium">{error}</p>
-                  </div>
-                ) : filteredTasks.length > 0 ? (
-                  filteredTasks.map((task) => (
-                    <ExtrusionCard 
-                      key={task.id} 
-                      task={task} 
-                      onEdit={(taskData) => { setEditingTask(taskData); setIsModalOpen(true); }} 
-                    />
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-40 text-gray-400 space-y-2">
-                    <Icon name="Factory" size={40} className="text-gray-300 opacity-50" />
-                    <p className="text-sm font-medium">검색 결과가 없습니다.</p>
-                  </div>
-                )}
-              </main>
-
-              {/* 우측 하단 플로팅 버튼 (신규 추가) */}
-              <button
-                onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
-                className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all z-40"
-              >
-                <Icon name="Plus" size={28} />
-              </button>
-
-              {/* 신규 등록 및 수정 통합 모달 */}
-              <NewTaskModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSubmit={handleSaveTask}
-                isSubmitting={isSubmitting}
-                initialData={editingTask}
-              />
-            </div>
-          );
+            // 각 뷰 렌더링 호출
+            if(view === 'product') renderProducts();
+            if(view === 'schedule') renderSchedule();
+            if(view === 'inventory') renderInventory();
         }
 
-        // 최종 렌더링
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // --- 제품 DB (Product) ---
+        const getBadge = (type) => {
+            const c = "px-2.5 py-1 text-[11px] font-bold rounded-full inline-block border ";
+            if(type==='양산') return `<span class="${c} bg-navy-light text-navy-main border-navy-borderLight/50">양산</span>`;
+            if(type==='샘플') return `<span class="${c} bg-gray-100 text-gray-600 border-gray-200">샘플</span>`;
+            return `<span class="${c} bg-blue-50 text-blue-600 border-blue-100">${type}</span>`;
+        };
+
+        function renderProducts() {
+            const term = document.getElementById('searchProduct').value.toLowerCase();
+            const filtered = dbData.filter(i => i.itemCode.toLowerCase().includes(term) || i.productSpec.toLowerCase().includes(term) || i.company.toLowerCase().includes(term));
+            
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+            
+            filtered.sort((a,b) => b.id - a.id).forEach(item => {
+                const isChecked = selectedProductIds.has(item.id);
+                const activeClass = isChecked ? 'checked-row bg-[#E8EFF5]' : 'bg-white';
+                const tr = document.createElement('tr');
+                tr.className = `main-row ${activeClass} transition-colors`;
+                tr.innerHTML = `
+                    <td class="px-5 py-3 text-center"><input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" value="${item.id}" ${isChecked?'checked':''}></td>
+                    <td class="px-5 py-3 font-mono text-sm text-navy-muted">${item.date}</td>
+                    <td class="px-5 py-3">${getBadge(item.type)}</td>
+                    <td class="px-5 py-3 font-bold text-navy-text">${item.itemCode}</td>
+                    <td class="px-5 py-3 text-sm text-navy-text">${item.productSpec}</td>
+                    <td class="px-5 py-3 text-sm text-navy-muted">${item.company}</td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="editProduct(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button onclick="requestDelete('product', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 체크박스 이벤트
+            document.querySelectorAll('.prod-cb').forEach(cb => {
+                cb.addEventListener('change', e => {
+                    const id = parseInt(e.target.value);
+                    e.target.checked ? selectedProductIds.add(id) : selectedProductIds.delete(id);
+                    renderProducts(); // 색상 및 상세뷰 갱신
+                });
+            });
+
+            // 전체체크 로직
+            const allCb = document.getElementById('selectAllCheckbox');
+            const cbs = document.querySelectorAll('.prod-cb');
+            allCb.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
+            
+            allCb.onchange = (e) => {
+                cbs.forEach(c => {
+                    e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value));
+                });
+                renderProducts();
+            };
+
+            lucide.createIcons();
+            updateProductDetails();
+        }
+
+        function updateProductDetails() {
+            const panel = document.getElementById('detailsPanel');
+            const tbody = document.getElementById('detailsBody');
+            
+            if(selectedProductIds.size === 0) {
+                panel.classList.add('hidden');
+                return;
+            }
+            panel.classList.remove('hidden');
+            document.getElementById('selectedCount').textContent = selectedProductIds.size;
+            
+            tbody.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => `
+                <tr class="bg-white/40 hover:bg-white/60 transition-colors">
+                    <td class="px-4 py-2 font-bold text-[13px] border-r border-navy-borderLight/30 text-navy-text">${item.itemCode}</td>
+                    <td class="px-4 py-2 text-[13px] text-navy-text">${item.productSpec}</td>
+                    <td class="px-4 py-2 text-[13px] text-navy-main font-mono font-bold">${item.measured || '-'}</td>
+                    <td class="px-4 py-2 text-[13px] text-blue-700 font-mono font-bold">${item.laser || '-'}</td>
+                    <td class="px-4 py-2 text-[13px] text-navy-muted">${item.mixture || '-'}</td>
+                    <td class="px-4 py-2 text-[13px] text-right font-mono font-bold text-navy-text">${item.shrinkage || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function clearSelection() { selectedProductIds.clear(); renderProducts(); }
+        document.getElementById('searchProduct').addEventListener('input', renderProducts);
+
+        // --- 일정 관리 (Schedule) ---
+        function renderSchedule() {
+            const list = document.getElementById('scheduleList');
+            const empty = document.getElementById('emptySchedule');
+            list.innerHTML = '';
+            
+            if(scheduleData.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            
+            scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
+                const isDone = item.status === 'done';
+                const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
+                const iconObj = isDone ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-navy-main"></i>` : `<i data-lucide="circle" class="w-5 h-5 text-gray-300"></i>`;
+                
+                const li = document.createElement('li');
+                li.className = 'p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group';
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 cursor-pointer" onclick="toggleScheduleStatus(${item.id})">
+                        ${iconObj}
+                        <span class="text-sm ${textStyle}">${item.task}</span>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editSchedule(${item.id})" class="p-1 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button onclick="requestDelete('schedule', ${item.id})" class="p-1 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleScheduleStatus(id) {
+            const idx = scheduleData.findIndex(i => i.id === id);
+            if(idx > -1) {
+                scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done';
+                renderSchedule();
+            }
+        }
+
+        // --- 재고 관리 (Inventory) ---
+        function renderInventory() {
+            const term = document.getElementById('searchInventory').value.toLowerCase();
+            const filtered = inventoryData.filter(i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term));
+            
+            const tbody = document.getElementById('inventoryTableBody');
+            const empty = document.getElementById('emptyInventory');
+            tbody.innerHTML = '';
+            
+            if(filtered.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            
+            filtered.sort((a,b) => b.id - a.id).forEach(item => {
+                // 수량 부족 시 경고색 (임의 로직: 100 미만)
+                const isLow = item.qty < 50;
+                const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="px-5 py-3.5 text-sm text-gray-500">${item.category}</td>
+                    <td class="px-5 py-3.5 text-sm font-bold text-navy-text">${item.name}</td>
+                    <td class="px-5 py-3.5 text-sm font-mono font-bold text-right ${qtyStyle}">${item.qty.toLocaleString()}</td>
+                    <td class="px-5 py-3.5 text-sm text-gray-500">${item.unit}</td>
+                    <td class="px-5 py-3.5 text-sm text-gray-400 font-mono text-center">${item.update}</td>
+                    <td class="px-5 py-3.5 text-center">
+                        <button onclick="editInventory(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button onclick="requestDelete('inventory', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+        document.getElementById('searchInventory').addEventListener('input', renderInventory);
+
+        // --- 모달 공통 로직 ---
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // --- 생산 DB CRUD ---
+        function openProductModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('p-id').value = '';
+            document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
+            openModal('productModal');
+        }
+        function saveProduct() {
+            const form = document.getElementById('productForm');
+            if(!form.checkValidity()) return form.reportValidity();
+            
+            const id = document.getElementById('p-id').value;
+            const data = {
+                date: document.getElementById('p-date').value, type: document.getElementById('p-type').value,
+                itemCode: document.getElementById('p-code').value.toUpperCase(), company: document.getElementById('p-company').value,
+                productSpec: document.getElementById('p-spec').value, measured: document.getElementById('p-measured').value,
+                laser: document.getElementById('p-laser').value, mixture: document.getElementById('p-mixture').value,
+                shrinkage: document.getElementById('p-shrink').value
+            };
+            if(id) { Object.assign(dbData.find(i=>i.id==id), data); } 
+            else { dbData.push({ id: Date.now(), ...data }); }
+            closeModal('productModal'); renderProducts();
+        }
+        function editProduct(id) {
+            const item = dbData.find(i => i.id === id);
+            document.getElementById('p-id').value = item.id;
+            ['date','type','company'].forEach(k => document.getElementById(`p-${k}`).value = item[k]||'');
+            document.getElementById('p-code').value = item.itemCode;
+            document.getElementById('p-spec').value = item.productSpec;
+            document.getElementById('p-measured').value = item.measured;
+            document.getElementById('p-laser').value = item.laser;
+            document.getElementById('p-mixture').value = item.mixture;
+            document.getElementById('p-shrink').value = item.shrinkage;
+            document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
+            openModal('productModal');
+        }
+
+        // --- 일정 CRUD ---
+        function openScheduleModal() {
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('s-id').value = '';
+            document.getElementById('scheduleModalTitle').textContent = '일정 등록';
+            openModal('scheduleModal');
+        }
+        function saveSchedule() {
+            const form = document.getElementById('scheduleForm');
+            if(!form.checkValidity()) return form.reportValidity();
+            const id = document.getElementById('s-id').value;
+            const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
+            if(id) { Object.assign(scheduleData.find(i=>i.id==id), data); } 
+            else { scheduleData.push({ id: Date.now(), ...data }); }
+            closeModal('scheduleModal'); renderSchedule();
+        }
+        function editSchedule(id) {
+            const item = scheduleData.find(i => i.id === id);
+            document.getElementById('s-id').value = item.id;
+            document.getElementById('s-task').value = item.task;
+            document.getElementById('s-status').value = item.status;
+            document.getElementById('scheduleModalTitle').textContent = '일정 수정';
+            openModal('scheduleModal');
+        }
+
+        // --- 재고 CRUD ---
+        function openInventoryModal() {
+            document.getElementById('inventoryForm').reset();
+            document.getElementById('i-id').value = '';
+            document.getElementById('inventoryModalTitle').textContent = '재고 등록';
+            openModal('inventoryModal');
+        }
+        function saveInventory() {
+            const form = document.getElementById('inventoryForm');
+            if(!form.checkValidity()) return form.reportValidity();
+            const id = document.getElementById('i-id').value;
+            const data = {
+                category: document.getElementById('i-category').value, name: document.getElementById('i-name').value,
+                qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value,
+                update: new Date().toISOString().split('T')[0]
+            };
+            if(id) { Object.assign(inventoryData.find(i=>i.id==id), data); } 
+            else { inventoryData.push({ id: Date.now(), ...data }); }
+            closeModal('inventoryModal'); renderInventory();
+        }
+        function editInventory(id) {
+            const item = inventoryData.find(i => i.id === id);
+            document.getElementById('i-id').value = item.id;
+            document.getElementById('i-category').value = item.category;
+            document.getElementById('i-name').value = item.name;
+            document.getElementById('i-qty').value = item.qty;
+            document.getElementById('i-unit').value = item.unit;
+            document.getElementById('inventoryModalTitle').textContent = '재고 수정';
+            openModal('inventoryModal');
+        }
+
+        // --- 공통 삭제 ---
+        function requestDelete(type, id) {
+            deleteInfo = { type, id };
+            openModal('deleteModal');
+        }
+        function closeDeleteModal() { deleteInfo = { type: null, id: null }; closeModal('deleteModal'); }
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if(deleteInfo.type === 'product') { dbData = dbData.filter(i => i.id !== deleteInfo.id); selectedProductIds.delete(deleteInfo.id); renderProducts(); }
+            if(deleteInfo.type === 'schedule') { scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); renderSchedule(); }
+            if(deleteInfo.type === 'inventory') { inventoryData = inventoryData.filter(i => i.id !== deleteInfo.id); renderInventory(); }
+            closeDeleteModal();
+        });
+
+        // 초기 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            switchTab('product'); // 기본 탭 오픈
+        });
     </script>
 </body>
 </html>
