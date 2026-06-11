@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실리콘 통합 관리 시스템 | 네이비 테마</title>
+    <title>실리콘 통합 관리 시스템 | 반응형 카드 UI</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -21,15 +21,15 @@
                     },
                     colors: {
                         navy: {
-                            main: '#1A365D',       // 메인 딥 네이비
-                            hover: '#112240',      // 호버용 다크 네이비
-                            light: '#F0F4F8',      // 연한 네이비 배경
-                            borderLight: '#D9E2EC', // 연한 네이비 보더
-                            red: '#E3003F',         // 경고/삭제용 레드 (유지)
-                            bg: '#F5F7F8',          // 전체 배경
-                            text: '#222222',        // 기본 텍스트
-                            muted: '#666666',       // 보조 텍스트
-                            border: '#E4E8EB'       // 기본 보더
+                            main: '#1A365D',       
+                            hover: '#112240',      
+                            light: '#F0F4F8',      
+                            borderLight: '#D9E2EC', 
+                            red: '#E3003F',         
+                            bg: '#F5F7F8',          
+                            text: '#222222',        
+                            muted: '#666666',       
+                            border: '#E4E8EB'       
                         }
                     },
                     boxShadow: {
@@ -48,27 +48,25 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* 호버 효과 */
-        tbody tr.main-row:hover td { background-color: #f8fafc !important; }
-        tbody tr.main-row.checked-row:hover td { background-color: #E2E8F0 !important; }
-        
         /* 애니메이션 */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .panel-enter { animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     </style>
 </head>
 <body class="bg-navy-bg text-navy-text font-sans h-screen overflow-hidden flex flex-col">
 
-    <!-- 상단 네비게이션 헤더 -->
-    <header class="bg-white border-b-2 border-navy-main px-6 py-4 flex justify-between items-center shadow-sm z-10 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-navy-main p-1.5 rounded-md">
+    <header class="bg-white border-b-2 border-navy-main px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shadow-sm z-20 shrink-0">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="bg-navy-main p-1.5 rounded-md hidden sm:block">
                 <i data-lucide="layers" class="h-5 w-5 text-white"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-navy-text tracking-tight">통합 제조 관리 시스템</h1>
+                <h1 class="text-lg sm:text-xl font-bold text-navy-text tracking-tight">통합 제조 관리 시스템</h1>
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -79,40 +77,39 @@
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-[1400px] mx-auto">
+    <main class="flex-1 overflow-y-auto p-3 sm:p-6 w-full max-w-[1400px] mx-auto relative pb-20 sm:pb-6">
         
-        <!-- 네비게이션 탭 -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-5 sm:mb-6">
             <!-- 오늘의 일정 탭 -->
-            <button onclick="switchTab('schedule')" id="tab-schedule" class="bg-white p-5 shadow-card border-2 border-transparent rounded-xl flex items-center justify-between transition-all hover:shadow-md">
-                <div class="text-left">
-                    <p class="text-xs font-bold text-navy-muted mb-1 uppercase tracking-wider">Today's Tasks</p>
-                    <h3 class="text-xl font-black text-navy-text">오늘의 일정</h3>
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="bg-white p-3 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-2 sm:gap-0">
+                <div class="p-2 sm:p-3 rounded-full bg-gray-50 text-gray-400 transition-colors order-first sm:order-last shrink-0" id="icon-bg-schedule">
+                    <i data-lucide="calendar-check" class="h-5 w-5 sm:h-7 sm:w-7"></i>
                 </div>
-                <div class="p-3 rounded-full bg-gray-50 text-gray-400 transition-colors" id="icon-bg-schedule">
-                    <i data-lucide="calendar-check" class="h-7 w-7"></i>
+                <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-navy-muted mb-0.5 sm:mb-1 uppercase tracking-wider hidden sm:block">Today's Tasks</p>
+                    <h3 class="text-sm sm:text-xl font-black text-navy-text">오늘의 일정</h3>
                 </div>
             </button>
             
             <!-- 제품 DB 탭 (기본 활성화) -->
-            <button onclick="switchTab('product')" id="tab-product" class="bg-white p-5 shadow-tab-active border-2 border-navy-main rounded-xl flex items-center justify-between transition-all hover:shadow-md">
-                <div class="text-left">
-                    <p class="text-xs font-bold text-navy-main mb-1 uppercase tracking-wider">Extrusion Log</p>
-                    <h3 class="text-xl font-black text-navy-text">제품 DB</h3>
+            <button onclick="switchTab('product')" id="tab-product" class="bg-white p-3 sm:p-5 shadow-tab-active border-2 border-navy-main rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-2 sm:gap-0">
+                <div class="p-2 sm:p-3 rounded-full bg-navy-light text-navy-main transition-colors order-first sm:order-last shrink-0" id="icon-bg-product">
+                    <i data-lucide="database" class="h-5 w-5 sm:h-7 sm:w-7"></i>
                 </div>
-                <div class="p-3 rounded-full bg-navy-light text-navy-main transition-colors" id="icon-bg-product">
-                    <i data-lucide="database" class="h-7 w-7"></i>
+                <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-navy-main mb-0.5 sm:mb-1 uppercase tracking-wider hidden sm:block">Extrusion Log</p>
+                    <h3 class="text-sm sm:text-xl font-black text-navy-text">제품 DB</h3>
                 </div>
             </button>
             
             <!-- 재고 관리 탭 -->
-            <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-white p-5 shadow-card border-2 border-transparent rounded-xl flex items-center justify-between transition-all hover:shadow-md">
-                <div class="text-left">
-                    <p class="text-xs font-bold text-navy-muted mb-1 uppercase tracking-wider">Stock Management</p>
-                    <h3 class="text-xl font-black text-navy-text">재고 관리</h3>
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-white p-3 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-2 sm:gap-0">
+                <div class="p-2 sm:p-3 rounded-full bg-gray-50 text-gray-400 transition-colors order-first sm:order-last shrink-0" id="icon-bg-inventory">
+                    <i data-lucide="package" class="h-5 w-5 sm:h-7 sm:w-7"></i>
                 </div>
-                <div class="p-3 rounded-full bg-gray-50 text-gray-400 transition-colors" id="icon-bg-inventory">
-                    <i data-lucide="package" class="h-7 w-7"></i>
+                <div>
+                    <p class="text-[10px] sm:text-xs font-bold text-navy-muted mb-0.5 sm:mb-1 uppercase tracking-wider hidden sm:block">Stock Management</p>
+                    <h3 class="text-sm sm:text-xl font-black text-navy-text">재고 관리</h3>
                 </div>
             </button>
         </div>
@@ -121,73 +118,67 @@
         <!-- VIEW 1: 제품 DB -->
         <!-- ========================================== -->
         <div id="view-product" class="fade-in block">
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-navy-text">일일 생산 기록</h2>
-                    <p class="text-sm text-navy-muted mt-1">압출 공정의 상세 데이터를 조회하고 관리합니다.</p>
+                    <h2 class="text-lg sm:text-xl font-bold text-navy-text">일일 생산 기록</h2>
+                    <p class="text-xs sm:text-sm text-navy-muted mt-1">압출 공정 데이터를 등록하고 상세 제원을 조회합니다.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button class="px-4 py-2 bg-white border border-navy-border text-navy-text text-sm font-medium rounded-lg hover:bg-gray-50 flex items-center shadow-sm">
-                        <i data-lucide="download" class="h-4 w-4 mr-2 text-navy-muted"></i> 다운로드
+                    <button class="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-white border border-navy-border text-navy-text text-sm font-bold rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm">
+                        <i data-lucide="download" class="h-4 w-4 mr-2 text-navy-muted"></i> 엑셀
                     </button>
-                    <button onclick="openProductModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm">
+                    <button onclick="openProductModal()" class="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm">
                         <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 생산 등록
                     </button>
                 </div>
             </div>
 
-            <!-- 선택 상세뷰 패널 -->
-            <div id="detailsPanel" class="hidden mb-4 bg-navy-light border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
-                <div class="bg-[#E8EFF5] px-5 py-3 border-b border-navy-borderLight flex justify-between items-center">
+            <!-- 선택 상세뷰 패널 (카드형) -->
+            <div id="detailsPanel" class="hidden mb-4 bg-navy-light/50 border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
+                <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-between items-center">
                     <div class="flex items-center">
-                        <i data-lucide="check-circle-2" class="h-5 w-5 text-navy-main mr-2"></i>
-                        <h3 class="text-sm font-bold text-navy-hover">선택 데이터 상세 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[11px] rounded-full">0</span></h3>
+                        <i data-lucide="check-square" class="h-4 w-4 sm:h-5 sm:w-5 text-navy-main mr-1.5 sm:mr-2"></i>
+                        <h3 class="text-xs sm:text-sm font-bold text-navy-text">선택 상세 제원 비교 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[10px] rounded-full">0</span></h3>
                     </div>
-                    <button onclick="clearSelection()" class="text-xs font-medium text-navy-hover hover:text-navy-main underline underline-offset-2">선택 해제</button>
+                    <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
-                <div class="overflow-x-auto bg-white/50 p-2">
-                    <table class="min-w-full divide-y divide-navy-borderLight/50">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">품번</th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">제품 규격</th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-main border-b border-navy-borderLight/50">실측 측정값</th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-blue-700 border-b border-navy-borderLight/50">레이저값</th>
-                                <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">배합</th>
-                                <th scope="col" class="px-4 py-2.5 text-right text-[11px] font-bold text-navy-muted border-b border-navy-borderLight/50">수축률(%)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-navy-borderLight/30" id="detailsBody"></tbody>
-                    </table>
+                <!-- 상세 제원 카드 그리드 -->
+                <div class="p-3 sm:p-4">
+                    <div id="detailsCardContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                        <!-- 상세 카드 JS 렌더링 -->
+                    </div>
                 </div>
             </div>
 
-            <!-- 데이터 그리드 -->
-            <div class="bg-white border border-navy-border rounded-xl shadow-card flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-navy-border flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center text-sm text-navy-text font-bold">전체 목록</div>
-                    <div class="relative w-full sm:max-w-md">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
+            <!-- 메인 데이터 리스트 영역 -->
+            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
+                <!-- 검색 및 컨트롤 -->
+                <div class="p-3 sm:p-4 border-b border-navy-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 sm:py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm">
+                            <input type="checkbox" id="selectAllCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer">
+                            <span class="text-xs font-bold text-navy-text">전체 선택</span>
+                        </label>
+                        <div class="text-xs sm:text-sm text-navy-muted font-medium flex items-center hidden sm:flex">
+                            <i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> 카드 뷰 모드
                         </div>
-                        <input type="text" id="searchProduct" placeholder="품번, 규격, 회사명 검색" class="block w-full pl-10 pr-4 py-2 text-sm border border-navy-border rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main bg-gray-50 focus:bg-white transition-all">
+                    </div>
+                    <div class="relative w-full sm:max-w-xs lg:max-w-md">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
+                        <input type="text" id="searchProduct" placeholder="품번, 규격, 회사명 검색" class="block w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main transition-colors shadow-sm">
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50 border-b border-navy-border">
-                            <tr>
-                                <th class="px-5 py-3.5 w-12 text-center"><input type="checkbox" id="selectAllCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer"></th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">생산일자</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">구분</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">품번</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">제품 규격</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">회사명</th>
-                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="productTableBody"></tbody>
-                    </table>
+                
+                <!-- 제품 리스트 (카드 그리드) -->
+                <div class="p-3 sm:p-4 bg-gray-50/30">
+                    <div id="productCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <!-- 제품 카드 JS 렌더링 -->
+                    </div>
+                    <!-- 빈 상태 -->
+                    <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
+                        <i data-lucide="search-x" class="h-10 w-10 text-gray-300 mb-3"></i>
+                        <h3 class="text-sm font-bold text-gray-600">조회된 레코드가 없습니다.</h3>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,24 +187,24 @@
         <!-- VIEW 2: 오늘의 일정 -->
         <!-- ========================================== -->
         <div id="view-schedule" class="hidden fade-in">
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-navy-text">오늘의 일정 관리</h2>
-                    <p class="text-sm text-navy-muted mt-1">공정 라인 점검 및 생산 스케줄을 기록합니다.</p>
+                    <h2 class="text-lg sm:text-xl font-bold text-navy-text">오늘의 일정 관리</h2>
+                    <p class="text-xs sm:text-sm text-navy-muted mt-1">공정 라인 점검 및 스케줄을 기록합니다.</p>
                 </div>
-                <button onclick="openScheduleModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm">
+                <button onclick="openScheduleModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm">
                     <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 새 일정 등록
                 </button>
             </div>
 
-            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
-                <div class="p-4 border-b border-navy-border bg-gray-50 flex justify-between items-center">
-                    <h3 class="font-bold text-navy-text text-sm">일정 목록</h3>
-                    <span id="dateDisplay" class="text-xs font-bold text-navy-muted bg-white px-3 py-1 rounded-full border border-gray-200"></span>
+            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden p-3 sm:p-4">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                    <h3 class="font-bold text-navy-text text-sm flex items-center"><i data-lucide="list-todo" class="w-4 h-4 mr-1.5 text-navy-main"></i> 작업 리스트</h3>
+                    <span id="dateDisplay" class="text-[10px] sm:text-xs font-bold text-navy-muted bg-gray-50 px-2 sm:px-3 py-1 rounded-full border border-gray-200"></span>
                 </div>
-                <ul id="scheduleList" class="divide-y divide-gray-100">
-                    <!-- JS Rendering -->
-                </ul>
+                <div id="scheduleCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- 일정 카드 JS 렌더링 -->
+                </div>
                 <div id="emptySchedule" class="hidden py-16 text-center">
                     <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
                     <p class="text-sm font-bold text-navy-text">등록된 일정이 없습니다.</p>
@@ -225,43 +216,27 @@
         <!-- VIEW 3: 재고 관리 -->
         <!-- ========================================== -->
         <div id="view-inventory" class="hidden fade-in">
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-navy-text">실시간 재고 관리</h2>
-                    <p class="text-sm text-navy-muted mt-1">원자재 및 부자재의 재고 현황을 기록합니다.</p>
+                    <h2 class="text-lg sm:text-xl font-bold text-navy-text">실시간 재고 관리</h2>
+                    <p class="text-xs sm:text-sm text-navy-muted mt-1">원자재 및 부자재의 잔여 수량을 기록합니다.</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <div class="relative w-full sm:w-64">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
-                        </div>
-                        <input type="text" id="searchInventory" placeholder="품목 검색" class="block w-full pl-10 pr-3 py-2 text-sm border border-navy-border rounded-lg bg-white">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
+                        <input type="text" id="searchInventory" placeholder="품목 검색" class="block w-full pl-9 pr-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:border-navy-main">
                     </div>
-                    <button onclick="openInventoryModal()" class="px-4 py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center shadow-sm shrink-0">
+                    <button onclick="openInventoryModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm shrink-0">
                         <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 재고 등록
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50 border-b border-navy-border">
-                            <tr>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">카테고리</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">품목명 (자재명)</th>
-                                <th class="px-5 py-3.5 text-right text-xs font-bold text-navy-muted whitespace-nowrap">현재 수량</th>
-                                <th class="px-5 py-3.5 text-left text-xs font-bold text-navy-muted whitespace-nowrap">단위</th>
-                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap">최종 업데이트</th>
-                                <th class="px-5 py-3.5 text-center text-xs font-bold text-navy-muted whitespace-nowrap w-24">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="inventoryTableBody">
-                            <!-- JS Rendering -->
-                        </tbody>
-                    </table>
+            <div class="bg-transparent">
+                <div id="inventoryCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                    <!-- 재고 카드 JS 렌더링 -->
                 </div>
-                <div id="emptyInventory" class="hidden py-16 text-center">
+                <div id="emptyInventory" class="hidden py-16 text-center bg-white rounded-xl border border-gray-200 mt-2">
                     <i data-lucide="package-open" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
                     <p class="text-sm font-bold text-navy-text">등록된 재고 데이터가 없습니다.</p>
                 </div>
@@ -270,109 +245,116 @@
 
     </main>
 
-    <!-- [MODAL] 제품 DB -->
+    <!-- ========================================================= -->
+    <!-- 통합 모달 (가운데 정렬 팝업형, 반응형 크기 조절) -->
+    <!-- ========================================================= -->
+    
+    <!-- 1. 제품 등록 모달 -->
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
-            <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-                <div class="bg-white px-6 py-4 border-b flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 레코드 등록</span></h3>
+            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden fade-in">
+                <div class="bg-white px-5 sm:px-6 py-4 border-b flex justify-between items-center">
+                    <h3 class="text-base sm:text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 레코드 등록</span></h3>
                     <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
                 </div>
-                <div class="px-6 py-5">
-                    <form id="productForm" class="space-y-5">
+                <div class="px-5 sm:px-6 py-5">
+                    <form id="productForm" class="space-y-4 sm:space-y-5">
                         <input type="hidden" id="p-id">
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">일자</label><input type="date" id="p-date" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
-                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">구분</label><select id="p-type" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"><option>양산</option><option>샘플</option><option>시양산</option></select></div>
-                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">품번</label><input type="text" id="p-code" required class="w-full border border-gray-300 rounded-lg p-2 text-sm uppercase focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
-                            <div class="col-span-2 sm:col-span-1"><label class="block text-[13px] font-bold mb-1 text-navy-text">회사명</label><input type="text" id="p-company" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                        <!-- 1열 -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">일자</label><input type="date" id="p-date" required class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">구분</label><select id="p-type" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white"><option>양산</option><option>샘플</option><option>시양산</option></select></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">품번</label><input type="text" id="p-code" required placeholder="SIL-X99" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm uppercase focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div class="col-span-2 sm:col-span-1"><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">회사명</label><input type="text" id="p-company" required placeholder="고객사명" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">제품 규격</label><input type="text" id="p-spec" required class="w-full border border-gray-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
-                            <div><label class="block text-[13px] font-bold text-navy-main mb-1">측정값</label><input type="text" id="p-measured" class="w-full border border-navy-borderLight rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
-                            <div><label class="block text-[13px] font-bold text-blue-600 mb-1">레이저값</label><input type="text" id="p-laser" class="w-full border border-blue-200 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"></div>
+                        <!-- 2열 제원 (배경 강조) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 bg-navy-light/50 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
+                            <div><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">제품 규격 <span class="text-[10px] text-gray-400 font-normal ml-1">내경*외경*길이</span></label><input type="text" id="p-spec" required placeholder="15.0*20.0*50" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white"></div>
+                            <div><label class="block text-xs sm:text-[13px] font-bold text-navy-main mb-1">실측 측정값 <span class="text-[10px] text-navy-main/60 font-normal ml-1">내경*외경</span></label><input type="text" id="p-measured" placeholder="14.8*19.6" class="w-full border border-navy-borderLight rounded-lg p-2.5 sm:p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white shadow-sm"></div>
+                            <div><label class="block text-xs sm:text-[13px] font-bold text-blue-600 mb-1">레이저값 <span class="text-[10px] text-blue-400 font-normal ml-1">수치입력</span></label><input type="text" id="p-laser" placeholder="14.9" class="w-full border border-blue-200 rounded-lg p-2.5 sm:p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white shadow-sm"></div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">배합</label><input type="text" id="p-mixture" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
-                            <div><label class="block text-[13px] font-bold mb-1 text-navy-text">수축률(%)</label><input type="number" id="p-shrink" step="0.1" class="w-full border border-gray-300 rounded-lg p-2 text-sm text-right focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                        <!-- 3열 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">배합 (Mixture)</label><input type="text" id="p-mixture" placeholder="KE-951U 100 + HC 1.5" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
+                            <div class="relative"><label class="block text-xs sm:text-[13px] font-bold mb-1 text-navy-text">수축률(%)</label><input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full border border-gray-300 rounded-lg p-2.5 sm:p-2 pl-3 pr-8 text-sm text-right font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"><span class="absolute right-3 top-[34px] sm:top-[30px] text-gray-400 font-bold text-xs">%</span></div>
                         </div>
                     </form>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
-                    <button onclick="closeModal('productModal')" class="px-4 py-2 border bg-white rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveProduct()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100 pb-safe sm:pb-4">
+                    <button onclick="closeModal('productModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 border bg-white rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveProduct()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장하기</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- [MODAL] 일정 등록 -->
+    <!-- 2. 일정 등록 모달 -->
     <div id="scheduleModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
-            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div class="px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg text-navy-text" id="scheduleModalTitle">일정 추가</h3><button onclick="closeModal('scheduleModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-                <div class="p-6">
+            <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="scheduleModalTitle">일정 추가</h3><button onclick="closeModal('scheduleModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="p-5 sm:p-6">
                     <form id="scheduleForm" class="space-y-4">
                         <input type="hidden" id="s-id">
                         <div>
-                            <label class="block text-sm font-bold mb-1 text-navy-text">작업 내용 <span class="text-navy-red">*</span></label>
-                            <input type="text" id="s-task" required placeholder="예: 1호기 실린더 청소" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">작업 내용 <span class="text-navy-red">*</span></label>
+                            <input type="text" id="s-task" required placeholder="예: 1호기 실린더 청소" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-1 text-navy-text">상태</label>
-                            <select id="s-status" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">상태</label>
+                            <select id="s-status" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
                                 <option value="pending">대기중 (Pending)</option>
                                 <option value="done">완료 (Done)</option>
                             </select>
                         </div>
                     </form>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
-                    <button onclick="closeModal('scheduleModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveSchedule()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                    <button onclick="closeModal('scheduleModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveSchedule()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- [MODAL] 재고 등록 -->
+    <!-- 3. 재고 등록 모달 -->
     <div id="inventoryModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('inventoryModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
-            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div class="px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg text-navy-text" id="inventoryModalTitle">재고 등록</h3><button onclick="closeModal('inventoryModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-                <div class="p-6">
+            <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="inventoryModalTitle">재고 등록</h3><button onclick="closeModal('inventoryModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="p-5 sm:p-6">
                     <form id="inventoryForm" class="space-y-4">
                         <input type="hidden" id="i-id">
                         <div>
-                            <label class="block text-sm font-bold mb-1 text-navy-text">분류</label>
-                            <select id="i-category" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">분류</label>
+                            <select id="i-category" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
                                 <option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-1 text-navy-text">품목명 <span class="text-navy-red">*</span></label>
-                            <input type="text" id="i-name" required placeholder="예: KCC-70U" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">품목명 <span class="text-navy-red">*</span></label>
+                            <input type="text" id="i-name" required placeholder="예: KCC-70U" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
                         </div>
-                        <div class="flex gap-4">
+                        <div class="flex gap-3">
                             <div class="flex-1">
-                                <label class="block text-sm font-bold mb-1 text-navy-text">수량 <span class="text-navy-red">*</span></label>
-                                <input type="number" id="i-qty" required class="w-full border border-gray-300 rounded-lg p-2 text-sm text-right focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">수량 <span class="text-navy-red">*</span></label>
+                                <input type="number" id="i-qty" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-right font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
                             </div>
                             <div class="w-24">
-                                <label class="block text-sm font-bold mb-1 text-navy-text">단위</label>
-                                <select id="i-unit" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">단위</label>
+                                <select id="i-unit" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
                                     <option>Kg</option><option>EA</option><option>Box</option><option>L</option>
                                 </select>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
-                    <button onclick="closeModal('inventoryModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveInventory()" class="px-6 py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                    <button onclick="closeModal('inventoryModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button onclick="saveInventory()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
                 </div>
             </div>
         </div>
@@ -381,16 +363,16 @@
     <!-- [MODAL] 삭제 확인 -->
     <div id="deleteModal" class="fixed inset-0 z-[70] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
-        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden text-center">
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xs sm:max-w-sm overflow-hidden text-center fade-in">
                 <div class="p-6 pt-8">
                     <div class="mx-auto w-12 h-12 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-6 h-6"></i></div>
-                    <h3 class="text-lg font-bold text-navy-text">데이터 삭제</h3>
-                    <p class="text-sm text-gray-500 mt-2">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
+                    <h3 class="text-base sm:text-lg font-bold text-navy-text">데이터 삭제</h3>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-2">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 flex gap-2">
-                    <button onclick="closeDeleteModal()" class="flex-1 py-2 bg-white border border-gray-300 rounded-lg font-bold text-sm text-navy-text hover:bg-gray-50">취소</button>
-                    <button id="confirmDeleteBtn" class="flex-1 py-2 bg-navy-red text-white rounded-lg font-bold text-sm hover:bg-red-700">삭제</button>
+                <div class="bg-gray-50 px-4 sm:px-6 py-4 flex gap-2">
+                    <button onclick="closeDeleteModal()" class="flex-1 py-2.5 sm:py-2 bg-white border border-gray-300 rounded-lg font-bold text-sm text-navy-text hover:bg-gray-50">취소</button>
+                    <button id="confirmDeleteBtn" class="flex-1 py-2.5 sm:py-2 bg-navy-red text-white rounded-lg font-bold text-sm hover:bg-red-700 shadow-md">삭제</button>
                 </div>
             </div>
         </div>
@@ -400,11 +382,12 @@
         lucide.createIcons();
         document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
 
-        // --- 데이터 관리 ---
+        // --- Mock Data ---
         let dbData = [
-            { id: 4, date: '2026-06-11', type: '양산', itemCode: 'SIL-X99', company: '대한정공(주)', productSpec: '15.0*20.0*50', measured: '14.8*19.8*49.5', laser: '14.9*19.8', mixture: 'KCC-70U + 경화제 2%', shrinkage: '2.5' },
-            { id: 3, date: '2026-06-11', type: '샘플', itemCode: 'SIL-W60', company: '(주)미래건설', productSpec: '10.5*15.0*100', measured: '10.3*14.9*99.0', laser: '10.4', mixture: 'KE-951U 100 + HC 1.5', shrinkage: '3.0' },
-            { id: 1, date: '2026-06-10', type: '양산', itemCode: 'SIL-T50', company: '대한정공(주)', productSpec: '8.0*10.0*500', measured: '7.9*9.9*498', laser: '8.0*10.0', mixture: '내열용 KCC-80U', shrinkage: '2.2' }
+            { id: 4, date: '2026-06-11', type: '양산', itemCode: 'SIL-X99', company: '대한정공(주)', productSpec: '15.0*20.0*50', measured: '14.8*19.8', laser: '14.9', mixture: 'KCC-70U + 경화제 2%', shrinkage: '2.5' },
+            { id: 3, date: '2026-06-11', type: '샘플', itemCode: 'SIL-W60', company: '(주)미래건설', productSpec: '10.5*15.0*100', measured: '10.3*14.9', laser: '10.4', mixture: 'KE-951U 100 + HC 1.5', shrinkage: '3.0' },
+            { id: 2, date: '2026-06-10', type: '시양산', itemCode: 'SIL-M40', company: '제일메디칼', productSpec: '5.0*8.0*200', measured: '5.1*8.1', laser: '5.1', mixture: '의료용 LSR A/B', shrinkage: '1.8' },
+            { id: 1, date: '2026-06-10', type: '양산', itemCode: 'SIL-T50', company: '대한정공(주)', productSpec: '8.0*10.0*500', measured: '7.9*9.9', laser: '8.0', mixture: '내열용 KCC-80U', shrinkage: '2.2' }
         ];
         
         let scheduleData = [
@@ -414,17 +397,17 @@
         ];
 
         let inventoryData = [
-            { id: 1, category: '원자재 (생고무)', name: 'KCC-70U (내열용)', qty: 450, unit: 'Kg', update: '2026-06-11' },
-            { id: 2, category: '첨가제/경화제', name: 'HC-1.5 경화제', qty: 25, unit: 'L', update: '2026-06-10' },
-            { id: 3, category: '포장재', name: '압출 롤 포장 박스', qty: 120, unit: 'Box', update: '2026-06-08' }
+            { id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' },
+            { id: 2, category: '첨가제/경화제', name: 'HC-1.5', qty: 25, unit: 'L', update: '2026-06-10' },
+            { id: 3, category: '포장재', name: '롤 포장 박스', qty: 120, unit: 'Box', update: '2026-06-08' },
+            { id: 4, category: '기타 소모품', name: '내열 장갑', qty: 15, unit: 'EA', update: '2026-06-05' }
         ];
 
-        // 상태 변수
-        let currentView = 'product'; // product, schedule, inventory
+        let currentView = 'product'; 
         let deleteInfo = { type: null, id: null };
         let selectedProductIds = new Set();
 
-        // --- 탭 전환 로직 ---
+        // --- 상단 탭 전환 로직 ---
         function switchTab(view) {
             currentView = view;
             const views = ['product', 'schedule', 'inventory'];
@@ -436,7 +419,6 @@
                 
                 if (v === view) {
                     el.classList.remove('hidden');
-                    // 탭 활성화 스타일 (네이비 스타일)
                     tab.classList.add('border-navy-main', 'shadow-tab-active');
                     tab.classList.remove('border-transparent', 'shadow-card');
                     tab.querySelector('h3').classList.add('text-navy-text');
@@ -446,7 +428,6 @@
                     iconBg.classList.remove('bg-gray-50', 'text-gray-400');
                 } else {
                     el.classList.add('hidden');
-                    // 탭 비활성화 스타일
                     tab.classList.remove('border-navy-main', 'shadow-tab-active');
                     tab.classList.add('border-transparent', 'shadow-card');
                     tab.querySelector('p').classList.remove('text-navy-main');
@@ -456,53 +437,100 @@
                 }
             });
 
-            // 각 뷰 렌더링 호출
             if(view === 'product') renderProducts();
             if(view === 'schedule') renderSchedule();
             if(view === 'inventory') renderInventory();
+            lucide.createIcons();
         }
 
-        // --- 제품 DB (Product) ---
+        // --- 공통 뱃지 ---
         const getBadge = (type) => {
-            const c = "px-2.5 py-1 text-[11px] font-bold rounded-full inline-block border ";
-            if(type==='양산') return `<span class="${c} bg-navy-light text-navy-main border-navy-borderLight/50">양산</span>`;
-            if(type==='샘플') return `<span class="${c} bg-gray-100 text-gray-600 border-gray-200">샘플</span>`;
-            return `<span class="${c} bg-blue-50 text-blue-600 border-blue-100">${type}</span>`;
+            const cls = "px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded bg-white border";
+            if(type==='양산') return `<span class="${cls} text-navy-main border-navy-main/30">양산</span>`;
+            if(type==='샘플') return `<span class="${cls} text-gray-600 border-gray-300">샘플</span>`;
+            return `<span class="${cls} text-blue-600 border-blue-200">${type}</span>`;
+        };
+        const getInvBadge = (cat) => {
+            const cls = "px-2 py-0.5 text-[10px] rounded-full font-bold border whitespace-nowrap";
+            if(cat.includes('원자재')) return `<span class="${cls} bg-orange-50 text-orange-600 border-orange-100">원자재</span>`;
+            if(cat.includes('첨가제')) return `<span class="${cls} bg-purple-50 text-purple-600 border-purple-100">첨가제</span>`;
+            return `<span class="${cls} bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
         };
 
+        // --- 1. 제품 DB (카드 리스트 렌더링) ---
         function renderProducts() {
             const term = document.getElementById('searchProduct').value.toLowerCase();
             const filtered = dbData.filter(i => i.itemCode.toLowerCase().includes(term) || i.productSpec.toLowerCase().includes(term) || i.company.toLowerCase().includes(term));
             
-            const tbody = document.getElementById('productTableBody');
-            tbody.innerHTML = '';
+            const container = document.getElementById('productCardContainer');
+            const empty = document.getElementById('emptyProduct');
+            container.innerHTML = '';
             
-            filtered.sort((a,b) => b.id - a.id).forEach(item => {
-                const isChecked = selectedProductIds.has(item.id);
-                const activeClass = isChecked ? 'checked-row bg-[#E8EFF5]' : 'bg-white';
-                const tr = document.createElement('tr');
-                tr.className = `main-row ${activeClass} transition-colors`;
-                tr.innerHTML = `
-                    <td class="px-5 py-3 text-center"><input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" value="${item.id}" ${isChecked?'checked':''}></td>
-                    <td class="px-5 py-3 font-mono text-sm text-navy-muted">${item.date}</td>
-                    <td class="px-5 py-3">${getBadge(item.type)}</td>
-                    <td class="px-5 py-3 font-bold text-navy-text">${item.itemCode}</td>
-                    <td class="px-5 py-3 text-sm text-navy-text">${item.productSpec}</td>
-                    <td class="px-5 py-3 text-sm text-navy-muted">${item.company}</td>
-                    <td class="px-5 py-3 text-center">
-                        <button onclick="editProduct(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                        <button onclick="requestDelete('product', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            if(filtered.length === 0) {
+                empty.classList.remove('hidden');
+                empty.classList.add('flex');
+            } else {
+                empty.classList.add('hidden');
+                empty.classList.remove('flex');
+                
+                filtered.sort((a,b) => b.id - a.id).forEach(item => {
+                    const isChecked = selectedProductIds.has(item.id);
+                    // 체크된 카드 하이라이트 스타일
+                    const activeClass = isChecked 
+                        ? 'border-navy-main bg-blue-50/20 ring-1 ring-navy-main shadow-md' 
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md';
+                    
+                    const card = document.createElement('div');
+                    card.className = `p-4 sm:p-5 rounded-xl border transition-all cursor-pointer relative group ${activeClass}`;
+                    
+                    // 카드 전체 클릭 시 체크박스 토글 로직
+                    card.onclick = (e) => {
+                        // 버튼이나 아이콘을 누른게 아니라면 카드 클릭으로 인식
+                        if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && e.target.type !== 'checkbox') {
+                            const cb = card.querySelector('.prod-cb');
+                            cb.checked = !cb.checked;
+                            cb.dispatchEvent(new Event('change'));
+                        }
+                    };
 
-            // 체크박스 이벤트
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <!-- 체크박스 영역 클릭 시 버블링 중지 -->
+                                <div class="flex items-center" onclick="event.stopPropagation()">
+                                    <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
+                                </div>
+                                ${getBadge(item.type)}
+                                <span class="text-xs text-gray-400 font-mono tracking-tight">${item.date}</span>
+                            </div>
+                            <div class="flex gap-2 text-gray-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                <button onclick="editProduct(${item.id}); event.stopPropagation();" class="p-1 hover:text-navy-main bg-white rounded shadow-sm border border-gray-200"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-1 hover:text-navy-red bg-white rounded shadow-sm border border-gray-200"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2.5">
+                            <h4 class="text-base sm:text-lg font-black text-navy-text flex items-center gap-2">
+                                ${item.itemCode}
+                                <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 truncate max-w-[120px]">${item.company}</span>
+                            </h4>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-2 sm:p-2.5 rounded-lg border border-gray-100 flex items-center gap-2">
+                            <i data-lucide="ruler" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-[13px] font-bold text-gray-700 font-mono">${item.productSpec}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            // 체크박스 변경 이벤트 바인딩
             document.querySelectorAll('.prod-cb').forEach(cb => {
                 cb.addEventListener('change', e => {
                     const id = parseInt(e.target.value);
                     e.target.checked ? selectedProductIds.add(id) : selectedProductIds.delete(id);
-                    renderProducts(); // 색상 및 상세뷰 갱신
+                    renderProducts(); // 전체 리렌더링하여 클래스 갱신
                 });
             });
 
@@ -511,20 +539,24 @@
             const cbs = document.querySelectorAll('.prod-cb');
             allCb.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
             
-            allCb.onchange = (e) => {
+            // 기존 이벤트 제거 및 재등록을 위해 clone 사용
+            const newAllCb = allCb.cloneNode(true);
+            allCb.parentNode.replaceChild(newAllCb, allCb);
+            newAllCb.addEventListener('change', (e) => {
                 cbs.forEach(c => {
                     e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value));
                 });
                 renderProducts();
-            };
+            });
 
             lucide.createIcons();
             updateProductDetails();
         }
 
+        // 상세 제원 패널 (체크 시 표시, 카드형으로 렌더링)
         function updateProductDetails() {
             const panel = document.getElementById('detailsPanel');
-            const tbody = document.getElementById('detailsBody');
+            const container = document.getElementById('detailsCardContainer');
             
             if(selectedProductIds.size === 0) {
                 panel.classList.add('hidden');
@@ -533,26 +565,42 @@
             panel.classList.remove('hidden');
             document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
-            tbody.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => `
-                <tr class="bg-white/40 hover:bg-white/60 transition-colors">
-                    <td class="px-4 py-2 font-bold text-[13px] border-r border-navy-borderLight/30 text-navy-text">${item.itemCode}</td>
-                    <td class="px-4 py-2 text-[13px] text-navy-text">${item.productSpec}</td>
-                    <td class="px-4 py-2 text-[13px] text-navy-main font-mono font-bold">${item.measured || '-'}</td>
-                    <td class="px-4 py-2 text-[13px] text-blue-700 font-mono font-bold">${item.laser || '-'}</td>
-                    <td class="px-4 py-2 text-[13px] text-navy-muted">${item.mixture || '-'}</td>
-                    <td class="px-4 py-2 text-[13px] text-right font-mono font-bold text-navy-text">${item.shrinkage || '-'}</td>
-                </tr>
+            container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => `
+                <div class="bg-white p-3 sm:p-4 rounded-xl border border-navy-borderLight shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                        <span class="font-bold text-[13px] sm:text-sm text-navy-text tracking-tight">${item.itemCode}</span>
+                        <span class="text-[11px] sm:text-xs text-navy-muted font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">${item.productSpec}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[11px] sm:text-xs">
+                        <div class="bg-blue-50/50 p-1.5 rounded">
+                            <span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">실측 측정값</span>
+                            <span class="font-bold text-navy-main font-mono">${item.measured || '-'}</span>
+                        </div>
+                        <div class="bg-blue-50/50 p-1.5 rounded">
+                            <span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">레이저값</span>
+                            <span class="font-bold text-blue-700 font-mono">${item.laser || '-'}</span>
+                        </div>
+                        <div class="col-span-2 bg-gray-50 p-1.5 rounded">
+                            <span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">배합 (Mixture)</span>
+                            <span class="text-gray-700 truncate block w-full" title="${item.mixture || '-'}">${item.mixture || '-'}</span>
+                        </div>
+                        <div class="col-span-2 bg-gray-50 p-1.5 rounded flex justify-between items-center">
+                            <span class="text-gray-400 font-bold text-[10px] sm:text-[11px]">수축률(%)</span>
+                            <span class="font-bold text-gray-800 font-mono text-sm">${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
+                        </div>
+                    </div>
+                </div>
             `).join('');
         }
 
         function clearSelection() { selectedProductIds.clear(); renderProducts(); }
         document.getElementById('searchProduct').addEventListener('input', renderProducts);
 
-        // --- 일정 관리 (Schedule) ---
+        // --- 2. 일정 관리 (카드 리스트) ---
         function renderSchedule() {
-            const list = document.getElementById('scheduleList');
+            const container = document.getElementById('scheduleCardContainer');
             const empty = document.getElementById('emptySchedule');
-            list.innerHTML = '';
+            container.innerHTML = '';
             
             if(scheduleData.length === 0) {
                 empty.classList.remove('hidden');
@@ -563,21 +611,23 @@
             scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
                 const isDone = item.status === 'done';
                 const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
-                const iconObj = isDone ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-navy-main"></i>` : `<i data-lucide="circle" class="w-5 h-5 text-gray-300"></i>`;
+                const iconClass = isDone ? 'text-navy-main border-navy-main bg-navy-light/50' : 'text-transparent border-gray-300 bg-white';
                 
-                const li = document.createElement('li');
-                li.className = 'p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group';
-                li.innerHTML = `
-                    <div class="flex items-center gap-3 cursor-pointer" onclick="toggleScheduleStatus(${item.id})">
-                        ${iconObj}
-                        <span class="text-sm ${textStyle}">${item.task}</span>
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="toggleScheduleStatus(${item.id})">
+                        <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center ${iconClass} transition-colors shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${isDone ? 'text-navy-main' : 'hidden'}"></i>
+                        </div>
+                        <span class="text-xs sm:text-sm ${textStyle}">${item.task}</span>
                     </div>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="editSchedule(${item.id})" class="p-1 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                        <button onclick="requestDelete('schedule', ${item.id})" class="p-1 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-1.5 shrink-0 ml-2">
+                        <button onclick="editSchedule(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                        <button onclick="requestDelete('schedule', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
                     </div>
                 `;
-                list.appendChild(li);
+                container.appendChild(card);
             });
             lucide.createIcons();
         }
@@ -590,14 +640,14 @@
             }
         }
 
-        // --- 재고 관리 (Inventory) ---
+        // --- 3. 재고 관리 (카드 그리드) ---
         function renderInventory() {
             const term = document.getElementById('searchInventory').value.toLowerCase();
             const filtered = inventoryData.filter(i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term));
             
-            const tbody = document.getElementById('inventoryTableBody');
+            const container = document.getElementById('inventoryCardContainer');
             const empty = document.getElementById('emptyInventory');
-            tbody.innerHTML = '';
+            container.innerHTML = '';
             
             if(filtered.length === 0) {
                 empty.classList.remove('hidden');
@@ -606,34 +656,40 @@
             empty.classList.add('hidden');
             
             filtered.sort((a,b) => b.id - a.id).forEach(item => {
-                // 수량 부족 시 경고색 (임의 로직: 100 미만)
-                const isLow = item.qty < 50;
+                const isLow = item.qty < 50; 
                 const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
                 
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors';
-                tr.innerHTML = `
-                    <td class="px-5 py-3.5 text-sm text-gray-500">${item.category}</td>
-                    <td class="px-5 py-3.5 text-sm font-bold text-navy-text">${item.name}</td>
-                    <td class="px-5 py-3.5 text-sm font-mono font-bold text-right ${qtyStyle}">${item.qty.toLocaleString()}</td>
-                    <td class="px-5 py-3.5 text-sm text-gray-500">${item.unit}</td>
-                    <td class="px-5 py-3.5 text-sm text-gray-400 font-mono text-center">${item.update}</td>
-                    <td class="px-5 py-3.5 text-center">
-                        <button onclick="editInventory(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                        <button onclick="requestDelete('inventory', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col relative group hover:border-navy-main transition-colors hover:shadow-md';
+                card.innerHTML = `
+                    <div class="absolute top-3 right-3 flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button onclick="editInventory(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                        <button onclick="requestDelete('inventory', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                    </div>
+                    <div class="mb-3">
+                        <div class="mb-2">${getInvBadge(item.category)}</div>
+                        <h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3>
+                        <p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p>
+                    </div>
+                    <div class="mt-auto border-t border-gray-100 pt-3 flex items-end justify-between bg-gray-50/50 -mx-4 -mb-4 px-4 pb-4 rounded-b-xl">
+                        <span class="text-[11px] sm:text-xs font-bold text-gray-500">현재 잔여 수량</span>
+                        <div class="text-right">
+                            <span class="text-lg sm:text-xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-0.5">${item.unit}</span>
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(card);
             });
             lucide.createIcons();
         }
         document.getElementById('searchInventory').addEventListener('input', renderInventory);
 
-        // --- 모달 공통 로직 ---
+        // --- 공통 모달 조작 ---
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- 생산 DB CRUD ---
+        // --- 생산 DB 저장/수정 ---
         function openProductModal() {
             document.getElementById('productForm').reset();
             document.getElementById('p-id').value = '';
@@ -671,11 +727,11 @@
             openModal('productModal');
         }
 
-        // --- 일정 CRUD ---
+        // --- 일정 저장/수정 ---
         function openScheduleModal() {
             document.getElementById('scheduleForm').reset();
             document.getElementById('s-id').value = '';
-            document.getElementById('scheduleModalTitle').textContent = '일정 등록';
+            document.getElementById('scheduleModalTitle').textContent = '일정 추가';
             openModal('scheduleModal');
         }
         function saveSchedule() {
@@ -696,7 +752,7 @@
             openModal('scheduleModal');
         }
 
-        // --- 재고 CRUD ---
+        // --- 재고 저장/수정 ---
         function openInventoryModal() {
             document.getElementById('inventoryForm').reset();
             document.getElementById('i-id').value = '';
@@ -727,12 +783,13 @@
             openModal('inventoryModal');
         }
 
-        // --- 공통 삭제 ---
+        // --- 공통 삭제 프로세스 ---
         function requestDelete(type, id) {
             deleteInfo = { type, id };
             openModal('deleteModal');
         }
         function closeDeleteModal() { deleteInfo = { type: null, id: null }; closeModal('deleteModal'); }
+        
         document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
             if(deleteInfo.type === 'product') { dbData = dbData.filter(i => i.id !== deleteInfo.id); selectedProductIds.delete(deleteInfo.id); renderProducts(); }
             if(deleteInfo.type === 'schedule') { scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); renderSchedule(); }
@@ -740,9 +797,9 @@
             closeDeleteModal();
         });
 
-        // 초기 실행
+        // 초기 로드
         window.addEventListener('DOMContentLoaded', () => {
-            switchTab('product'); // 기본 탭 오픈
+            switchTab('product'); 
         });
     </script>
 </body>
