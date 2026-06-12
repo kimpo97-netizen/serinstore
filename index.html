@@ -48,6 +48,12 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
+        /* 호버 효과 */
+        @media (hover: hover) {
+            tbody tr.main-row:hover td { background-color: #f8fafc !important; }
+            tbody tr.main-row.checked-row:hover td { background-color: #E8EFF5 !important; }
+        }
+        
         /* 애니메이션 */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -142,7 +148,6 @@
                     </div>
                     <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
-                <!-- 상세 제원 카드 그리드 -->
                 <div class="p-3 sm:p-4">
                     <div id="detailsCardContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                         <!-- 상세 카드 JS 렌더링 -->
@@ -151,8 +156,7 @@
             </div>
 
             <!-- 메인 데이터 리스트 영역 -->
-            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden">
-                <!-- 검색 및 컨트롤 -->
+            <div class="bg-white border border-navy-border rounded-xl shadow-card flex flex-col overflow-hidden">
                 <div class="p-3 sm:p-4 border-b border-navy-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
                     <div class="flex items-center gap-3">
                         <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 sm:py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm">
@@ -169,16 +173,25 @@
                     </div>
                 </div>
                 
-                <!-- 제품 리스트 (카드 그리드) -->
-                <div class="p-3 sm:p-4 bg-gray-50/30">
-                    <div id="productCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        <!-- 제품 카드 JS 렌더링 -->
-                    </div>
-                    <!-- 빈 상태 -->
-                    <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
-                        <i data-lucide="search-x" class="h-10 w-10 text-gray-300 mb-3"></i>
-                        <h3 class="text-sm font-bold text-gray-600">조회된 레코드가 없습니다.</h3>
-                    </div>
+                <div class="overflow-x-auto w-full">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 border-b border-navy-border">
+                            <tr>
+                                <th class="px-4 sm:px-5 py-3 w-10 text-center"><input type="checkbox" id="selectAllCheckboxDummy" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer invisible"></th>
+                                <th class="px-3 sm:px-5 py-3 text-left text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap w-16 sm:w-20">구분</th>
+                                <th class="px-3 sm:px-5 py-3 text-left text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap w-24 sm:w-28">생산일자</th>
+                                <th class="px-3 sm:px-5 py-3 text-left text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap w-28 sm:w-32">품번</th>
+                                <th class="px-3 sm:px-5 py-3 text-left text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap">제품 규격</th>
+                                <th class="px-3 sm:px-5 py-3 text-left text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap">회사명</th>
+                                <th class="px-3 sm:px-5 py-3 text-center text-[11px] sm:text-xs font-bold text-navy-muted whitespace-nowrap w-20">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="productTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white">
+                    <i data-lucide="search-x" class="h-10 w-10 text-gray-300 mb-3"></i>
+                    <h3 class="text-sm font-bold text-gray-600">조회된 레코드가 없습니다.</h3>
                 </div>
             </div>
         </div>
@@ -203,7 +216,6 @@
                     <span id="dateDisplay" class="text-[10px] sm:text-xs font-bold text-navy-muted bg-gray-50 px-2 sm:px-3 py-1 rounded-full border border-gray-200"></span>
                 </div>
                 <div id="scheduleCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <!-- 일정 카드 JS 렌더링 -->
                 </div>
                 <div id="emptySchedule" class="hidden py-16 text-center">
                     <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
@@ -234,7 +246,6 @@
 
             <div class="bg-transparent">
                 <div id="inventoryCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                    <!-- 재고 카드 JS 렌더링 -->
                 </div>
                 <div id="emptyInventory" class="hidden py-16 text-center bg-white rounded-xl border border-gray-200 mt-2">
                     <i data-lucide="package-open" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
@@ -246,119 +257,236 @@
     </main>
 
     <!-- ========================================================= -->
-    <!-- 통합 모달 (가운데 정렬 팝업형, 반응형 크기 조절) -->
+    <!-- 통합 모달 (생산 레코드 등록) -->
     <!-- ========================================================= -->
-    
-    <!-- 1. 제품 등록 모달 (개편됨) -->
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-4" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-            <div class="relative w-full max-w-[800px] bg-white rounded-2xl shadow-2xl flex flex-col max-h-full fade-in">
+            <div class="relative w-full max-w-[1000px] bg-white rounded-2xl shadow-2xl flex flex-col max-h-full fade-in">
                 <div class="bg-white px-5 sm:px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h3 class="text-base sm:text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 레코드 등록</span></h3>
-                    <button onclick="closeModal('productModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
+                    <button onclick="closeModal('productModal')" type="button" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
                 </div>
                 <!-- 폼 바디 (스크롤 영역) -->
                 <div class="px-5 sm:px-6 py-5 overflow-y-auto custom-scrollbar">
                     <form id="productForm" class="space-y-6">
                         <input type="hidden" id="p-id">
+
+                        <!-- 섹션 1: 배합 정보 (맨 위) -->
+                        <div>
+                            <div class="flex justify-between items-end border-b border-gray-100 pb-1.5 mb-3">
+                                <h4 class="text-sm font-bold text-navy-main"><i data-lucide="beaker" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보 및 투입량 계산</h4>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs sm:text-[13px] font-bold text-gray-600">기준 중량(KG)</span>
+                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-20 border border-navy-main bg-blue-50 rounded-lg p-1.5 text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
+                                </div>
+                            </div>
+                            
+                            <div class="bg-navy-light/30 p-4 rounded-xl border border-navy-borderLight space-y-4">
+                                <!-- 가로 3열 균등 그리드 (1:1:1 비율) -->
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    
+                                    <!-- 1. 원자재 -->
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-4">
+                                        <div class="flex justify-between items-center mb-1.5">
+                                            <label class="text-xs sm:text-[13px] font-bold text-navy-text">원자재 구성</label>
+                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[10px] sm:text-xs font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 hover:bg-gray-50 flex items-center gap-1 shadow-sm"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="raw-container">
+                                            <!-- 동적 원자재 행 -->
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. 경화제 -->
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-4">
+                                        <div class="flex justify-between items-center mb-1.5">
+                                            <label class="text-xs sm:text-[13px] font-bold text-gray-700">경화제 <span class="text-[10px] font-normal text-gray-400 ml-1">(g/kg)</span></label>
+                                            <button type="button" onclick="addCureRow()" class="text-[10px] sm:text-xs font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 hover:bg-gray-50 flex items-center gap-1 shadow-sm"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="cure-container">
+                                            <!-- 동적 경화제 행 -->
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. 첨가제 -->
+                                    <div>
+                                        <div class="flex justify-between items-center mb-1.5">
+                                            <label class="text-xs sm:text-[13px] font-bold text-gray-700">첨가제/안료 <span class="text-[10px] font-normal text-gray-400 ml-1">(g/kg)</span></label>
+                                            <button type="button" onclick="addAddRow()" class="text-[10px] sm:text-xs font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 hover:bg-gray-50 flex items-center gap-1 shadow-sm"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="add-container">
+                                            <!-- 동적 첨가제 행 -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 자동 요약 패널 -->
+                                <div class="bg-amber-100 p-3 rounded-lg border border-amber-300 shadow-sm mt-3 flex items-start gap-2">
+                                    <i data-lucide="info" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                                    <div id="mixture-summary" class="text-[13px] sm:text-sm leading-snug w-full">
+                                        <!-- JS 요약 채워짐 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <!-- 섹션 1: 기본 정보 -->
+                        <!-- 섹션 2: 기본 정보 -->
                         <div>
                             <h4 class="text-sm font-bold text-navy-main mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="file-text" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 기본 정보</h4>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                                <div><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">일자</label><input type="date" id="p-date" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none transition-colors"></div>
+                                <div><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">일자</label><input type="date" id="p-date" required class="w-full h-[36px] border border-gray-300 rounded-lg px-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
                                 
                                 <div>
                                     <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">구분 (공정)</label>
-                                    <div class="flex gap-1.5">
-                                        <label class="flex-1 cursor-pointer">
+                                    <div class="flex gap-1.5 h-[36px]">
+                                        <label class="flex-1 cursor-pointer h-full">
                                             <input type="radio" name="p-type" value="압출" class="peer sr-only" checked>
-                                            <div class="text-center py-2 sm:py-1.5 border border-gray-300 rounded-lg text-[13px] font-bold text-navy-muted peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main transition-colors">압출</div>
+                                            <div class="text-center flex items-center justify-center h-full border border-gray-300 rounded-lg text-[13px] font-bold text-gray-500 peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main transition-colors">압출</div>
                                         </label>
-                                        <label class="flex-1 cursor-pointer">
+                                        <label class="flex-1 cursor-pointer h-full">
                                             <input type="radio" name="p-type" value="프레스" class="peer sr-only">
-                                            <div class="text-center py-2 sm:py-1.5 border border-gray-300 rounded-lg text-[13px] font-bold text-navy-muted peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 transition-colors">프레스</div>
+                                            <div class="text-center flex items-center justify-center h-full border border-gray-300 rounded-lg text-[13px] font-bold text-gray-500 peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600 transition-colors">프레스</div>
                                         </label>
                                     </div>
                                 </div>
                                 
                                 <div>
                                     <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">품번 (Code)</label>
-                                    <div class="flex gap-1.5">
-                                        <input type="text" id="p-code" required placeholder="SIL-X99" class="w-full border border-gray-300 rounded-lg p-2 text-sm uppercase focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none transition-colors">
-                                        <button type="button" onclick="appendSample()" class="shrink-0 px-2.5 bg-gray-100 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-200 transition-colors">샘플</button>
+                                    <div class="flex gap-1.5 h-[36px]">
+                                        <input type="text" id="p-code" required placeholder="SIL-X99" class="w-full h-full border border-gray-300 rounded-lg px-2 text-sm uppercase focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
+                                        <button type="button" onclick="toggleSample()" class="shrink-0 px-2.5 h-full bg-gray-100 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-200 transition-colors">샘플</button>
                                     </div>
                                 </div>
                                 
-                                <div><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">회사명</label><input type="text" id="p-company" required placeholder="고객사명" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none transition-colors"></div>
+                                <div><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">회사명</label><input type="text" id="p-company" required placeholder="고객사명" class="w-full h-[36px] border border-gray-300 rounded-lg px-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none"></div>
                             </div>
                         </div>
 
-                        <!-- 섹션 2: 규격 및 제원 -->
+                        <!-- 섹션 3: 규격 및 제원 (한 줄 배치) -->
                         <div>
                             <h4 class="text-sm font-bold text-navy-main mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="ruler" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 규격 및 제원</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-navy-light/50 p-4 rounded-xl border border-navy-borderLight">
-                                <div class="col-span-1 sm:col-span-2 lg:col-span-1">
-                                    <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text flex items-center justify-between">
-                                        제품 규격 <span class="text-[10px] text-gray-400 font-normal">내경 / 외경 / 길이</span>
-                                    </label>
-                                    <div class="grid grid-cols-3 gap-1.5">
-                                        <input type="text" id="p-spec-in" placeholder="내경" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
-                                        <input type="text" id="p-spec-out" placeholder="외경" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
-                                        <input type="text" id="p-spec-len" placeholder="길이" class="w-full border border-gray-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
+                            <div class="grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 bg-navy-light/50 p-4 rounded-xl border border-navy-borderLight">
+                                
+                                <!-- 1. 제품 규격 -->
+                                <div class="col-span-2 lg:col-span-4">
+                                    <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text flex items-center justify-between">제품 규격 <span class="text-[10px] text-gray-400 font-normal">내경 / 외경 / 길이</span></label>
+                                    <div class="grid grid-cols-3 gap-1.5 h-[36px]">
+                                        <input type="text" id="p-spec-in" placeholder="내경" class="w-full h-full border border-gray-300 rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
+                                        <input type="text" id="p-spec-out" placeholder="외경" class="w-full h-full border border-gray-300 rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
+                                        <input type="text" id="p-spec-len" placeholder="길이" class="w-full h-full border border-gray-300 rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white">
                                     </div>
                                 </div>
-                                <div><label class="block text-xs sm:text-[13px] font-bold text-navy-main mb-1.5">실측 측정값 <span class="text-[10px] text-navy-main/60 font-normal ml-1">내경*외경</span></label><input type="text" id="p-measured" placeholder="14.8 * 19.6" class="w-full border border-navy-borderLight rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white shadow-sm transition-colors"></div>
-                                <div><label class="block text-xs sm:text-[13px] font-bold text-blue-600 mb-1.5">레이저값 <span class="text-[10px] text-blue-400 font-normal ml-1">수치입력</span></label><input type="text" id="p-laser" placeholder="14.9" class="w-full border border-blue-200 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white shadow-sm transition-colors"></div>
                                 
-                                <div><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">배합 (Mixture)</label><input type="text" id="p-mixture" placeholder="KE-951U 100 + HC 1.5" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white transition-colors"></div>
-                                <div class="relative"><label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">수축률(%)</label><input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full border border-gray-300 rounded-lg p-2 pl-3 pr-8 text-sm text-right font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white transition-colors"><span class="absolute right-3 top-[32px] sm:top-[30px] text-gray-400 font-bold text-xs">%</span></div>
-                                <div>
-                                    <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">작업방식</label>
-                                    <div class="flex gap-1.5">
-                                        <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="p-work" value="자동커팅" class="peer sr-only" checked>
-                                            <div class="text-center py-2 sm:py-1.5 border border-gray-300 rounded-lg text-xs font-bold text-navy-muted peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main transition-colors bg-white">자동커팅</div>
-                                        </label>
-                                        <label class="flex-1 cursor-pointer">
-                                            <input type="radio" name="p-work" value="롤 방식" class="peer sr-only">
-                                            <div class="text-center py-2 sm:py-1.5 border border-gray-300 rounded-lg text-xs font-bold text-navy-muted peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main transition-colors bg-white">롤 방식</div>
-                                        </label>
+                                <!-- 2. 실측 측정값 -->
+                                <div class="col-span-2 lg:col-span-4">
+                                    <label class="block text-xs sm:text-[13px] font-bold text-navy-main mb-1.5 flex items-center justify-between">실측 측정값 <span class="text-[10px] text-navy-main/60 font-normal">내경 / 외경 / 길이</span></label>
+                                    <div class="grid grid-cols-3 gap-1.5 h-[36px]">
+                                        <input type="text" id="p-meas-in" placeholder="내경" class="w-full h-full border border-navy-borderLight rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white shadow-sm">
+                                        <input type="text" id="p-meas-out" placeholder="외경" class="w-full h-full border border-navy-borderLight rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white shadow-sm">
+                                        <input type="text" id="p-meas-len" placeholder="길이" class="w-full h-full border border-navy-borderLight rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none text-center bg-white shadow-sm">
+                                    </div>
+                                </div>
+
+                                <!-- 3. 레이저값 -->
+                                <div class="col-span-1 lg:col-span-2">
+                                    <label class="block text-xs sm:text-[13px] font-bold text-blue-600 mb-1.5">레이저값 <span class="text-[10px] text-blue-400 font-normal ml-1">수치</span></label>
+                                    <input type="text" id="p-laser" placeholder="14.9" class="w-full h-[36px] border border-blue-200 rounded-lg px-2 text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white shadow-sm">
+                                </div>
+
+                                <!-- 4. 수축률 -->
+                                <div class="col-span-1 lg:col-span-2">
+                                    <label class="block text-xs sm:text-[13px] font-bold mb-1.5 text-navy-text">수축률(%)</label>
+                                    <div class="relative h-[36px]">
+                                        <input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full h-full border border-gray-300 rounded-lg pl-2 pr-6 text-sm text-right font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
+                                        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 섹션 3: 설비 상세 조건 -->
+                        <!-- 섹션 4: 설비 상세 조건 (동적 교체 영역) -->
                         <div>
-                            <h4 class="text-sm font-bold text-navy-main mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="settings" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                            <div class="flex justify-between items-end border-b border-gray-100 pb-1.5 mb-3">
+                                <h4 class="text-sm font-bold text-navy-main"><i data-lucide="settings" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건</h4>
+                            </div>
+                            
+                            <!-- 상단 분단: 압출기, 자동화 투입, 건조로 -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-5">
                                 <!-- 압출기 -->
                                 <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
                                     <label class="block text-xs font-bold text-gray-700 mb-2.5">압출기</label>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2"><span class="w-8 text-[11px] font-bold text-gray-500">번호</span><input type="text" id="p-ex-num" placeholder="1호기" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex items-center gap-2"><span class="w-8 text-[11px] font-bold text-gray-500">온도</span><input type="text" id="p-ex-temp" placeholder="180℃" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex items-center gap-2"><span class="w-8 text-[11px] font-bold text-gray-500">속도</span><input type="text" id="p-ex-speed" placeholder="12m/m" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                    </div>
-                                </div>
-                                <!-- 자동투입기 -->
-                                <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-                                    <label class="block text-xs font-bold text-gray-700 mb-2.5">자동투입기</label>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">투입속도</span><input type="text" id="p-fd-speed" class="border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">다량감속</span><input type="text" id="p-fd-decel" class="border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">역회전</span><input type="text" id="p-fd-rev" class="border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">싱글속도</span><input type="text" id="p-fd-single" class="border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">번호</span><input type="text" id="p-ex-num" placeholder="1호기" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">온도</span><input type="text" id="p-ex-temp" placeholder="180℃" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col col-span-2"><span class="text-[10px] font-bold text-gray-500 mb-0.5">속도</span><input type="text" id="p-ex-speed" placeholder="12m/m" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
                                     </div>
                                 </div>
-                                <!-- 2차가류 -->
+                                <!-- 자동화 투입 기계 -->
                                 <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-                                    <label class="block text-xs font-bold text-gray-700 mb-2.5">2차가류</label>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2"><span class="w-8 text-[11px] font-bold text-gray-500">온도</span><input type="text" id="p-cu-temp" placeholder="200℃" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
-                                        <div class="flex items-center gap-2"><span class="w-8 text-[11px] font-bold text-gray-500">시간</span><input type="text" id="p-cu-time" placeholder="4H" class="flex-1 border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-navy-main"></div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-2.5">자동화 투입 기계</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">투입속도</span><input type="text" id="p-fd-speed" placeholder="-" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">다량감속</span><input type="text" id="p-fd-decel" placeholder="-" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">역회전</span><input type="text" id="p-fd-rev" placeholder="-" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">싱글속도</span><input type="text" id="p-fd-single" placeholder="-" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                    </div>
+                                </div>
+                                <!-- 건조로 (was 2차가류) -->
+                                <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                                    <label class="block text-xs font-bold text-gray-700 mb-2.5">건조로</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">온도</span><input type="text" id="p-cu-temp" placeholder="200℃" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">시간</span><input type="text" id="p-cu-time" placeholder="4H" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 하단 분단: 후공정 (자동커팅 / 롤방식) -->
+                            <div class="border-t border-gray-100 pt-4">
+                                <div class="flex justify-between items-end mb-3">
+                                    <h4 class="text-sm font-bold text-navy-main"><i data-lucide="scissors" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> 후공정 (작업 방식)</h4>
+                                    <div class="flex gap-1.5 w-32 sm:w-40 h-[36px]">
+                                        <label class="flex-1 cursor-pointer h-full">
+                                            <input type="radio" name="p-work" value="자동커팅" class="peer sr-only" checked onchange="toggleWorkMethod()">
+                                            <div class="text-center flex items-center justify-center h-full border border-gray-300 rounded-lg text-[11px] font-bold text-gray-500 peer-checked:border-navy-main peer-checked:bg-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">자동커팅</div>
+                                        </label>
+                                        <label class="flex-1 cursor-pointer h-full">
+                                            <input type="radio" name="p-work" value="롤 방식" class="peer sr-only" onchange="toggleWorkMethod()">
+                                            <div class="text-center flex items-center justify-center h-full border border-gray-300 rounded-lg text-[11px] font-bold text-gray-500 peer-checked:border-navy-main peer-checked:bg-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">롤 방식</div>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                                    <!-- 자동커팅기 -->
+                                    <div id="fields-auto" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 block">
+                                        <label class="block text-xs font-bold text-gray-700 mb-2.5">자동커팅기</label>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">길이</span><input type="text" id="p-auto-len" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                            <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">후진속도</span><input type="text" id="p-auto-speed" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                            <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">누름</span><input type="text" id="p-auto-press" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                        </div>
+                                    </div>
+                                    <!-- 롤 방식 (큐텍스) -->
+                                    <div id="fields-roll" class="grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                                            <label class="block text-xs font-bold text-gray-700 mb-2.5">큐텍스 #1</label>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">지그(금형)</span><input type="text" id="p-roll1-jig" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">피딩속도</span><input type="text" id="p-roll1-feed" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">가감속</span><input type="text" id="p-roll1-accel" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">누름</span><input type="text" id="p-roll1-press" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                                            <label class="block text-xs font-bold text-gray-700 mb-2.5">큐텍스 #2</label>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">지그(금형)</span><input type="text" id="p-roll2-jig" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">피딩속도</span><input type="text" id="p-roll2-feed" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">가감속</span><input type="text" id="p-roll2-accel" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                                <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-500 mb-0.5">누름</span><input type="text" id="p-roll2-press" class="h-[36px] border border-gray-300 rounded-lg px-2 text-xs outline-none focus:border-navy-main bg-white"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -366,87 +494,66 @@
 
                     </form>
                 </div>
-                <!-- 하단 버튼 영역 -->
+                <!-- 하단 버튼 -->
                 <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100 shrink-0 rounded-b-2xl">
-                    <button onclick="closeModal('productModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 border bg-white rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveProduct()" class="flex-1 sm:flex-none px-8 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장하기</button>
+                    <button type="button" onclick="closeModal('productModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 border bg-white rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
+                    <button type="button" onclick="saveProduct()" class="flex-1 sm:flex-none px-8 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장하기</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. 일정 등록 모달 -->
+    <!-- 일정, 재고, 삭제 모달들 -->
     <div id="scheduleModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
             <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
-                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="scheduleModalTitle">일정 추가</h3><button onclick="closeModal('scheduleModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="scheduleModalTitle">일정 추가</h3><button type="button" onclick="closeModal('scheduleModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
                 <div class="p-5 sm:p-6">
                     <form id="scheduleForm" class="space-y-4">
                         <input type="hidden" id="s-id">
-                        <div>
-                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">작업 내용 <span class="text-navy-red">*</span></label>
-                            <input type="text" id="s-task" required placeholder="예: 1호기 실린더 청소" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
-                        </div>
+                        <div><label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">작업 내용 <span class="text-navy-red">*</span></label><input type="text" id="s-task" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"></div>
                         <div>
                             <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">상태</label>
-                            <select id="s-status" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
-                                <option value="pending">대기중 (Pending)</option>
-                                <option value="done">완료 (Done)</option>
-                            </select>
+                            <select id="s-status" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-white focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"><option value="pending">대기중</option><option value="done">완료</option></select>
                         </div>
                     </form>
                 </div>
                 <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
-                    <button onclick="closeModal('scheduleModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveSchedule()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                    <button type="button" onclick="closeModal('scheduleModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold">취소</button>
+                    <button type="button" onclick="saveSchedule()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold">저장</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. 재고 등록 모달 -->
     <div id="inventoryModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('inventoryModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
             <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
-                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="inventoryModalTitle">재고 등록</h3><button onclick="closeModal('inventoryModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+                <div class="px-5 sm:px-6 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base sm:text-lg text-navy-text" id="inventoryModalTitle">재고 등록</h3><button type="button" onclick="closeModal('inventoryModal')" class="text-gray-400 hover:text-navy-text p-1"><i data-lucide="x" class="h-5 w-5"></i></button></div>
                 <div class="p-5 sm:p-6">
                     <form id="inventoryForm" class="space-y-4">
                         <input type="hidden" id="i-id">
                         <div>
-                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">분류</label>
-                            <select id="i-category" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
-                                <option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option>
-                            </select>
+                            <label class="block text-xs sm:text-sm font-bold mb-1">분류</label>
+                            <select id="i-category" class="w-full border rounded-lg p-2.5 text-sm bg-white focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"><option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option></select>
                         </div>
-                        <div>
-                            <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">품목명 <span class="text-navy-red">*</span></label>
-                            <input type="text" id="i-name" required placeholder="예: KCC-70U" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
-                        </div>
+                        <div><label class="block text-xs sm:text-sm font-bold mb-1">품목명 <span class="text-navy-red">*</span></label><input type="text" id="i-name" required class="w-full border rounded-lg p-2.5 text-sm focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"></div>
                         <div class="flex gap-3">
-                            <div class="flex-1">
-                                <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">수량 <span class="text-navy-red">*</span></label>
-                                <input type="number" id="i-qty" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-right font-mono focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none">
-                            </div>
-                            <div class="w-24">
-                                <label class="block text-xs sm:text-sm font-bold mb-1 text-navy-text">단위</label>
-                                <select id="i-unit" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none bg-white">
-                                    <option>Kg</option><option>EA</option><option>Box</option><option>L</option>
-                                </select>
-                            </div>
+                            <div class="flex-1"><label class="block text-xs sm:text-sm font-bold mb-1">수량 <span class="text-navy-red">*</span></label><input type="number" id="i-qty" required class="w-full border rounded-lg p-2.5 text-sm text-right focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"></div>
+                            <div class="w-24"><label class="block text-xs sm:text-sm font-bold mb-1">단위</label><select id="i-unit" class="w-full border rounded-lg p-2.5 text-sm bg-white focus:border-navy-main focus:ring-2 focus:ring-navy-main/20"><option>Kg</option><option>EA</option><option>Box</option><option>L</option></select></div>
                         </div>
                     </form>
                 </div>
-                <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
-                    <button onclick="closeModal('inventoryModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-navy-text hover:bg-gray-50">취소</button>
-                    <button onclick="saveInventory()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold hover:bg-navy-hover">저장</button>
+                <div class="bg-gray-50 px-5 sm:px-6 py-4 flex justify-end gap-2 border-t">
+                    <button type="button" onclick="closeModal('inventoryModal')" class="flex-1 sm:flex-none px-4 py-3 sm:py-2 bg-white border rounded-lg text-sm font-bold">취소</button>
+                    <button type="button" onclick="saveInventory()" class="flex-1 sm:flex-none px-6 py-3 sm:py-2 bg-navy-main text-white rounded-lg text-sm font-bold">저장</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- [MODAL] 삭제 확인 -->
     <div id="deleteModal" class="fixed inset-0 z-[70] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -457,8 +564,8 @@
                     <p class="text-xs sm:text-sm text-gray-500 mt-2">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
                 </div>
                 <div class="bg-gray-50 px-4 sm:px-6 py-4 flex gap-2">
-                    <button onclick="closeDeleteModal()" class="flex-1 py-2.5 sm:py-2 bg-white border border-gray-300 rounded-lg font-bold text-sm text-navy-text hover:bg-gray-50">취소</button>
-                    <button id="confirmDeleteBtn" class="flex-1 py-2.5 sm:py-2 bg-navy-red text-white rounded-lg font-bold text-sm hover:bg-red-700 shadow-md">삭제</button>
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 sm:py-2 bg-white border rounded-lg font-bold text-sm text-navy-text hover:bg-gray-50">취소</button>
+                    <button type="button" id="confirmDeleteBtn" class="flex-1 py-2.5 sm:py-2 bg-navy-red text-white rounded-lg font-bold text-sm shadow-md">삭제</button>
                 </div>
             </div>
         </div>
@@ -468,67 +575,78 @@
         lucide.createIcons();
         document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
 
-        // --- Mock Data (신규 데이터 스키마 적용) ---
+        // --- 엔터키 폼 이동 로직 ---
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if(e.target.tagName === 'TEXTAREA' || e.target.type === 'button' || e.target.type === 'submit') return;
+                e.preventDefault();
+                
+                const form = e.target.closest('form');
+                if(!form) return;
+                
+                const focusableElements = 'input:not([type="hidden"]):not([readonly]), select, button:not([type="button"])';
+                const focusable = Array.from(form.querySelectorAll(focusableElements)).filter(el => {
+                    return el.offsetParent !== null && !el.classList.contains('hidden') && !el.closest('.hidden');
+                });
+                
+                const index = focusable.indexOf(e.target);
+                if (index > -1 && index < focusable.length - 1) {
+                    focusable[index + 1].focus();
+                }
+            }
+        });
+
+        // --- Mock Data ---
         let dbData = [
-            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', specIn: '15.0', specOut: '20.0', specLen: '50', measured: '14.8 * 19.8', laser: '14.9', mixture: 'KCC-70U + 경화제 2%', shrinkage: '2.5', workMethod: '자동커팅', exNum: '1호기', exTemp: '180', exSpeed: '12', fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30', cuTemp: '200', cuTime: '4' },
-            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', specIn: '10.5', specOut: '15.0', specLen: '100', measured: '10.3 * 14.9', laser: '10.4', mixture: 'KE-951U 100 + HC 1.5', shrinkage: '3.0', workMethod: '롤 방식', exNum: '-', exTemp: '-', exSpeed: '-', fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-', cuTemp: '180', cuTime: '2' },
-            { id: 1, date: '2026-06-10', type: '압출', itemCode: 'SIL-T50', company: '대한정공(주)', specIn: '8.0', specOut: '10.0', specLen: '500', measured: '7.9 * 9.9', laser: '8.0', mixture: '내열용 KCC-80U', shrinkage: '2.2', workMethod: '자동커팅', exNum: '2호기', exTemp: '190', exSpeed: '15', fdSpeed: '60', fdDecel: '15', fdRev: '5', fdSingle: '40', cuTemp: '200', cuTime: '4' }
+            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', 
+              specIn: '15.0', specOut: '20.0', specLen: '50', 
+              measIn: '14.8', measOut: '19.8', measLen: '49.5', 
+              laser: '14.9', shrinkage: '2.5', baseKg: 20, 
+              workMethod: '자동커팅', exNum: '1호기', exTemp: '180', exSpeed: '12', cuTemp: '200', cuTime: '4', autoLen: '50', autoSpeed: '15', autoPress: '20',
+              fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30',
+              raws: [{type: 'KCC', name: '70U', pct: '100'}],
+              cures: [{type:'백금AB', direct:'', ratio:10}], adds: [{name:'RED', ratio:5}], mixture: '기본 원자재: KCC 70U [100%] | 백금AB [200g] + RED [100g]' },
+            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', 
+              specIn: '10.5', specOut: '15.0', specLen: '100', 
+              measIn: '10.3', measOut: '14.9', measLen: '99.0', 
+              laser: '10.4', shrinkage: '3.0', baseKg: 20, 
+              workMethod: '롤 방식', roll1Jig: 'J-01', roll1Feed: '10', roll1Accel: '2', roll1Press: '5', roll2Jig: 'J-02', roll2Feed: '12', roll2Accel: '1', roll2Press: '4',
+              fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-',
+              raws: [{type: '어울림', name: 'HC-80', pct: '70'}, {type: '대일소재', name: 'HC-60', pct: '30'}],
+              cures: [{type:'과산화물(일반)', direct:'', ratio:15}], adds: [], mixture: '기본 원자재: 어울림 HC-80 [70%], 대일소재 HC-60 [30%] | 과산화물(일반) [300g]' }
         ];
         
-        let scheduleData = [
-            { id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' },
-            { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' },
-            { id: 3, task: '오후 원자재(생고무) 입고 검수', status: 'pending' }
-        ];
-
-        let inventoryData = [
-            { id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' },
-            { id: 2, category: '첨가제/경화제', name: 'HC-1.5', qty: 25, unit: 'L', update: '2026-06-10' },
-            { id: 3, category: '포장재', name: '롤 포장 박스', qty: 120, unit: 'Box', update: '2026-06-08' },
-            { id: 4, category: '기타 소모품', name: '내열 장갑', qty: 15, unit: 'EA', update: '2026-06-05' }
-        ];
-
+        let scheduleData = [{ id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' }, { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' }];
+        let inventoryData = [{ id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' }];
+        
         let currentView = 'product'; 
         let deleteInfo = { type: null, id: null };
         let selectedProductIds = new Set();
 
-        // --- 상단 탭 전환 로직 ---
         function switchTab(view) {
             currentView = view;
-            const views = ['product', 'schedule', 'inventory'];
-            
-            views.forEach(v => {
+            ['product', 'schedule', 'inventory'].forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 const tab = document.getElementById(`tab-${v}`);
                 const iconBg = document.getElementById(`icon-bg-${v}`);
-                
                 if (v === view) {
                     el.classList.remove('hidden');
-                    tab.classList.add('border-navy-main', 'shadow-tab-active');
-                    tab.classList.remove('border-transparent', 'shadow-card');
-                    tab.querySelector('h3').classList.add('text-navy-text');
-                    tab.querySelector('p').classList.add('text-navy-main');
-                    tab.querySelector('p').classList.remove('text-navy-muted');
-                    iconBg.classList.add('bg-navy-light', 'text-navy-main');
-                    iconBg.classList.remove('bg-gray-50', 'text-gray-400');
+                    tab.classList.add('border-navy-main', 'shadow-tab-active'); tab.classList.remove('border-transparent', 'shadow-card');
+                    tab.querySelector('h3').classList.add('text-navy-text'); tab.querySelector('p').classList.replace('text-navy-muted', 'text-navy-main');
+                    iconBg.classList.replace('bg-gray-50', 'bg-navy-light'); iconBg.classList.replace('text-gray-400', 'text-navy-main');
                 } else {
                     el.classList.add('hidden');
-                    tab.classList.remove('border-navy-main', 'shadow-tab-active');
-                    tab.classList.add('border-transparent', 'shadow-card');
-                    tab.querySelector('p').classList.remove('text-navy-main');
-                    tab.querySelector('p').classList.add('text-navy-muted');
-                    iconBg.classList.remove('bg-navy-light', 'text-navy-main');
-                    iconBg.classList.add('bg-gray-50', 'text-gray-400');
+                    tab.classList.remove('border-navy-main', 'shadow-tab-active'); tab.classList.add('border-transparent', 'shadow-card');
+                    tab.querySelector('p').classList.replace('text-navy-main', 'text-navy-muted');
+                    iconBg.classList.replace('bg-navy-light', 'bg-gray-50'); iconBg.classList.replace('text-navy-main', 'text-gray-400');
                 }
             });
-
             if(view === 'product') renderProducts();
             if(view === 'schedule') renderSchedule();
             if(view === 'inventory') renderInventory();
             lucide.createIcons();
         }
 
-        // --- 공통 뱃지 ---
         const getBadge = (type) => {
             const cls = "px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded bg-white border";
             if(type==='압출') return `<span class="${cls} text-navy-main border-navy-main/30">압출</span>`;
@@ -541,21 +659,156 @@
             if(cat.includes('첨가제')) return `<span class="${cls} bg-purple-50 text-purple-600 border-purple-100">첨가제</span>`;
             return `<span class="${cls} bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
         };
+        const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
 
-        // 규격 문자열 조합 (* 좌우 공백 추가)
-        const formatSpec = (inVal, outVal, lenVal) => {
-            return [inVal, outVal, lenVal].filter(Boolean).join(' * ');
-        };
-
-        // 샘플 텍스트 추가 
-        function appendSample() {
+        function toggleSample() {
             const codeInput = document.getElementById('p-code');
-            if (codeInput.value && !codeInput.value.includes('(샘플)')) {
-                codeInput.value = codeInput.value.trim() + ' (샘플)';
+            const sampleText = '(샘플)';
+            let currentVal = codeInput.value;
+            if (currentVal.includes(sampleText)) { codeInput.value = currentVal.replace(sampleText, '').trim(); } 
+            else { codeInput.value = currentVal.trim() + (currentVal ? ' ' : '') + sampleText; }
+        }
+
+        function toggleWorkMethod() {
+            const method = document.querySelector('input[name="p-work"]:checked')?.value;
+            const autoFields = document.getElementById('fields-auto');
+            const rollFields = document.getElementById('fields-roll');
+            if (method === '자동커팅') {
+                autoFields.classList.remove('hidden'); autoFields.classList.add('block');
+                rollFields.classList.add('hidden'); rollFields.classList.remove('grid');
+            } else {
+                autoFields.classList.add('hidden'); autoFields.classList.remove('block');
+                rollFields.classList.remove('hidden'); rollFields.classList.add('grid');
             }
         }
 
-        // --- 1. 제품 DB (카드 리스트 렌더링) ---
+        // --- 배합 동적 폼 및 계산 로직 ---
+        function addRawRow(type = 'KCC', name = '', pct = '', autoCalc = true) {
+            const container = document.getElementById('raw-container');
+            const row = document.createElement('div');
+            row.className = 'raw-row flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0 relative';
+            row.innerHTML = `
+                <select class="raw-type w-[80px] shrink-0 h-[36px] border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs bg-white outline-none focus:border-navy-main">
+                    <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option>
+                    <option value="어울림" ${type==='어울림'?'selected':''}>어울림</option>
+                    <option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
+                </select>
+                <input type="text" class="raw-name flex-1 min-w-0 h-[36px] border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-navy-main outline-none" placeholder="명칭" value="${name}" oninput="calcBatch()">
+                <div class="relative w-[55px] shrink-0 h-[36px]">
+                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs text-center sm:text-right pr-4 focus:border-navy-main outline-none bg-white" placeholder="%" value="${pct}" oninput="calcBatch()">
+                    <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] sm:text-[11px] text-gray-400 font-bold">%</span>
+                </div>
+                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-[36px] w-[36px] flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons(); 
+            if(autoCalc) autoDistributeRawPercents();
+            calcBatch();
+        }
+
+        function autoDistributeRawPercents() {
+            const rows = document.querySelectorAll('.raw-row');
+            if (rows.length === 0) return;
+            const pct = (100 / rows.length).toFixed(1).replace(/\.0$/, '');
+            rows.forEach(row => {
+                row.querySelector('.raw-percent').value = pct;
+            });
+        }
+
+        function toggleCureDirect(selectEl) {
+            const container = selectEl.closest('.cure-row').querySelector('.direct-container');
+            const directInput = container.querySelector('.cure-direct');
+            if(selectEl.value === '직접입력') { container.classList.remove('hidden'); directInput.focus(); } 
+            else { container.classList.add('hidden'); directInput.value = ''; }
+            calcBatch();
+        }
+
+        function addCureRow(type = '백금AB', direct = '', ratio = '') {
+            const container = document.getElementById('cure-container');
+            const row = document.createElement('div');
+            row.className = 'cure-row flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0 relative';
+            row.innerHTML = `
+                <select class="cure-type w-[80px] shrink-0 h-[36px] border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs bg-white outline-none focus:border-navy-main" onchange="toggleCureDirect(this)">
+                    <option value="백금AB" ${type==='백금AB'?'selected':''}>백금AB</option>
+                    <option value="과산화물(일반)" ${type==='과산화물(일반)'?'selected':''}>과산화물(일반)</option>
+                    <option value="직접입력" ${type==='직접입력'?'selected':''}>직접입력</option>
+                </select>
+                <div class="direct-container flex-1 min-w-0 h-[36px] ${type==='직접입력'?'':'hidden'}">
+                    <input type="text" class="cure-direct w-full h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-navy-main outline-none" placeholder="이름" value="${direct}" oninput="calcBatch()">
+                </div>
+                <div class="flex-1 min-w-0 ${type==='직접입력'?'hidden':''}"></div>
+                <div class="flex items-center gap-1 h-[36px] shrink-0">
+                    <input type="number" step="any" class="cure-ratio w-[55px] h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs text-center sm:text-right focus:border-navy-main outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <span class="text-[10px] font-bold text-gray-400">=</span>
+                    <input type="text" class="cure-total w-[55px] shrink-0 h-full border border-navy-borderLight bg-gray-100 rounded-lg px-1.5 text-[11px] sm:text-xs text-center sm:text-right font-bold text-navy-main outline-none cursor-default" readonly placeholder="0g">
+                </div>
+                <button type="button" onclick="this.closest('.cure-row').remove(); calcBatch();" class="h-[36px] w-[36px] flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons(); calcBatch();
+        }
+
+        function addAddRow(name = '', ratio = '') {
+            const container = document.getElementById('add-container');
+            const row = document.createElement('div');
+            row.className = 'add-row flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0 relative';
+            row.innerHTML = `
+                <input type="text" class="add-name flex-1 min-w-0 h-[36px] shrink-0 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-navy-main outline-none bg-white" placeholder="명칭(영문)" oninput="this.value = this.value.toUpperCase(); calcBatch();" value="${name}">
+                <div class="flex items-center gap-1 h-[36px] shrink-0">
+                    <input type="number" step="any" class="add-ratio w-[55px] h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs text-center sm:text-right focus:border-navy-main outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <span class="text-[10px] font-bold text-gray-400">=</span>
+                    <input type="text" class="add-total w-[55px] shrink-0 h-full border border-blue-200 bg-gray-100 rounded-lg px-1.5 text-[11px] sm:text-xs text-center sm:text-right font-bold text-blue-600 outline-none cursor-default" readonly placeholder="0g">
+                </div>
+                <button type="button" onclick="this.closest('.add-row').remove(); calcBatch();" class="h-[36px] w-[36px] flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons(); calcBatch();
+        }
+
+        function calcBatch() {
+            const baseKg = parseFloat(document.getElementById('p-base-kg').value) || 0;
+            
+            // 원자재
+            let rawItems = [];
+            document.querySelectorAll('.raw-row').forEach(row => {
+                const type = row.querySelector('.raw-type').value;
+                const name = row.querySelector('.raw-name').value.trim();
+                const pct = row.querySelector('.raw-percent').value;
+                let fullName = name ? `${type} ${name}` : type;
+                if(fullName) {
+                    rawItems.push(pct ? `${fullName} [${pct}%]` : fullName);
+                }
+            });
+
+            // 첨가물
+            let summaryItems = [];
+            document.querySelectorAll('.cure-row').forEach(row => {
+                const select = row.querySelector('.cure-type');
+                const direct = row.querySelector('.cure-direct');
+                const ratio = parseFloat(row.querySelector('.cure-ratio').value) || 0;
+                let name = select.value === '직접입력' ? direct.value.trim() : select.value;
+                let totalG = ratio * baseKg;
+                row.querySelector('.cure-total').value = totalG > 0 ? Math.round(totalG) + 'g' : '0g';
+                if (name && totalG > 0) summaryItems.push(`${name} [${Math.round(totalG)}g]`);
+            });
+
+            document.querySelectorAll('.add-row').forEach(row => {
+                const nameInput = row.querySelector('.add-name');
+                const ratio = parseFloat(row.querySelector('.add-ratio').value) || 0;
+                let name = nameInput.value.trim();
+                let totalG = ratio * baseKg;
+                row.querySelector('.add-total').value = totalG > 0 ? Math.round(totalG) + 'g' : '0g';
+                if (name && totalG > 0) summaryItems.push(`${name} [${Math.round(totalG)}g]`);
+            });
+
+            const summaryEl = document.getElementById('mixture-summary');
+            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨';
+            let addStr = summaryItems.length > 0 ? summaryItems.join(' + ') : '첨가물 없음';
+            
+            summaryEl.innerHTML = `<span class="text-gray-700 mr-1.5">기본 원자재: <b>${rawStr}</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">${addStr}</span>`;
+        }
+
+        // --- 1. 제품 DB 렌더링 ---
         function renderProducts() {
             const term = document.getElementById('searchProduct').value.toLowerCase();
             const filtered = dbData.filter(i => {
@@ -563,106 +816,80 @@
                 return i.itemCode.toLowerCase().includes(term) || specStr.includes(term) || i.company.toLowerCase().includes(term);
             });
             
-            const container = document.getElementById('productCardContainer');
+            const tbody = document.getElementById('productTableBody');
             const empty = document.getElementById('emptyProduct');
-            container.innerHTML = '';
+            
+            if(tbody) tbody.innerHTML = ''; 
             
             if(filtered.length === 0) {
-                empty.classList.remove('hidden');
-                empty.classList.add('flex');
+                if(empty) { empty.classList.remove('hidden'); empty.classList.add('flex'); }
             } else {
-                empty.classList.add('hidden');
-                empty.classList.remove('flex');
+                if(empty) { empty.classList.add('hidden'); empty.classList.remove('flex'); }
                 
                 filtered.sort((a,b) => b.id - a.id).forEach(item => {
                     const isChecked = selectedProductIds.has(item.id);
-                    const activeClass = isChecked 
-                        ? 'border-navy-main bg-blue-50/20 ring-1 ring-navy-main shadow-md' 
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md';
                     
-                    const card = document.createElement('div');
-                    card.className = `p-4 sm:p-5 rounded-xl border transition-all cursor-pointer relative group ${activeClass}`;
-                    
-                    card.onclick = (e) => {
-                        if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && e.target.type !== 'checkbox') {
-                            const cb = card.querySelector('.prod-cb');
-                            cb.checked = !cb.checked;
-                            cb.dispatchEvent(new Event('change'));
-                        }
-                    };
+                    if(tbody) {
+                        const trClass = isChecked ? 'checked-row bg-[#E8EFF5]' : 'bg-white';
+                        const tr = document.createElement('tr');
+                        tr.className = `main-row ${trClass} transition-colors cursor-pointer`;
+                        tr.onclick = (e) => {
+                            if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && e.target.type !== 'checkbox') {
+                                const cb = tr.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change'));
+                            }
+                        };
 
-                    const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
+                        const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
 
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-2.5">
-                                <div class="flex items-center" onclick="event.stopPropagation()">
-                                    <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
-                                </div>
-                                ${getBadge(item.type)}
-                                <span class="text-xs text-gray-400 font-mono tracking-tight">${item.date}</span>
-                            </div>
-                            <div class="flex gap-2 text-gray-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                <button onclick="editProduct(${item.id}); event.stopPropagation();" class="p-1 hover:text-navy-main bg-white rounded shadow-sm border border-gray-200"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
-                                <button onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-1 hover:text-navy-red bg-white rounded shadow-sm border border-gray-200"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-2.5">
-                            <h4 class="text-base sm:text-lg font-black text-navy-text flex items-center gap-2">
-                                ${item.itemCode}
-                                <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 truncate max-w-[120px]">${item.company}</span>
-                            </h4>
-                        </div>
-                        
-                        <div class="bg-gray-50 p-2 sm:p-2.5 rounded-lg border border-gray-100 flex items-center gap-2">
-                            <i data-lucide="ruler" class="w-4 h-4 text-gray-400"></i>
-                            <span class="text-[13px] font-bold text-gray-700 font-mono">${displaySpec || '-'}</span>
-                        </div>
-                    `;
-                    container.appendChild(card);
+                        tr.innerHTML = `
+                            <td class="px-3 sm:px-5 py-3 text-center"><input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" value="${item.id}" ${isChecked?'checked':''}></td>
+                            <td class="px-3 sm:px-5 py-3">${getBadge(item.type)}</td>
+                            <td class="px-3 sm:px-5 py-3 font-mono text-[11px] sm:text-sm text-navy-muted whitespace-nowrap">${item.date}</td>
+                            <td class="px-3 sm:px-5 py-3 font-bold text-[12px] sm:text-sm text-navy-text whitespace-nowrap">${item.itemCode}</td>
+                            <td class="px-3 sm:px-5 py-3 text-[12px] sm:text-sm text-navy-text whitespace-nowrap">${displaySpec || '-'}</td>
+                            <td class="px-3 sm:px-5 py-3 text-[12px] sm:text-sm text-navy-muted whitespace-nowrap">${item.company}</td>
+                            <td class="px-3 sm:px-5 py-3 text-center whitespace-nowrap">
+                                <button onclick="editProduct(${item.id}); event.stopPropagation();" class="p-1 sm:p-1.5 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                                <button onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-1 sm:p-1.5 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
                 });
             }
 
-            document.querySelectorAll('.prod-cb').forEach(cb => {
-                cb.addEventListener('change', e => {
-                    const id = parseInt(e.target.value);
-                    e.target.checked ? selectedProductIds.add(id) : selectedProductIds.delete(id);
-                    renderProducts(); 
-                });
-            });
-
-            const allCb = document.getElementById('selectAllCheckbox');
-            const cbs = document.querySelectorAll('.prod-cb');
-            allCb.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
+            document.querySelectorAll('.prod-cb').forEach(cb => { cb.addEventListener('change', e => { e.target.checked ? selectedProductIds.add(parseInt(e.target.value)) : selectedProductIds.delete(parseInt(e.target.value)); renderProducts(); }); });
             
-            const newAllCb = allCb.cloneNode(true);
-            allCb.parentNode.replaceChild(newAllCb, allCb);
-            newAllCb.addEventListener('change', (e) => {
-                cbs.forEach(c => {
-                    e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value));
-                });
-                renderProducts();
+            const allCbs = document.querySelectorAll('input[id^="selectAllCheckbox"]');
+            allCbs.forEach(allCb => {
+                const cbs = document.querySelectorAll('.prod-cb');
+                allCb.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
+                const newAllCb = allCb.cloneNode(true);
+                allCb.parentNode.replaceChild(newAllCb, allCb);
+                newAllCb.addEventListener('change', (e) => { cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); }); renderProducts(); });
             });
 
-            lucide.createIcons();
-            updateProductDetails();
+            lucide.createIcons(); updateProductDetails();
         }
 
-        // 상세 제원 패널 
         function updateProductDetails() {
             const panel = document.getElementById('detailsPanel');
             const container = document.getElementById('detailsCardContainer');
             
-            if(selectedProductIds.size === 0) {
-                panel.classList.add('hidden');
-                return;
-            }
+            if(selectedProductIds.size === 0) { panel.classList.add('hidden'); return; }
             panel.classList.remove('hidden');
             document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
             container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => {
                 const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
+                const displayMeas = formatSpec(item.measIn, item.measOut, item.measLen);
+                
+                let workDetailsHtml = item.workMethod === '자동커팅' 
+                    ? `<p class="font-mono text-gray-700 text-[10px] mt-0.5">L:${item.autoLen||'-'} / 후:${item.autoSpeed||'-'} / 누:${item.autoPress||'-'}</p>`
+                    : `<p class="font-mono text-gray-700 text-[10px] leading-tight mt-0.5">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</p>`;
+
+                const mixHTML = item.mixture || '-';
+
                 return `
                 <div class="bg-white p-3 sm:p-4 rounded-xl border border-navy-borderLight shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
@@ -670,37 +897,17 @@
                         <span class="text-[11px] sm:text-xs text-navy-muted font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">${displaySpec || '-'}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-y-2 gap-x-2 text-[11px] sm:text-xs">
-                        <div class="bg-blue-50/50 p-1.5 rounded">
-                            <span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">실측 측정값</span>
-                            <span class="font-bold text-navy-main font-mono">${item.measured || '-'}</span>
-                        </div>
-                        <div class="bg-blue-50/50 p-1.5 rounded">
-                            <span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">레이저값</span>
-                            <span class="font-bold text-blue-700 font-mono">${item.laser || '-'}</span>
-                        </div>
-                        <div class="col-span-2 bg-gray-50 p-1.5 rounded flex justify-between items-center">
-                            <span class="text-gray-400 font-bold text-[10px] sm:text-[11px]">배합</span>
-                            <span class="text-gray-700 truncate max-w-[150px]" title="${item.mixture || '-'}">${item.mixture || '-'}</span>
+                        <div class="bg-blue-50/50 p-1.5 rounded"><span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">실측 측정값</span><span class="font-bold text-navy-main font-mono">${displayMeas || '-'}</span></div>
+                        <div class="bg-blue-50/50 p-1.5 rounded"><span class="text-gray-400 block text-[10px] sm:text-[11px] mb-0.5 font-bold">레이저값</span><span class="font-bold text-blue-700 font-mono">${item.laser || '-'}</span></div>
+                        <div class="col-span-2 bg-amber-50/50 p-2 rounded flex flex-col justify-start gap-0.5 border border-amber-100">
+                            <span class="text-gray-500 font-bold text-[10px] sm:text-[11px]">배합 요약 (기준: ${item.baseKg||20}KG)</span>
+                            <span class="text-xs leading-snug break-words text-gray-800">${mixHTML}</span>
                         </div>
                     </div>
-                    <!-- 신규 설비 상세 요약 영역 -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 mt-2 pt-2 border-t border-navy-borderLight/30 text-[10px] sm:text-[11px]">
-                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100">
-                            <p class="font-bold text-gray-400 mb-0.5">압출기</p>
-                            <p class="font-mono text-gray-700">${item.exNum||'-'} / ${item.exTemp||'-'}℃ / ${item.exSpeed||'-'}</p>
-                        </div>
-                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100">
-                            <p class="font-bold text-gray-400 mb-0.5">투입/역회전</p>
-                            <p class="font-mono text-gray-700">${item.fdSpeed||'-'} / ${item.fdRev||'-'}</p>
-                        </div>
-                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100">
-                            <p class="font-bold text-gray-400 mb-0.5">작업/수축률</p>
-                            <p class="font-mono text-gray-700">${item.workMethod||'-'} / ${item.shrinkage ? item.shrinkage+'%' : '-'}</p>
-                        </div>
-                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100">
-                            <p class="font-bold text-gray-400 mb-0.5">2차가류</p>
-                            <p class="font-mono text-gray-700">${item.cuTemp||'-'}℃ / ${item.cuTime||'-'}H</p>
-                        </div>
+                    <div class="grid grid-cols-2 gap-1.5 mt-2 pt-2 border-t border-navy-borderLight/30 text-[10px] sm:text-[11px]">
+                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100"><p class="font-bold text-gray-400 mb-0.5">투입기 / 압출기 (${item.exNum||'-'})</p><p class="font-mono text-gray-700">T:${item.fdSpeed||'-'} / ${item.exTemp||'-'}℃</p></div>
+                        <div class="bg-gray-50 p-1.5 rounded border border-gray-100"><p class="font-bold text-gray-400 mb-0.5">건조로 / 수축</p><p class="font-mono text-gray-700">${item.cuTemp||'-'}℃ / ${item.shrinkage ? item.shrinkage+'%' : '-'}</p></div>
+                        <div class="col-span-2 bg-gray-50 p-1.5 rounded border border-gray-100"><p class="font-bold text-gray-400">후공정 <span class="font-normal">(${item.workMethod||'-'})</span></p>${workDetailsHtml}</div>
                     </div>
                 </div>
             `}).join('');
@@ -709,105 +916,25 @@
         function clearSelection() { selectedProductIds.clear(); renderProducts(); }
         document.getElementById('searchProduct').addEventListener('input', renderProducts);
 
-        // --- 2. 일정 관리 (카드 리스트) ---
-        function renderSchedule() {
-            const container = document.getElementById('scheduleCardContainer');
-            const empty = document.getElementById('emptySchedule');
-            container.innerHTML = '';
-            
-            if(scheduleData.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
-            empty.classList.add('hidden');
-            
-            scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
-                const isDone = item.status === 'done';
-                const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
-                const iconClass = isDone ? 'text-navy-main border-navy-main bg-navy-light/50' : 'text-transparent border-gray-300 bg-white';
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group';
-                card.innerHTML = `
-                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="toggleScheduleStatus(${item.id})">
-                        <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center ${iconClass} transition-colors shrink-0">
-                            <i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${isDone ? 'text-navy-main' : 'hidden'}"></i>
-                        </div>
-                        <span class="text-xs sm:text-sm ${textStyle}">${item.task}</span>
-                    </div>
-                    <div class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-1.5 shrink-0 ml-2">
-                        <button onclick="editSchedule(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
-                        <button onclick="requestDelete('schedule', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            lucide.createIcons();
-        }
-
-        function toggleScheduleStatus(id) {
-            const idx = scheduleData.findIndex(i => i.id === id);
-            if(idx > -1) {
-                scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done';
-                renderSchedule();
-            }
-        }
-
-        // --- 3. 재고 관리 (카드 그리드) ---
-        function renderInventory() {
-            const term = document.getElementById('searchInventory').value.toLowerCase();
-            const filtered = inventoryData.filter(i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term));
-            
-            const container = document.getElementById('inventoryCardContainer');
-            const empty = document.getElementById('emptyInventory');
-            container.innerHTML = '';
-            
-            if(filtered.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
-            empty.classList.add('hidden');
-            
-            filtered.sort((a,b) => b.id - a.id).forEach(item => {
-                const isLow = item.qty < 50; 
-                const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
-                
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col relative group hover:border-navy-main transition-colors hover:shadow-md';
-                card.innerHTML = `
-                    <div class="absolute top-3 right-3 flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button onclick="editInventory(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
-                        <button onclick="requestDelete('inventory', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
-                    </div>
-                    <div class="mb-3">
-                        <div class="mb-2">${getInvBadge(item.category)}</div>
-                        <h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3>
-                        <p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p>
-                    </div>
-                    <div class="mt-auto border-t border-gray-100 pt-3 flex items-end justify-between bg-gray-50/50 -mx-4 -mb-4 px-4 pb-4 rounded-b-xl">
-                        <span class="text-[11px] sm:text-xs font-bold text-gray-500">현재 잔여 수량</span>
-                        <div class="text-right">
-                            <span class="text-lg sm:text-xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span>
-                            <span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-0.5">${item.unit}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            lucide.createIcons();
-        }
-        document.getElementById('searchInventory').addEventListener('input', renderInventory);
-
         // --- 공통 모달 조작 ---
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // --- 생산 DB 저장/수정 ---
+        // --- 생산 DB 저장/수정 로직 ---
         function openProductModal() {
             document.getElementById('productForm').reset();
             document.getElementById('p-id').value = '';
             document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('p-base-kg').value = '20';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
+            
+            document.getElementById('raw-container').innerHTML = '';
+            document.getElementById('cure-container').innerHTML = '';
+            document.getElementById('add-container').innerHTML = '';
+            addRawRow('KCC', '', '', true); 
+            addCureRow('백금AB'); addAddRow();
+            
+            toggleWorkMethod(); 
             openModal('productModal');
         }
         
@@ -819,28 +946,81 @@
             const typeEl = document.querySelector('input[name="p-type"]:checked');
             const workEl = document.querySelector('input[name="p-work"]:checked');
             
+            const baseKg = parseFloat(document.getElementById('p-base-kg').value) || 20;
+            
+            let raws = [];
+            document.querySelectorAll('.raw-row').forEach(row => {
+                raws.push({
+                    type: row.querySelector('.raw-type').value,
+                    name: row.querySelector('.raw-name').value.trim(),
+                    pct: row.querySelector('.raw-percent').value
+                });
+            });
+
+            let cures = [];
+            document.querySelectorAll('.cure-row').forEach(row => {
+                cures.push({
+                    type: row.querySelector('.cure-type').value,
+                    direct: row.querySelector('.cure-direct').value.trim(),
+                    ratio: row.querySelector('.cure-ratio').value
+                });
+            });
+
+            let adds = [];
+            document.querySelectorAll('.add-row').forEach(row => {
+                adds.push({
+                    name: row.querySelector('.add-name').value.trim(),
+                    ratio: row.querySelector('.add-ratio').value
+                });
+            });
+
+            const summaryEl = document.getElementById('mixture-summary');
+            const mixtureStr = summaryEl.innerHTML; 
+            
             const data = {
                 date: document.getElementById('p-date').value, 
                 type: typeEl ? typeEl.value : '압출',
                 itemCode: document.getElementById('p-code').value.trim(), 
                 company: document.getElementById('p-company').value,
+                
                 specIn: document.getElementById('p-spec-in').value,
                 specOut: document.getElementById('p-spec-out').value,
                 specLen: document.getElementById('p-spec-len').value,
-                measured: document.getElementById('p-measured').value,
+                
+                measIn: document.getElementById('p-meas-in').value,
+                measOut: document.getElementById('p-meas-out').value,
+                measLen: document.getElementById('p-meas-len').value,
+                
                 laser: document.getElementById('p-laser').value, 
-                mixture: document.getElementById('p-mixture').value,
                 shrinkage: document.getElementById('p-shrink').value,
+                
+                baseKg: baseKg,
+                raws: raws,
+                cures: cures,
+                adds: adds,
+                mixture: mixtureStr,
+
                 workMethod: workEl ? workEl.value : '자동커팅',
                 exNum: document.getElementById('p-ex-num').value,
                 exTemp: document.getElementById('p-ex-temp').value,
                 exSpeed: document.getElementById('p-ex-speed').value,
+                cuTemp: document.getElementById('p-cu-temp').value,
+                cuTime: document.getElementById('p-cu-time').value,
                 fdSpeed: document.getElementById('p-fd-speed').value,
                 fdDecel: document.getElementById('p-fd-decel').value,
                 fdRev: document.getElementById('p-fd-rev').value,
                 fdSingle: document.getElementById('p-fd-single').value,
-                cuTemp: document.getElementById('p-cu-temp').value,
-                cuTime: document.getElementById('p-cu-time').value,
+                autoLen: document.getElementById('p-auto-len').value,
+                autoSpeed: document.getElementById('p-auto-speed').value,
+                autoPress: document.getElementById('p-auto-press').value,
+                roll1Jig: document.getElementById('p-roll1-jig').value,
+                roll1Feed: document.getElementById('p-roll1-feed').value,
+                roll1Accel: document.getElementById('p-roll1-accel').value,
+                roll1Press: document.getElementById('p-roll1-press').value,
+                roll2Jig: document.getElementById('p-roll2-jig').value,
+                roll2Feed: document.getElementById('p-roll2-feed').value,
+                roll2Accel: document.getElementById('p-roll2-accel').value,
+                roll2Press: document.getElementById('p-roll2-press').value,
             };
             
             if(id) { Object.assign(dbData.find(i=>i.id==id), data); } 
@@ -853,102 +1033,147 @@
             const item = dbData.find(i => i.id === id);
             document.getElementById('p-id').value = item.id;
             
-            // Radio Buttons
             const typeRadio = document.querySelector(`input[name="p-type"][value="${item.type}"]`);
             if(typeRadio) typeRadio.checked = true;
             
             const workRadio = document.querySelector(`input[name="p-work"][value="${item.workMethod}"]`);
             if(workRadio) workRadio.checked = true;
             
-            // Regular Inputs
             ['date','company'].forEach(k => document.getElementById(`p-${k}`).value = item[k]||'');
             document.getElementById('p-code').value = item.itemCode;
+            
             document.getElementById('p-spec-in').value = item.specIn || '';
             document.getElementById('p-spec-out').value = item.specOut || '';
             document.getElementById('p-spec-len').value = item.specLen || '';
-            document.getElementById('p-measured').value = item.measured || '';
+            
+            document.getElementById('p-meas-in').value = item.measIn || '';
+            document.getElementById('p-meas-out').value = item.measOut || '';
+            document.getElementById('p-meas-len').value = item.measLen || '';
+            
             document.getElementById('p-laser').value = item.laser || '';
-            document.getElementById('p-mixture').value = item.mixture || '';
             document.getElementById('p-shrink').value = item.shrinkage || '';
             
-            // New Detail Inputs
+            document.getElementById('p-base-kg').value = item.baseKg || 20;
+            
+            document.getElementById('raw-container').innerHTML = '';
+            if(item.raws && item.raws.length > 0) { item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); } else { addRawRow('KCC', '', '100', false); }
+
+            document.getElementById('cure-container').innerHTML = '';
+            if(item.cures && item.cures.length > 0) { item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); } else { addCureRow('백금AB'); }
+
+            document.getElementById('add-container').innerHTML = '';
+            if(item.adds && item.adds.length > 0) { item.adds.forEach(a => addAddRow(a.name, a.ratio)); } else { addAddRow(); }
+            
             document.getElementById('p-ex-num').value = item.exNum || '';
             document.getElementById('p-ex-temp').value = item.exTemp || '';
             document.getElementById('p-ex-speed').value = item.exSpeed || '';
+            document.getElementById('p-cu-temp').value = item.cuTemp || '';
+            document.getElementById('p-cu-time').value = item.cuTime || '';
             document.getElementById('p-fd-speed').value = item.fdSpeed || '';
             document.getElementById('p-fd-decel').value = item.fdDecel || '';
             document.getElementById('p-fd-rev').value = item.fdRev || '';
             document.getElementById('p-fd-single').value = item.fdSingle || '';
-            document.getElementById('p-cu-temp').value = item.cuTemp || '';
-            document.getElementById('p-cu-time').value = item.cuTime || '';
+            
+            document.getElementById('p-auto-len').value = item.autoLen || '';
+            document.getElementById('p-auto-speed').value = item.autoSpeed || '';
+            document.getElementById('p-auto-press').value = item.autoPress || '';
+            
+            document.getElementById('p-roll1-jig').value = item.roll1Jig || '';
+            document.getElementById('p-roll1-feed').value = item.roll1Feed || '';
+            document.getElementById('p-roll1-accel').value = item.roll1Accel || '';
+            document.getElementById('p-roll1-press').value = item.roll1Press || '';
+            
+            document.getElementById('p-roll2-jig').value = item.roll2Jig || '';
+            document.getElementById('p-roll2-feed').value = item.roll2Feed || '';
+            document.getElementById('p-roll2-accel').value = item.roll2Accel || '';
+            document.getElementById('p-roll2-press').value = item.roll2Press || '';
             
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
+            toggleWorkMethod(); 
             openModal('productModal');
+            calcBatch(); 
         }
 
-        // --- 일정 저장/수정 ---
-        function openScheduleModal() {
-            document.getElementById('scheduleForm').reset();
-            document.getElementById('s-id').value = '';
-            document.getElementById('scheduleModalTitle').textContent = '일정 추가';
-            openModal('scheduleModal');
+        // --- 일정 / 재고 / 삭제 모달 로직 ---
+        function renderSchedule() {
+            const container = document.getElementById('scheduleCardContainer'); const empty = document.getElementById('emptySchedule');
+            container.innerHTML = '';
+            if(scheduleData.length === 0) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
+                const isDone = item.status === 'done'; const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
+                const iconClass = isDone ? 'text-navy-main border-navy-main bg-navy-light/50' : 'text-transparent border-gray-300 bg-white';
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="toggleScheduleStatus(${item.id})">
+                        <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center ${iconClass} transition-colors shrink-0"><i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${isDone ? 'text-navy-main' : 'hidden'}"></i></div>
+                        <span class="text-xs sm:text-sm ${textStyle}">${item.task}</span>
+                    </div>
+                    <div class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-1.5 shrink-0 ml-2">
+                        <button onclick="editSchedule(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                        <button onclick="requestDelete('schedule', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
         }
+        function toggleScheduleStatus(id) {
+            const idx = scheduleData.findIndex(i => i.id === id);
+            if(idx > -1) { scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done'; renderSchedule(); }
+        }
+        function openScheduleModal() { document.getElementById('scheduleForm').reset(); document.getElementById('s-id').value = ''; document.getElementById('scheduleModalTitle').textContent = '일정 추가'; openModal('scheduleModal'); }
         function saveSchedule() {
-            const form = document.getElementById('scheduleForm');
-            if(!form.checkValidity()) return form.reportValidity();
-            const id = document.getElementById('s-id').value;
-            const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
-            if(id) { Object.assign(scheduleData.find(i=>i.id==id), data); } 
-            else { scheduleData.push({ id: Date.now(), ...data }); }
+            const form = document.getElementById('scheduleForm'); if(!form.checkValidity()) return form.reportValidity();
+            const id = document.getElementById('s-id').value; const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
+            if(id) { Object.assign(scheduleData.find(i=>i.id==id), data); } else { scheduleData.push({ id: Date.now(), ...data }); }
             closeModal('scheduleModal'); renderSchedule();
         }
         function editSchedule(id) {
-            const item = scheduleData.find(i => i.id === id);
-            document.getElementById('s-id').value = item.id;
-            document.getElementById('s-task').value = item.task;
-            document.getElementById('s-status').value = item.status;
-            document.getElementById('scheduleModalTitle').textContent = '일정 수정';
-            openModal('scheduleModal');
+            const item = scheduleData.find(i => i.id === id); document.getElementById('s-id').value = item.id; document.getElementById('s-task').value = item.task; document.getElementById('s-status').value = item.status;
+            document.getElementById('scheduleModalTitle').textContent = '일정 수정'; openModal('scheduleModal');
         }
 
-        // --- 재고 저장/수정 ---
-        function openInventoryModal() {
-            document.getElementById('inventoryForm').reset();
-            document.getElementById('i-id').value = '';
-            document.getElementById('inventoryModalTitle').textContent = '재고 등록';
-            openModal('inventoryModal');
+        function renderInventory() {
+            const term = document.getElementById('searchInventory').value.toLowerCase();
+            const filtered = inventoryData.filter(i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term));
+            const container = document.getElementById('inventoryCardContainer'); const empty = document.getElementById('emptyInventory');
+            container.innerHTML = '';
+            if(filtered.length === 0) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            filtered.sort((a,b) => b.id - a.id).forEach(item => {
+                const isLow = item.qty < 50; const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col relative group hover:border-navy-main transition-colors hover:shadow-md';
+                card.innerHTML = `
+                    <div class="absolute top-3 right-3 flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button onclick="editInventory(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                        <button onclick="requestDelete('inventory', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></button>
+                    </div>
+                    <div class="mb-3"><div class="mb-2">${getInvBadge(item.category)}</div><h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3><p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p></div>
+                    <div class="mt-auto border-t border-gray-100 pt-3 flex items-end justify-between bg-gray-50/50 -mx-4 -mb-4 px-4 pb-4 rounded-b-xl"><span class="text-[11px] sm:text-xs font-bold text-gray-500">현재 잔여 수량</span><div class="text-right"><span class="text-lg sm:text-xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span><span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-0.5">${item.unit}</span></div></div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
         }
+        document.getElementById('searchInventory').addEventListener('input', renderInventory);
+        function openInventoryModal() { document.getElementById('inventoryForm').reset(); document.getElementById('i-id').value = ''; document.getElementById('inventoryModalTitle').textContent = '재고 등록'; openModal('inventoryModal'); }
         function saveInventory() {
-            const form = document.getElementById('inventoryForm');
-            if(!form.checkValidity()) return form.reportValidity();
+            const form = document.getElementById('inventoryForm'); if(!form.checkValidity()) return form.reportValidity();
             const id = document.getElementById('i-id').value;
-            const data = {
-                category: document.getElementById('i-category').value, name: document.getElementById('i-name').value,
-                qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value,
-                update: new Date().toISOString().split('T')[0]
-            };
-            if(id) { Object.assign(inventoryData.find(i=>i.id==id), data); } 
-            else { inventoryData.push({ id: Date.now(), ...data }); }
+            const data = { category: document.getElementById('i-category').value, name: document.getElementById('i-name').value, qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value, update: new Date().toISOString().split('T')[0] };
+            if(id) { Object.assign(inventoryData.find(i=>i.id==id), data); } else { inventoryData.push({ id: Date.now(), ...data }); }
             closeModal('inventoryModal'); renderInventory();
         }
         function editInventory(id) {
-            const item = inventoryData.find(i => i.id === id);
-            document.getElementById('i-id').value = item.id;
-            document.getElementById('i-category').value = item.category;
-            document.getElementById('i-name').value = item.name;
-            document.getElementById('i-qty').value = item.qty;
-            document.getElementById('i-unit').value = item.unit;
-            document.getElementById('inventoryModalTitle').textContent = '재고 수정';
-            openModal('inventoryModal');
+            const item = inventoryData.find(i => i.id === id); document.getElementById('i-id').value = item.id; document.getElementById('i-category').value = item.category; document.getElementById('i-name').value = item.name; document.getElementById('i-qty').value = item.qty; document.getElementById('i-unit').value = item.unit;
+            document.getElementById('inventoryModalTitle').textContent = '재고 수정'; openModal('inventoryModal');
         }
 
-        // --- 공통 삭제 프로세스 ---
-        function requestDelete(type, id) {
-            deleteInfo = { type, id };
-            openModal('deleteModal');
-        }
+        function requestDelete(type, id) { deleteInfo = { type, id }; openModal('deleteModal'); }
         function closeDeleteModal() { deleteInfo = { type: null, id: null }; closeModal('deleteModal'); }
-        
         document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
             if(deleteInfo.type === 'product') { dbData = dbData.filter(i => i.id !== deleteInfo.id); selectedProductIds.delete(deleteInfo.id); renderProducts(); }
             if(deleteInfo.type === 'schedule') { scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); renderSchedule(); }
@@ -956,10 +1181,7 @@
             closeDeleteModal();
         });
 
-        // 초기 로드
-        window.addEventListener('DOMContentLoaded', () => {
-            switchTab('product'); 
-        });
+        window.addEventListener('DOMContentLoaded', () => { switchTab('product'); });
     </script>
 </body>
 </html>
