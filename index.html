@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>실리콘 통합 관리 시스템 | 반응형 UI</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Noto Sans KR -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <script>
@@ -17,129 +20,176 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace']
                     },
                     colors: {
-                        navy: { main: '#1A365D', hover: '#112240', light: '#F0F4F8', borderLight: '#D9E2EC', red: '#E3003F', bg: '#F5F7F8', text: '#222222', muted: '#666666', border: '#E4E8EB' }
+                        navy: {
+                            main: '#1A365D',       
+                            hover: '#112240',      
+                            light: '#F0F4F8',      
+                            borderLight: '#D9E2EC', 
+                            red: '#E3003F',         
+                            bg: '#F5F7F8',          
+                            text: '#222222',        
+                            muted: '#666666',       
+                            border: '#E4E8EB'       
+                        }
                     },
                     boxShadow: {
-                        'card': '0 2px 8px rgba(0, 0, 0, 0.04)', 'floating': '0 8px 24px rgba(26, 54, 93, 0.12)', 'tab-active': '0 4px 12px rgba(26, 54, 93, 0.15)'
+                        'card': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'floating': '0 8px 24px rgba(26, 54, 93, 0.12)',
+                        'tab-active': '0 4px 12px rgba(26, 54, 93, 0.15)'
                     }
                 }
             }
         }
     </script>
     <style>
+        /* 부드러운 스크롤바 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        @media (hover: hover) {
-            tbody tr.main-row:hover td { background-color: #f8fafc !important; }
-            tbody tr.main-row.checked-row:hover td { background-color: #E8EFF5 !important; }
-        }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 애니메이션 */
+        .fade-in { animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        
         .panel-enter { animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        
         body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     </style>
 </head>
 <body class="bg-navy-bg text-navy-text font-sans h-screen overflow-hidden flex flex-col">
 
-    <header class="bg-white border-b-2 border-navy-main px-4 sm:px-6 py-3 flex justify-between items-center shadow-sm z-20 shrink-0">
+    <header class="bg-white border-b-2 border-navy-main px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-2 sm:gap-3">
-            <div class="bg-navy-main p-1.5 rounded-md hidden sm:block"><i data-lucide="layers" class="h-5 w-5 text-white"></i></div>
-            <h1 class="text-[15px] sm:text-xl font-bold text-navy-text tracking-tight">통합 제조 관리 시스템</h1>
+            <div class="bg-navy-main p-1.5 rounded-md hidden sm:block">
+                <i data-lucide="layers" class="h-5 w-5 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-[15px] sm:text-xl font-bold text-navy-text tracking-tight">통합 제조 관리 시스템</h1>
+            </div>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs sm:text-sm text-navy-muted font-medium hidden sm:inline-block">관리자님, 환영합니다.</span>
-            <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-navy-light border border-navy-borderLight flex items-center justify-center text-navy-main font-bold text-xs sm:text-sm">A</div>
+            <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-navy-light border border-navy-borderLight flex items-center justify-center text-navy-main font-bold text-xs sm:text-sm">
+                A
+            </div>
         </div>
     </header>
 
     <main class="flex-1 overflow-y-auto p-3 sm:p-6 w-full max-w-[1400px] mx-auto relative pb-20 sm:pb-6">
         
         <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <!-- 오늘의 일정 탭 -->
             <button onclick="switchTab('schedule')" id="tab-schedule" class="bg-white p-2.5 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
-                <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-schedule"><i data-lucide="calendar-check" class="h-4 w-4 sm:h-7 sm:w-7"></i></div>
-                <div><p class="text-[10px] font-bold text-navy-muted mb-0.5 uppercase tracking-wider hidden sm:block">Tasks</p><h3 class="text-xs sm:text-xl font-black text-navy-text">오늘의 일정</h3></div>
+                <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-schedule">
+                    <i data-lucide="calendar-check" class="h-4 w-4 sm:h-7 sm:w-7"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-navy-muted mb-0.5 uppercase tracking-wider hidden sm:block">Tasks</p>
+                    <h3 class="text-xs sm:text-xl font-black text-navy-text">오늘의 일정</h3>
+                </div>
             </button>
+            
+            <!-- 제품 DB 탭 (기본 활성화) -->
             <button onclick="switchTab('product')" id="tab-product" class="bg-white p-2.5 sm:p-5 shadow-tab-active border-2 border-navy-main rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
-                <div class="p-1.5 sm:p-3 rounded-full bg-navy-light text-navy-main order-first sm:order-last shrink-0" id="icon-bg-product"><i data-lucide="database" class="h-4 w-4 sm:h-7 sm:w-7"></i></div>
-                <div><p class="text-[10px] font-bold text-navy-main mb-0.5 uppercase tracking-wider hidden sm:block">Log</p><h3 class="text-xs sm:text-xl font-black text-navy-text">제품 DB</h3></div>
+                <div class="p-1.5 sm:p-3 rounded-full bg-navy-light text-navy-main order-first sm:order-last shrink-0" id="icon-bg-product">
+                    <i data-lucide="database" class="h-4 w-4 sm:h-7 sm:w-7"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-navy-main mb-0.5 uppercase tracking-wider hidden sm:block">Log</p>
+                    <h3 class="text-xs sm:text-xl font-black text-navy-text">제품 DB</h3>
+                </div>
             </button>
+            
+            <!-- 재고 관리 탭 -->
             <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-white p-2.5 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
-                <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-inventory"><i data-lucide="package" class="h-4 w-4 sm:h-7 sm:w-7"></i></div>
-                <div><p class="text-[10px] font-bold text-navy-muted mb-0.5 uppercase tracking-wider hidden sm:block">Stock</p><h3 class="text-xs sm:text-xl font-black text-navy-text">재고 관리</h3></div>
+                <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-inventory">
+                    <i data-lucide="package" class="h-4 w-4 sm:h-7 sm:w-7"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-navy-muted mb-0.5 uppercase tracking-wider hidden sm:block">Stock</p>
+                    <h3 class="text-xs sm:text-xl font-black text-navy-text">재고 관리</h3>
+                </div>
             </button>
         </div>
 
+        <!-- ========================================== -->
+        <!-- VIEW 1: 제품 DB (모던 피드 뷰) -->
+        <!-- ========================================== -->
         <div id="view-product" class="fade-in block">
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
+            <div class="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-base sm:text-xl font-bold text-navy-text">일일 생산 기록</h2>
-                    <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">압출 공정 데이터를 등록하고 상세 제원을 조회합니다.</p>
+                    <h2 class="text-base sm:text-xl font-bold text-navy-text tracking-tight">일일 생산 기록</h2>
+                    <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">생산 레코드와 제원을 직관적으로 관리합니다.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white border border-navy-border text-navy-text text-xs sm:text-sm font-bold rounded-lg hover:bg-gray-50 flex items-center justify-center shadow-sm"><i data-lucide="download" class="h-3.5 w-3.5 mr-1.5 text-navy-muted"></i> 엑셀</button>
-                    <button onclick="openProductModal()" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-navy-main text-white text-xs sm:text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm"><i data-lucide="plus" class="h-3.5 w-3.5 mr-1.5"></i> 생산 등록</button>
+                    <button class="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-gray-300 text-navy-text text-sm font-bold rounded-xl hover:bg-gray-50 flex items-center justify-center shadow-sm transition-colors">
+                        <i data-lucide="download" class="h-4 w-4 mr-2 text-navy-muted"></i> 엑셀
+                    </button>
+                    <button onclick="openProductModal()" class="flex-1 sm:flex-none px-5 py-2.5 bg-navy-main text-white text-sm font-bold rounded-xl hover:bg-navy-hover flex items-center justify-center shadow-sm transition-colors">
+                        <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 생산 등록
+                    </button>
                 </div>
             </div>
 
+            <!-- 선택 상세뷰 패널 -->
             <div id="detailsPanel" class="hidden mb-4 bg-navy-light/50 border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
-                <div class="bg-navy-light px-3 sm:px-4 py-2 sm:py-3 border-b border-navy-borderLight flex justify-between items-center">
-                    <div class="flex items-center"><i data-lucide="check-square" class="h-4 w-4 sm:h-5 sm:w-5 text-navy-main mr-1.5"></i><h3 class="text-[11px] sm:text-sm font-bold text-navy-text">선택 비교 <span id="selectedCount" class="ml-1 px-1.5 py-0.5 bg-navy-main text-white text-[9px] rounded-full">0</span></h3></div>
-                    <button onclick="clearSelection()" class="text-[11px] sm:text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
+                <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i data-lucide="check-square" class="h-4 w-4 sm:h-5 sm:w-5 text-navy-main mr-2"></i>
+                        <h3 class="text-xs sm:text-sm font-bold text-navy-text">선택 상세 제원 비교 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[10px] rounded-full">0</span></h3>
+                    </div>
+                    <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
-                <div class="p-2 sm:p-4">
-                    <div id="detailsCardContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4"></div>
+                <div class="p-4 sm:p-5">
+                    <div id="detailsCardContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                        <!-- JS 렌더링 영역 -->
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white border border-navy-border rounded-xl shadow-card flex flex-col overflow-hidden">
-                <div class="p-3 sm:p-4 border-b border-navy-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+            <!-- 메인 리스트 컨테이너 -->
+            <div class="bg-transparent flex flex-col overflow-hidden">
+                <!-- 컨트롤 바 -->
+                <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 sm:py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 shadow-sm">
-                            <input type="checkbox" id="selectAllCheckbox" class="w-3.5 h-3.5 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer">
-                            <span class="text-[11px] sm:text-xs font-bold text-navy-text">전체 선택</span>
+                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-gray-200 hover:border-navy-main/50 transition-colors shadow-sm">
+                            <input type="checkbox" id="selectAllFeedCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer">
+                            <span class="text-xs sm:text-sm font-bold text-navy-text">전체 선택</span>
                         </label>
+                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-200 hidden sm:inline-block">총 <span id="totalProductCount" class="text-navy-main font-black">0</span>건</span>
                     </div>
-                    <div class="relative w-full sm:max-w-xs">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400"></i>
-                        <input type="text" id="searchProduct" placeholder="검색 (품번, 회사명 등)" class="block w-full pl-8 pr-3 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main shadow-sm">
+                    <div class="relative w-full sm:max-w-md">
+                        <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
+                        <input type="text" id="searchProduct" placeholder="품번, 규격, 회사명 검색" class="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main transition-all shadow-sm">
                     </div>
                 </div>
                 
-                <div id="productCardContainer" class="p-3 bg-gray-50/30 grid grid-cols-1 sm:hidden gap-3">
-                    </div>
-                <div class="overflow-x-auto w-full hidden sm:block">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50 border-b border-navy-border">
-                            <tr>
-                                <th class="px-3 py-3 w-10 text-center"><input type="checkbox" id="selectAllCheckboxDummy" class="w-4 h-4 text-navy-main border-gray-300 rounded invisible"></th>
-                                <th class="px-3 py-3 text-left text-[11px] font-bold text-navy-muted whitespace-nowrap">구분</th>
-                                <th class="px-3 py-3 text-left text-[11px] font-bold text-navy-muted whitespace-nowrap">생산일자</th>
-                                <th class="px-3 py-3 text-left text-[11px] font-bold text-navy-muted whitespace-nowrap">품번</th>
-                                <th class="px-3 py-3 text-left text-[11px] font-bold text-navy-muted whitespace-nowrap">제품 규격</th>
-                                <th class="px-3 py-3 text-left text-[11px] font-bold text-navy-muted whitespace-nowrap">회사명</th>
-                                <th class="px-3 py-3 text-center text-[11px] font-bold text-navy-muted whitespace-nowrap w-20">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="productTableBody"></tbody>
-                    </table>
+                <!-- JS 렌더링: 피드형 리스트 -->
+                <div id="productFeedContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-4">
                 </div>
-                <div id="emptyProduct" class="hidden flex-col items-center justify-center py-12 px-4 text-center bg-white">
-                    <i data-lucide="search-x" class="h-8 w-8 text-gray-300 mb-2"></i>
-                    <h3 class="text-xs sm:text-sm font-bold text-gray-600">조회된 데이터가 없습니다.</h3>
+
+                <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <i data-lucide="search-x" class="h-8 w-8 text-gray-300"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-700">조회된 레코드가 없습니다.</h3>
+                    <p class="text-xs text-gray-400 mt-1">다른 검색어를 입력하거나 새 데이터를 등록해주세요.</p>
                 </div>
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- VIEW 2: 오늘의 일정 -->
+        <!-- ========================================== -->
         <div id="view-schedule" class="hidden fade-in">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
                     <h2 class="text-base sm:text-xl font-bold text-navy-text">오늘의 일정 관리</h2>
                     <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">공정 라인 점검 및 스케줄을 기록합니다.</p>
                 </div>
-                <button onclick="openScheduleModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm">
+                <button onclick="openScheduleModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-xl hover:bg-navy-hover flex items-center justify-center shadow-sm">
                     <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 새 일정 등록
                 </button>
             </div>
@@ -158,6 +208,9 @@
             </div>
         </div>
         
+        <!-- ========================================== -->
+        <!-- VIEW 3: 재고 관리 -->
+        <!-- ========================================== -->
         <div id="view-inventory" class="hidden fade-in">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
@@ -167,9 +220,9 @@
                 <div class="flex flex-col sm:flex-row gap-2">
                     <div class="relative w-full sm:w-64">
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
-                        <input type="text" id="searchInventory" placeholder="품목 검색" class="block w-full pl-9 pr-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:border-navy-main">
+                        <input type="text" id="searchInventory" placeholder="품목 검색" class="block w-full pl-9 pr-3 py-2.5 sm:py-2 text-sm border border-gray-300 rounded-xl bg-white shadow-sm focus:outline-none focus:border-navy-main">
                     </div>
-                    <button onclick="openInventoryModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-lg hover:bg-navy-hover flex items-center justify-center shadow-sm shrink-0">
+                    <button onclick="openInventoryModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-xl hover:bg-navy-hover flex items-center justify-center shadow-sm shrink-0">
                         <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 재고 등록
                     </button>
                 </div>
@@ -178,7 +231,7 @@
             <div class="bg-transparent">
                 <div id="inventoryCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 </div>
-                <div id="emptyInventory" class="hidden py-16 text-center bg-white rounded-xl border border-gray-200 mt-2">
+                <div id="emptyInventory" class="hidden py-16 text-center bg-white rounded-2xl border border-gray-200 mt-2 shadow-sm">
                     <i data-lucide="package-open" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
                     <p class="text-sm font-bold text-navy-text">등록된 재고 데이터가 없습니다.</p>
                 </div>
@@ -187,150 +240,169 @@
 
     </main>
 
+    <!-- ========================================================= -->
+    <!-- 통합 모달 (생산 레코드 등록/수정) - 유연한 입력 필드(Flex) 적용 -->
+    <!-- ========================================================= -->
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
-        <div class="fixed inset-0 z-10 flex items-center justify-center p-2 sm:p-4">
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-2 sm:p-4" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom));">
             <div class="relative w-full max-w-[1000px] bg-white rounded-xl sm:rounded-2xl shadow-2xl flex flex-col max-h-full fade-in">
                 
-                <div class="bg-white px-4 sm:px-6 py-3 sm:py-4 border-b flex justify-between items-center shrink-0 rounded-t-xl">
+                <div class="bg-white px-4 sm:px-6 py-3 sm:py-4 border-b flex justify-between items-center shrink-0 rounded-t-xl sm:rounded-t-2xl">
                     <h3 class="text-sm sm:text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-4 sm:h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 등록</span></h3>
-                    <button onclick="closeModal('productModal')" type="button" class="text-gray-400 p-1"><i data-lucide="x" class="h-5 w-5"></i></button>
+                    <button type="button" onclick="closeModal('productModal')" class="text-gray-400 p-1.5 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button>
                 </div>
                 
-                <div class="px-3 sm:px-6 py-4 overflow-y-auto custom-scrollbar">
-                    <form id="productForm" class="space-y-6">
+                <!-- 폼 바디 (스크롤 영역) -->
+                <div class="px-4 sm:px-6 py-4 overflow-y-auto custom-scrollbar">
+                    <form id="productForm" class="space-y-5">
                         <input type="hidden" id="p-id">
 
+                        <!-- [고정영역] 1. 기본 정보 -->
                         <div>
-                            <div class="flex justify-between items-end border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
-                                <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보 및 계산</h4>
-                                <div class="flex items-center gap-1.5">
+                            <div class="flex justify-between items-center border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
+                                <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 기본 정보</h4>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+                                <div class="flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">일자</label>
+                                    <input type="date" id="p-date" required class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">구분</label>
+                                    <div class="flex gap-1 h-9 sm:h-10">
+                                        <label class="flex-1 min-w-0 cursor-pointer h-full"><input type="radio" name="p-type" value="압출" class="peer sr-only" checked><div class="flex items-center justify-center h-full border border-gray-300 rounded-lg text-[11px] sm:text-xs font-bold text-gray-500 peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main">압출</div></label>
+                                        <label class="flex-1 min-w-0 cursor-pointer h-full"><input type="radio" name="p-type" value="프레스" class="peer sr-only"><div class="flex items-center justify-center h-full border border-gray-300 rounded-lg text-[11px] sm:text-xs font-bold text-gray-500 peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600">프레스</div></label>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">품번</label>
+                                    <div class="flex gap-1 h-9 sm:h-10">
+                                        <input type="text" id="p-code" required placeholder="SIL-X99" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-2 text-xs sm:text-sm uppercase focus:border-navy-main outline-none">
+                                        <button type="button" onclick="toggleSample()" class="px-2 sm:px-3 bg-gray-100 border border-gray-300 rounded-lg text-[10px] sm:text-xs font-bold shrink-0 active:bg-gray-200 transition-colors">샘플</button>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">회사명</label>
+                                    <input type="text" id="p-company" required placeholder="고객사명" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- [고정영역] 2. 규격 및 제원 -->
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-2 sm:mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="ruler" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 규격 및 제원</h4>
+                            <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 sm:gap-4 bg-navy-light/40 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
+                                <div class="col-span-2 lg:col-span-4 flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600 flex justify-between">제품 규격 <span class="font-normal text-gray-400">내/외/길이</span></label>
+                                    <div class="grid grid-cols-3 gap-1 h-9 sm:h-10">
+                                        <input type="text" id="p-spec-in" placeholder="내경" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-1 text-xs text-center outline-none focus:border-navy-main">
+                                        <input type="text" id="p-spec-out" placeholder="외경" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-1 text-xs text-center outline-none focus:border-navy-main">
+                                        <input type="text" id="p-spec-len" placeholder="길이" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-1 text-xs text-center outline-none focus:border-navy-main">
+                                    </div>
+                                </div>
+                                <div class="col-span-2 lg:col-span-4 flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-navy-main mb-1 flex justify-between">실측 측정값 <span class="font-normal text-navy-main/60">내/외/길이</span></label>
+                                    <div class="grid grid-cols-3 gap-1 h-9 sm:h-10">
+                                        <input type="text" id="p-meas-in" placeholder="내경" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
+                                        <input type="text" id="p-meas-out" placeholder="외경" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
+                                        <input type="text" id="p-meas-len" placeholder="길이" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
+                                    </div>
+                                </div>
+                                <div class="col-span-1 lg:col-span-2 flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-blue-600 mb-1">레이저값</label>
+                                    <input type="text" id="p-laser" placeholder="14.9" class="w-full min-w-0 h-9 sm:h-10 border border-blue-200 bg-white rounded-lg px-2 text-xs shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                </div>
+                                <div class="col-span-1 lg:col-span-2 flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">수축률(%)</label>
+                                    <div class="relative h-9 sm:h-10 w-full">
+                                        <input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full min-w-0 h-full border border-gray-300 rounded-lg pl-2 pr-6 text-xs text-right outline-none focus:border-navy-main">
+                                        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. 카테고리 탭 (배합 정보 / 설비 가동 조건) -->
+                        <div class="mt-4 sm:mt-6 border-b border-gray-200">
+                            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                                <button type="button" onclick="switchModalTab('mixture')" id="modal-tab-mixture" class="border-navy-main text-navy-main font-bold whitespace-nowrap py-2 sm:py-3 px-1 border-b-2 text-xs sm:text-sm transition-colors focus:outline-none">
+                                    <i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보
+                                </button>
+                                <button type="button" onclick="switchModalTab('equipment')" id="modal-tab-equipment" class="border-transparent text-gray-500 hover:text-gray-700 font-medium whitespace-nowrap py-2 sm:py-3 px-1 border-b-2 text-xs sm:text-sm transition-colors focus:outline-none">
+                                    <i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- [탭 컨텐츠 1] 배합 정보 (순수 Flex 적용) -->
+                        <div id="modal-pane-mixture" class="block fade-in pt-2">
+                            <div class="flex justify-between items-end mb-2 sm:mb-3">
+                                <span class="text-[10px] sm:text-xs text-gray-500 font-medium">원자재 및 첨가물을 설정합니다.</span>
+                                <div class="flex items-center gap-1.5 shrink-0">
                                     <span class="text-[10px] sm:text-[11px] font-bold text-gray-600">기준 중량(KG)</span>
-                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-14 sm:w-16 h-7 sm:h-8 border border-navy-main bg-blue-50 rounded px-1.5 text-[11px] sm:text-xs text-right font-mono font-bold focus:outline-none text-navy-main">
+                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-16 sm:w-20 min-w-0 h-8 sm:h-9 border border-navy-main bg-blue-50 rounded-lg px-2 text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
                                 </div>
                             </div>
                             
-                            <div class="bg-navy-light/30 p-2.5 sm:p-4 rounded-xl border border-navy-borderLight">
-                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-3">
-                                    
-                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3">
+                            <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4">
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
                                         <div class="flex justify-between items-center mb-1">
                                             <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
-                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-1.5 sm:px-2 py-1 rounded text-gray-600 shadow-sm flex gap-1"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
                                         </div>
                                         <div id="raw-container" class="space-y-1"></div>
                                     </div>
-
-                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3">
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
                                         <div class="flex justify-between items-center mb-1">
-                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">경화제 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g/kg)</span></label>
-                                            <button type="button" onclick="addCureRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-1.5 sm:px-2 py-1 rounded text-gray-600 shadow-sm flex gap-1"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">경화제 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
+                                            <button type="button" onclick="addCureRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
                                         </div>
                                         <div id="cure-container" class="space-y-1"></div>
                                     </div>
-
-                                    <div>
+                                    <div class="flex flex-col min-w-0">
                                         <div class="flex justify-between items-center mb-1">
-                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">첨가제/안료 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g/kg)</span></label>
-                                            <button type="button" onclick="addAddRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-1.5 sm:px-2 py-1 rounded text-gray-600 shadow-sm flex gap-1"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">첨가제/안료 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
+                                            <button type="button" onclick="addAddRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
                                         </div>
                                         <div id="add-container" class="space-y-1"></div>
                                     </div>
                                 </div>
-
                                 <div class="bg-amber-50/80 p-2.5 sm:p-3 rounded-lg border border-amber-200 shadow-sm mt-3 flex items-start gap-1.5">
                                     <i data-lucide="info" class="w-3.5 h-3.5 text-red-600 mt-0.5 shrink-0"></i>
                                     <div id="mixture-summary" class="text-[11px] sm:text-[13px] leading-tight w-full break-keep"></div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div>
-                            <div class="flex justify-between items-center border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
-                                <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 기본 정보</h4>
-                                <button type="button" onclick="toggleMixtureSection()" class="text-[10px] font-bold bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-600 sm:hidden">배합 토글</button>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                                <div><label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">일자</label><input type="date" id="p-date" required class="w-full h-8 sm:h-9 border border-gray-300 rounded px-2 text-xs sm:text-sm focus:border-navy-main outline-none"></div>
-                                <div>
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">구분</label>
-                                    <div class="flex gap-1 h-8 sm:h-9">
-                                        <label class="flex-1 cursor-pointer h-full"><input type="radio" name="p-type" value="압출" class="peer sr-only" checked><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[11px] sm:text-xs font-bold text-gray-500 peer-checked:border-navy-main peer-checked:bg-navy-light peer-checked:text-navy-main">압출</div></label>
-                                        <label class="flex-1 cursor-pointer h-full"><input type="radio" name="p-type" value="프레스" class="peer sr-only"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[11px] sm:text-xs font-bold text-gray-500 peer-checked:border-purple-600 peer-checked:bg-purple-50 peer-checked:text-purple-600">프레스</div></label>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">품번</label>
-                                    <div class="flex gap-1 h-8 sm:h-9">
-                                        <input type="text" id="p-code" required placeholder="SIL-X99" class="w-full h-full border border-gray-300 rounded px-2 text-xs sm:text-sm uppercase focus:border-navy-main outline-none">
-                                        <button type="button" onclick="toggleSample()" class="px-2 bg-gray-100 border border-gray-300 rounded text-[10px] sm:text-xs font-bold shrink-0">샘플</button>
-                                    </div>
-                                </div>
-                                <div><label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">회사명</label><input type="text" id="p-company" required placeholder="고객사명" class="w-full h-8 sm:h-9 border border-gray-300 rounded px-2 text-xs sm:text-sm focus:border-navy-main outline-none"></div>
-                            </div>
-                        </div>
 
-                        <div>
-                            <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-2 sm:mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="ruler" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 규격 및 제원</h4>
-                            <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 sm:gap-4 bg-navy-light/40 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
-                                <div class="col-span-2 lg:col-span-4">
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600 flex justify-between">제품 규격 <span class="font-normal text-gray-400">내/외/길이</span></label>
-                                    <div class="grid grid-cols-3 gap-1 h-8 sm:h-9">
-                                        <input type="text" id="p-spec-in" placeholder="내경" class="w-full h-full border border-gray-300 rounded px-1 text-xs text-center">
-                                        <input type="text" id="p-spec-out" placeholder="외경" class="w-full h-full border border-gray-300 rounded px-1 text-xs text-center">
-                                        <input type="text" id="p-spec-len" placeholder="길이" class="w-full h-full border border-gray-300 rounded px-1 text-xs text-center">
-                                    </div>
-                                </div>
-                                <div class="col-span-2 lg:col-span-4">
-                                    <label class="block text-[10px] sm:text-xs font-bold text-navy-main mb-1 flex justify-between">실측 측정값 <span class="font-normal text-navy-main/60">내/외/길이</span></label>
-                                    <div class="grid grid-cols-3 gap-1 h-8 sm:h-9">
-                                        <input type="text" id="p-meas-in" placeholder="내경" class="w-full h-full border border-navy-borderLight rounded px-1 text-xs text-center shadow-sm">
-                                        <input type="text" id="p-meas-out" placeholder="외경" class="w-full h-full border border-navy-borderLight rounded px-1 text-xs text-center shadow-sm">
-                                        <input type="text" id="p-meas-len" placeholder="길이" class="w-full h-full border border-navy-borderLight rounded px-1 text-xs text-center shadow-sm">
-                                    </div>
-                                </div>
-                                <div class="col-span-1 lg:col-span-2">
-                                    <label class="block text-[10px] sm:text-xs font-bold text-blue-600 mb-1">레이저값</label>
-                                    <input type="text" id="p-laser" placeholder="14.9" class="w-full h-8 sm:h-9 border border-blue-200 rounded px-2 text-xs shadow-sm">
-                                </div>
-                                <div class="col-span-1 lg:col-span-2">
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">수축률(%)</label>
-                                    <div class="relative h-8 sm:h-9">
-                                        <input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full h-full border border-gray-300 rounded pl-2 pr-5 text-xs text-right">
-                                        <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-end border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
-                                <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건</h4>
-                            </div>
+                        <!-- [탭 컨텐츠 2] 설비 가동 조건 -->
+                        <div id="modal-pane-equipment" class="hidden fade-in pt-2">
+                            <span class="block text-[10px] sm:text-xs text-gray-500 font-medium mb-2 sm:mb-3">공정의 설비 파라미터 및 후공정을 설정합니다.</span>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
-                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
+                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">압출기</label>
                                     <div class="grid grid-cols-2 gap-1.5">
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">번호</span><input type="text" id="p-ex-num" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-ex-temp" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col col-span-2"><span class="text-[9px] font-bold text-gray-400 mb-0.5">속도</span><input type="text" id="p-ex-speed" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">번호</span><input type="text" id="p-ex-num" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-ex-temp" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col col-span-2 min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">속도</span><input type="text" id="p-ex-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
+                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">자동화 투입 기계</label>
                                     <div class="grid grid-cols-2 gap-1.5">
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">투입속도</span><input type="text" id="p-fd-speed" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">다량감속</span><input type="text" id="p-fd-decel" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">역회전</span><input type="text" id="p-fd-rev" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">싱글속도</span><input type="text" id="p-fd-single" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">투입속도</span><input type="text" id="p-fd-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">다량감속</span><input type="text" id="p-fd-decel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">역회전</span><input type="text" id="p-fd-rev" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">싱글속도</span><input type="text" id="p-fd-single" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
+                                <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">건조로</label>
                                     <div class="grid grid-cols-2 gap-1.5">
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-cu-temp" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">시간</span><input type="text" id="p-cu-time" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px] outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-cu-temp" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">시간</span><input type="text" id="p-cu-time" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
                                     </div>
                                 </div>
                             </div>
@@ -338,36 +410,36 @@
                             <div class="border-t border-gray-100 pt-3">
                                 <div class="flex justify-between items-center mb-2">
                                     <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="scissors" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1"></i> 후공정</h4>
-                                    <div class="flex gap-1 w-28 sm:w-36 h-7 sm:h-8">
-                                        <label class="flex-1 cursor-pointer h-full"><input type="radio" name="p-work" value="자동커팅" class="peer sr-only" checked onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:text-white">자동커팅</div></label>
-                                        <label class="flex-1 cursor-pointer h-full"><input type="radio" name="p-work" value="롤 방식" class="peer sr-only" onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:text-white">롤방식</div></label>
+                                    <div class="flex gap-1 w-28 sm:w-36 h-8">
+                                        <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-work" value="자동커팅" class="peer sr-only" checked onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">자동커팅</div></label>
+                                        <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-work" value="롤 방식" class="peer sr-only" onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">롤방식</div></label>
                                     </div>
                                 </div>
                                 
                                 <div id="fields-auto" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 block">
                                     <div class="grid grid-cols-3 gap-2">
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">길이</span><input type="text" id="p-auto-len" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px]"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">후진속도</span><input type="text" id="p-auto-speed" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px]"></div>
-                                        <div class="flex flex-col"><span class="text-[9px] font-bold text-gray-400 mb-0.5">누름</span><input type="text" id="p-auto-press" class="h-7 sm:h-8 border border-gray-300 rounded px-1.5 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">길이</span><input type="text" id="p-auto-len" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">후진속도</span><input type="text" id="p-auto-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">누름</span><input type="text" id="p-auto-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
                                     </div>
                                 </div>
-                                <div id="fields-roll" class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 hidden">
-                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
+                                <div id="fields-roll" class="grid grid-cols-1 sm:grid-cols-2 gap-2 hidden">
+                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                         <label class="block text-[10px] font-bold text-gray-700 mb-1">큐텍스 #1</label>
                                         <div class="grid grid-cols-4 gap-1.5">
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll1-jig" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll1-feed" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll1-accel" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll1-press" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll1-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll1-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll1-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll1-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
                                         </div>
                                     </div>
-                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
+                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                         <label class="block text-[10px] font-bold text-gray-700 mb-1">큐텍스 #2</label>
                                         <div class="grid grid-cols-4 gap-1.5">
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll2-jig" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll2-feed" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll2-accel" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll2-press" class="h-7 sm:h-8 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll2-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll2-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll2-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll2-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -376,40 +448,75 @@
 
                     </form>
                 </div>
+                <!-- 하단 버튼 -->
                 <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex justify-end gap-2 border-t border-gray-100 shrink-0 rounded-b-xl sm:rounded-b-2xl">
-                    <button type="button" onclick="closeModal('productModal')" class="flex-1 sm:flex-none px-4 py-2.5 border bg-white rounded-lg text-xs sm:text-sm font-bold text-navy-text">취소</button>
-                    <button type="button" onclick="saveProduct()" class="flex-1 sm:flex-none px-6 py-2.5 bg-navy-main text-white rounded-lg text-xs sm:text-sm font-bold">저장하기</button>
+                    <button type="button" onclick="closeModal('productModal')" class="flex-1 sm:flex-none px-4 py-2.5 border border-gray-300 bg-white rounded-xl text-xs sm:text-sm font-bold text-navy-text hover:bg-gray-100 transition-colors shadow-sm">취소</button>
+                    <button type="button" onclick="saveProduct()" class="flex-1 sm:flex-none px-6 py-2.5 bg-navy-main text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-navy-hover transition-colors shadow-sm">저장하기</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- 일정 모달 -->
     <div id="scheduleModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
         <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
-            <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base text-navy-text" id="scheduleModalTitle">일정 추가</h3><button type="button" onclick="closeModal('scheduleModal')" class="text-gray-400"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-            <div class="p-5"><form id="scheduleForm" class="space-y-4"><input type="hidden" id="s-id"><div><label class="block text-xs font-bold mb-1">작업 내용</label><input type="text" id="s-task" required class="w-full border rounded-lg p-2.5 text-sm"></div><div><label class="block text-xs font-bold mb-1">상태</label><select id="s-status" class="w-full border rounded-lg p-2.5 text-sm"><option value="pending">대기중</option><option value="done">완료</option></select></div></form></div>
-            <div class="bg-gray-50 px-5 py-4 flex gap-2"><button type="button" onclick="closeModal('scheduleModal')" class="flex-1 border bg-white rounded-lg py-2 text-sm font-bold">취소</button><button type="button" onclick="saveSchedule()" class="flex-1 bg-navy-main text-white rounded-lg py-2 text-sm font-bold">저장</button></div>
+            <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base text-navy-text" id="scheduleModalTitle">일정 추가</h3><button type="button" onclick="closeModal('scheduleModal')" class="text-gray-400 p-2 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+            <div class="p-5">
+                <form id="scheduleForm" class="space-y-4">
+                    <input type="hidden" id="s-id">
+                    <div><label class="block text-xs font-bold mb-1.5">작업 내용 <span class="text-navy-red">*</span></label><input type="text" id="s-task" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"></div>
+                    <div><label class="block text-xs font-bold mb-1.5">상태</label><select id="s-status" class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"><option value="pending">대기중</option><option value="done">완료</option></select></div>
+                </form>
+            </div>
+            <div class="bg-gray-50 px-5 py-4 flex gap-3">
+                <button type="button" onclick="closeModal('scheduleModal')" class="flex-1 border border-gray-300 bg-white rounded-xl py-3 text-sm font-bold shadow-sm transition-colors hover:bg-gray-50">취소</button>
+                <button type="button" onclick="saveSchedule()" class="flex-1 bg-navy-main text-white rounded-xl py-3 text-sm font-bold shadow-sm hover:bg-navy-hover transition-colors">저장</button>
+            </div>
         </div>
     </div>
 
+    <!-- 재고 모달 -->
     <div id="inventoryModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('inventoryModal')"></div>
         <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
-            <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base text-navy-text" id="inventoryModalTitle">재고 등록</h3><button type="button" onclick="closeModal('inventoryModal')" class="text-gray-400"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-            <div class="p-5"><form id="inventoryForm" class="space-y-4"><input type="hidden" id="i-id"><div><label class="block text-xs font-bold mb-1">분류</label><select id="i-category" class="w-full border rounded-lg p-2.5 text-sm"><option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option></select></div><div><label class="block text-xs font-bold mb-1">품목명</label><input type="text" id="i-name" required class="w-full border rounded-lg p-2.5 text-sm"></div><div class="flex gap-2"><div class="flex-1"><label class="block text-xs font-bold mb-1">수량</label><input type="number" id="i-qty" required class="w-full border rounded-lg p-2.5 text-sm text-right"></div><div class="w-20"><label class="block text-xs font-bold mb-1">단위</label><select id="i-unit" class="w-full border rounded-lg p-2.5 text-sm"><option>Kg</option><option>EA</option><option>Box</option><option>L</option></select></div></div></form></div>
-            <div class="bg-gray-50 px-5 py-4 flex gap-2"><button type="button" onclick="closeModal('inventoryModal')" class="flex-1 border bg-white rounded-lg py-2 text-sm font-bold">취소</button><button type="button" onclick="saveInventory()" class="flex-1 bg-navy-main text-white rounded-lg py-2 text-sm font-bold">저장</button></div>
+            <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base text-navy-text" id="inventoryModalTitle">재고 등록</h3><button type="button" onclick="closeModal('inventoryModal')" class="text-gray-400 p-2 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+            <div class="p-5">
+                <form id="inventoryForm" class="space-y-4">
+                    <input type="hidden" id="i-id">
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5">분류</label>
+                        <select id="i-category" class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"><option>원자재 (생고무)</option><option>첨가제/경화제</option><option>포장재</option><option>기타 소모품</option></select>
+                    </div>
+                    <div><label class="block text-xs font-bold mb-1.5">품목명 <span class="text-navy-red">*</span></label><input type="text" id="i-name" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"></div>
+                    <div class="flex gap-3">
+                        <div class="flex-1"><label class="block text-xs font-bold mb-1.5">수량 <span class="text-navy-red">*</span></label><input type="number" id="i-qty" required class="w-full border border-gray-300 rounded-lg p-3 text-sm text-right focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"></div>
+                        <div class="w-24"><label class="block text-xs font-bold mb-1.5">단위</label><select id="i-unit" class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"><option>Kg</option><option>EA</option><option>Box</option><option>L</option></select></div>
+                    </div>
+                </form>
+            </div>
+            <div class="bg-gray-50 px-5 py-4 flex gap-3">
+                <button type="button" onclick="closeModal('inventoryModal')" class="flex-1 border border-gray-300 bg-white rounded-xl py-3 text-sm font-bold shadow-sm transition-colors hover:bg-gray-50">취소</button>
+                <button type="button" onclick="saveInventory()" class="flex-1 bg-navy-main text-white rounded-xl py-3 text-sm font-bold shadow-sm transition-colors hover:bg-navy-hover">저장</button>
+            </div>
         </div>
     </div>
 
+    <!-- 삭제 모달 -->
     <div id="deleteModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
-        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-xs overflow-hidden text-center fade-in">
-            <div class="p-6 pt-8"><div class="mx-auto w-12 h-12 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-3"><i data-lucide="alert-circle" class="w-6 h-6"></i></div><h3 class="text-base font-bold text-navy-text">데이터 삭제</h3><p class="text-xs text-gray-500 mt-1">삭제 후 복구할 수 없습니다.</p></div>
-            <div class="bg-gray-50 px-4 py-3 flex gap-2"><button type="button" onclick="closeDeleteModal()" class="flex-1 py-2 bg-white border rounded-lg font-bold text-sm">취소</button><button type="button" id="confirmDeleteBtn" class="flex-1 py-2 bg-navy-red text-white rounded-lg font-bold text-sm">삭제</button></div>
+        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-[320px] overflow-hidden text-center fade-in p-6">
+            <div class="mx-auto w-14 h-14 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-7 h-7"></i></div>
+            <h3 class="text-lg font-bold text-navy-text">데이터 삭제</h3>
+            <p class="text-sm text-gray-500 mt-2 mb-6">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold active:bg-gray-200 transition-colors">취소</button>
+                <button type="button" id="confirmDeleteBtn" class="flex-1 py-3.5 bg-red-500 text-white rounded-xl text-sm font-bold active:bg-red-600 transition-colors">삭제</button>
+            </div>
         </div>
     </div>
 
+    <!-- JS Area -->
     <script>
         document.addEventListener('DOMContentLoaded', () => { 
             lucide.createIcons();
@@ -425,6 +532,13 @@
             const searchInv = document.getElementById('searchInventory');
             if(searchInv) searchInv.addEventListener('input', renderInventory);
             
+            const selectAll = document.getElementById('selectAllFeedCheckbox');
+            if(selectAll) selectAll.addEventListener('change', (e) => {
+                const cbs = document.querySelectorAll('.prod-cb');
+                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); });
+                renderProducts();
+            });
+
             switchTab('product'); 
         });
 
@@ -436,7 +550,7 @@
                 const form = e.target.closest('form');
                 if(!form) return;
                 const focusableElements = 'input:not([type="hidden"]):not([readonly]), select, button:not([type="button"])';
-                const focusable = Array.from(form.querySelectorAll(focusableElements)).filter(el => el.offsetParent !== null && !el.classList.contains('hidden'));
+                const focusable = Array.from(form.querySelectorAll(focusableElements)).filter(el => el.offsetParent !== null && !el.classList.contains('hidden') && !el.closest('.hidden'));
                 const index = focusable.indexOf(e.target);
                 if (index > -1 && index < focusable.length - 1) focusable[index + 1].focus();
             }
@@ -444,21 +558,22 @@
 
         // Mock 데이터
         let dbData = [
-            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', specIn: '15.0', specOut: '20.0', specLen: '50', measIn: '14.8', measOut: '19.8', measLen: '49.5', laser: '14.9', shrinkage: '2.5', baseKg: 20, 
+            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', 
+              specIn: '15.0', specOut: '20.0', specLen: '50', measIn: '14.8', measOut: '19.8', measLen: '49.5', laser: '14.9', shrinkage: '2.5', baseKg: 20, 
               workMethod: '자동커팅', exNum: '1호기', exTemp: '180', exSpeed: '12', cuTemp: '200', cuTime: '4', autoLen: '50', autoSpeed: '15', autoPress: '20', fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30',
               raws: [{type: 'KCC', name: '70U', pct: '100'}], cures: [{type:'백금AB', direct:'', ratio:10}], adds: [{name:'RED', ratio:5}], 
-              mixture: '기본 원자재: <b>KCC 70U [100%]</b> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">백금AB [200g] + RED [100g]</span>' },
-            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', specIn: '10.5', specOut: '15.0', specLen: '100', measIn: '10.3', measOut: '14.9', measLen: '99.0', laser: '10.4', shrinkage: '3.0', baseKg: 20, 
+              mixture: '<span class="text-gray-700 mr-1.5">기본 원자재: <b>KCC 70U [100%]</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">백금AB [200g] + RED [100g]</span>' },
+            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', 
+              specIn: '10.5', specOut: '15.0', specLen: '100', measIn: '10.3', measOut: '14.9', measLen: '99.0', laser: '10.4', shrinkage: '3.0', baseKg: 20, 
               workMethod: '롤 방식', roll1Jig: 'J-01', roll1Feed: '10', roll1Accel: '2', roll1Press: '5', roll2Jig: 'J-02', roll2Feed: '12', roll2Accel: '1', roll2Press: '4', fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-',
               raws: [{type: '어울림', name: 'HC-80', pct: '70'}, {type: '대일소재', name: 'HC-60', pct: '30'}], cures: [{type:'과산화물(일반)', direct:'', ratio:15}], adds: [], 
-              mixture: '기본 원자재: <b>어울림 HC-80 [70%], 대일소재 HC-60 [30%]</b> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">과산화물(일반) [300g]</span>' }
+              mixture: '<span class="text-gray-700 mr-1.5">기본 원자재: <b>어울림 HC-80 [70%], 대일소재 HC-60 [30%]</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">과산화물(일반) [300g]</span>' }
         ];
         let scheduleData = [{ id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' }, { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' }];
         let inventoryData = [{ id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' }];
         
         let currentView = 'product'; let deleteInfo = { type: null, id: null }; let selectedProductIds = new Set();
 
-        // 공통 UI 제어
         function switchTab(view) {
             currentView = view;
             ['product', 'schedule', 'inventory'].forEach(v => {
@@ -477,15 +592,33 @@
             lucide.createIcons();
         }
 
-        const getBadge = (type) => type==='압출' ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-white border text-gray-600 border-gray-300">${type}</span>`;
-        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2 py-0.5 text-[9px] rounded-full font-bold border bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2 py-0.5 text-[9px] rounded-full font-bold border bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2 py-0.5 text-[9px] rounded-full font-bold border bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
+        // --- 생산 모달 내 탭 전환 로직 ---
+        function switchModalTab(tabName) {
+            const tabs = ['mixture', 'equipment'];
+            tabs.forEach(t => {
+                const pane = document.getElementById('modal-pane-' + t);
+                const btn = document.getElementById('modal-tab-' + t);
+                if(t === tabName) {
+                    pane.classList.remove('hidden');
+                    btn.classList.add('border-navy-main', 'text-navy-main', 'font-bold');
+                    btn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
+                } else {
+                    pane.classList.add('hidden');
+                    btn.classList.remove('border-navy-main', 'text-navy-main', 'font-bold');
+                    btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
+                }
+            });
+        }
+
+        const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
+        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
         const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
 
         function toggleSample() {
             const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value;
             ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st;
         }
-        function toggleMixtureSection() { document.getElementById('mixture-section').classList.toggle('hidden'); }
+
         function toggleWorkMethod() {
             const m = document.querySelector('input[name="p-work"]:checked')?.value;
             const autoF = document.getElementById('fields-auto'); const rollF = document.getElementById('fields-roll');
@@ -493,23 +626,23 @@
             else { autoF.classList.add('hidden'); autoF.classList.remove('block'); rollF.classList.remove('hidden'); rollF.classList.add('grid'); }
         }
 
-        // --- 배합 동적 폼 (비율 완벽화) ---
+        // --- 배합 동적 폼 (비율/명칭 칸 너비 Flex 유연하게 자동 조절) ---
         function addRawRow(type = 'KCC', name = '', pct = '', autoCalc = true) {
             const container = document.getElementById('raw-container');
             const row = document.createElement('div');
-            row.className = 'raw-row flex items-center gap-1.5 relative pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0';
+            row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0';
             row.innerHTML = `
-                <select class="raw-type w-[80px] shrink-0 h-[32px] border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main">
+                <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white">
                     <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option>
                     <option value="어울림" ${type==='어울림'?'selected':''}>어울림</option>
                     <option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
                 </select>
-                <input type="text" class="raw-name flex-1 min-w-0 h-[32px] border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none" placeholder="명칭" value="${name}" oninput="calcBatch()">
-                <div class="relative w-[55px] shrink-0 h-[32px]">
-                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded pl-1.5 pr-4 text-[11px] text-right focus:border-navy-main outline-none bg-white" placeholder="%" value="${pct}" oninput="calcBatch()">
+                <input type="text" class="raw-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none bg-white" placeholder="명칭" value="${name}" oninput="calcBatch()">
+                <div class="relative flex-[3] min-w-0 h-9">
+                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-4 text-[11px] sm:text-xs text-right focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${pct}" oninput="calcBatch()">
                     <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
                 </div>
-                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-[32px] w-[32px] flex items-center justify-center bg-red-50 text-red-500 rounded hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
             container.appendChild(row); lucide.createIcons(); 
             if(autoCalc) autoDistributeRawPercents(); calcBatch();
@@ -527,23 +660,23 @@
         function addCureRow(type = '백금AB', direct = '', ratio = '') {
             const container = document.getElementById('cure-container');
             const row = document.createElement('div');
-            row.className = 'cure-row flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0 relative';
+            row.className = 'cure-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0 relative';
             row.innerHTML = `
-                <select class="cure-type w-[80px] shrink-0 h-[32px] border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main" onchange="toggleCureDirect(this)">
+                <select class="cure-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white" onchange="toggleCureDirect(this)">
                     <option value="백금AB" ${type==='백금AB'?'selected':''}>백금AB</option>
                     <option value="과산화물(일반)" ${type==='과산화물(일반)'?'selected':''}>과산화물(일반)</option>
                     <option value="직접입력" ${type==='직접입력'?'selected':''}>직접입력</option>
                 </select>
-                <div class="direct-container flex-1 min-w-0 h-[32px] ${type==='직접입력'?'':'hidden'}">
-                    <input type="text" class="cure-direct w-full h-full border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none" placeholder="이름" value="${direct}" oninput="calcBatch()">
+                <div class="direct-container flex-[4] min-w-0 h-9 ${type==='직접입력'?'':'hidden'}">
+                    <input type="text" class="cure-direct w-full h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none" placeholder="이름" value="${direct}" oninput="calcBatch()">
                 </div>
                 <div class="flex-1 min-w-0 ${type==='직접입력'?'hidden':''}"></div>
-                <div class="flex items-center gap-1 h-[32px] shrink-0">
-                    <input type="number" step="any" class="cure-ratio w-[45px] h-full border border-gray-300 rounded px-1 text-[11px] text-center focus:border-navy-main outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
-                    <span class="text-[10px] font-bold text-gray-400">=</span>
-                    <input type="text" class="cure-total w-[45px] shrink-0 h-full border border-navy-borderLight bg-gray-100 rounded px-1 text-[11px] text-right font-bold text-navy-main outline-none cursor-default" readonly placeholder="0g">
+                <div class="flex items-center gap-1 flex-[4] min-w-0 h-9">
+                    <input type="number" step="any" class="cure-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <span class="text-[10px] font-bold text-gray-400 shrink-0">=</span>
+                    <input type="text" class="cure-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-gray-700 outline-none cursor-default" readonly placeholder="0g">
                 </div>
-                <button type="button" onclick="this.closest('.cure-row').remove(); calcBatch();" class="h-[32px] w-[32px] flex items-center justify-center bg-red-50 text-red-500 rounded hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="this.closest('.cure-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
             container.appendChild(row); lucide.createIcons(); calcBatch();
         }
@@ -551,15 +684,15 @@
         function addAddRow(name = '', ratio = '') {
             const container = document.getElementById('add-container');
             const row = document.createElement('div');
-            row.className = 'add-row flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-200/50 first:border-0 first:pt-0 first:mt-0 relative';
+            row.className = 'add-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0 relative';
             row.innerHTML = `
-                <input type="text" class="add-name w-[80px] flex-1 min-w-0 h-[32px] shrink-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none bg-white" placeholder="명칭(영문)" oninput="this.value = this.value.toUpperCase(); calcBatch();" value="${name}">
-                <div class="flex items-center gap-1 h-[32px] shrink-0">
-                    <input type="number" step="any" class="add-ratio w-[45px] h-full border border-gray-300 rounded px-1 text-[11px] text-center focus:border-navy-main outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
-                    <span class="text-[10px] font-bold text-gray-400">=</span>
-                    <input type="text" class="add-total w-[45px] shrink-0 h-full border border-blue-200 bg-gray-100 rounded px-1 text-[11px] text-right font-bold text-blue-600 outline-none cursor-default" readonly placeholder="0g">
+                <input type="text" class="add-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none bg-white" placeholder="명칭(영문)" oninput="this.value = this.value.toUpperCase(); calcBatch();" value="${name}">
+                <div class="flex items-center gap-1 flex-[4] min-w-0 h-9">
+                    <input type="number" step="any" class="add-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <span class="text-[10px] font-bold text-gray-400 shrink-0">=</span>
+                    <input type="text" class="add-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-blue-600 outline-none cursor-default" readonly placeholder="0g">
                 </div>
-                <button type="button" onclick="this.closest('.add-row').remove(); calcBatch();" class="h-[32px] w-[32px] flex items-center justify-center bg-red-50 text-red-500 rounded hover:bg-red-100 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="this.closest('.add-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
             container.appendChild(row); lucide.createIcons(); calcBatch();
         }
@@ -593,7 +726,7 @@
             sumEl.innerHTML = `<span class="text-gray-700 mr-1.5">기본 원자재: <b>${rawStr}</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">${addStr}</span>`;
         }
 
-        // --- 1. 제품 DB 렌더링 ---
+        // --- 1. 제품 DB (통합 피드 리스트 렌더링) ---
         function renderProducts() {
             const term = document.getElementById('searchProduct')?.value.toLowerCase() || '';
             const filtered = dbData.filter(i => {
@@ -601,8 +734,8 @@
                 return i.itemCode.toLowerCase().includes(term) || specStr.includes(term) || i.company.toLowerCase().includes(term);
             });
             
-            const tbody = document.getElementById('productTableBody'); const cardCon = document.getElementById('productCardContainer'); const empty = document.getElementById('emptyProduct');
-            if(tbody) tbody.innerHTML = ''; if(cardCon) cardCon.innerHTML = '';
+            const feedCon = document.getElementById('productFeedContainer'); const empty = document.getElementById('emptyProduct');
+            if(feedCon) feedCon.innerHTML = '';
             
             if(filtered.length === 0) { if(empty) { empty.classList.remove('hidden'); empty.classList.add('flex'); } } 
             else {
@@ -610,29 +743,60 @@
                 filtered.sort((a,b) => b.id - a.id).forEach(item => {
                     const isChecked = selectedProductIds.has(item.id); const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
                     
-                    if(tbody) {
-                        const trClass = isChecked ? 'checked-row bg-[#E8EFF5]' : 'bg-white';
-                        const tr = document.createElement('tr'); tr.className = `main-row ${trClass} transition-colors cursor-pointer`;
-                        tr.onclick = (e) => { if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && e.target.type !== 'checkbox') { const cb = tr.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } };
-                        tr.innerHTML = `<td class="px-3 py-3 text-center"><input type="checkbox" class="prod-cb w-3.5 h-3.5 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}></td><td class="px-3 py-3">${getBadge(item.type)}</td><td class="px-3 py-3 font-mono text-[11px] text-navy-muted whitespace-nowrap">${item.date}</td><td class="px-3 py-3 font-bold text-[11px] text-navy-text whitespace-nowrap">${item.itemCode}</td><td class="px-3 py-3 text-[11px] text-navy-text whitespace-nowrap">${displaySpec || '-'}</td><td class="px-3 py-3 text-[11px] text-navy-muted whitespace-nowrap">${item.company}</td><td class="px-3 py-3 text-center whitespace-nowrap"><button onclick="editProduct(${item.id}); event.stopPropagation();" class="p-1 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-1 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></td>`;
-                        tbody.appendChild(tr);
-                    }
-                    if(cardCon) {
-                        const activeClass = isChecked ? 'border-navy-main bg-blue-50/20 shadow-md' : 'border-gray-200 bg-white hover:shadow-md';
-                        const card = document.createElement('div'); card.className = `p-3 rounded-xl border cursor-pointer relative ${activeClass}`;
-                        card.onclick = (e) => { if(e.target.tagName !== 'BUTTON' && !e.target.closest('button') && e.target.type !== 'checkbox') { const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } };
-                        card.innerHTML = `<div class="flex justify-between items-start mb-2"><div class="flex items-center gap-2"><div onclick="event.stopPropagation()"><input type="checkbox" class="prod-cb w-3.5 h-3.5 text-navy-main rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}></div>${getBadge(item.type)}<span class="text-[10px] text-gray-400 font-mono">${item.date}</span></div><div class="flex gap-1"><button onclick="editProduct(${item.id}); event.stopPropagation();" class="p-1 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-1 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div><div class="mb-2"><h4 class="text-sm font-black text-navy-text flex items-center gap-1.5">${item.itemCode}<span class="text-[9px] font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border truncate max-w-[100px]">${item.company}</span></h4></div><div class="bg-gray-50 p-2 rounded-lg border border-gray-100 flex items-center gap-1.5"><i data-lucide="ruler" class="w-3.5 h-3.5 text-gray-400"></i><span class="text-[11px] font-bold text-gray-700 font-mono">${displaySpec || '-'}</span></div>`;
-                        cardCon.appendChild(card);
+                    if(feedCon) {
+                        const activeClass = isChecked ? 'border-navy-main bg-blue-50/20 shadow-md ring-1 ring-navy-main' : 'border-gray-200 bg-white hover:shadow-md';
+                        const card = document.createElement('div'); 
+                        card.className = `p-3.5 sm:p-5 rounded-2xl border cursor-pointer relative transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group ${activeClass}`;
+                        
+                        // 카드 영역 클릭 시 체크박스 토글
+                        card.onclick = (e) => { 
+                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox') return; 
+                            const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); 
+                        };
+                        
+                        card.innerHTML = `
+                            <div class="flex items-center gap-3.5 flex-1 min-w-0">
+                                <div class="p-1 shrink-0" onclick="event.stopPropagation()">
+                                    <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
+                                </div>
+                                <div class="flex flex-col gap-1 min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        ${getBadge(item.type)}
+                                        <h4 class="text-sm sm:text-base font-bold text-navy-text truncate">${item.itemCode}</h4>
+                                        <span class="text-[10px] sm:text-xs text-gray-400 font-mono shrink-0">${item.date}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[11px] sm:text-xs text-gray-500 truncate">
+                                        <span class="font-medium truncate max-w-[120px] sm:max-w-[200px] text-gray-600">${item.company}</span>
+                                        <span class="text-gray-300">|</span>
+                                        <i data-lucide="ruler" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0"></i>
+                                        <span class="font-mono text-gray-700 font-bold truncate">${displaySpec || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity justify-end sm:justify-start w-full sm:w-auto">
+                                <button type="button" onclick="editProduct(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors active:bg-gray-200">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl transition-colors active:bg-gray-200">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                        feedCon.appendChild(card);
                     }
                 });
             }
+            
+            // 데이터 총 개수 업데이트
+            const countEl = document.getElementById('totalProductCount');
+            if(countEl) countEl.textContent = filtered.length;
+
             document.querySelectorAll('.prod-cb').forEach(cb => { cb.addEventListener('change', e => { e.target.checked ? selectedProductIds.add(parseInt(e.target.value)) : selectedProductIds.delete(parseInt(e.target.value)); renderProducts(); }); });
-            const allCbs = document.querySelectorAll('input[id^="selectAllCheckbox"]');
-            allCbs.forEach(allCb => {
-                const cbs = document.querySelectorAll('.prod-cb'); allCb.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
-                const nCb = allCb.cloneNode(true); allCb.parentNode.replaceChild(nCb, allCb);
-                nCb.addEventListener('change', (e) => { cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); }); renderProducts(); });
-            });
+            const allCbs = document.getElementById('selectAllFeedCheckbox');
+            if (allCbs) {
+                const cbs = document.querySelectorAll('.prod-cb'); 
+                allCbs.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
+            }
             lucide.createIcons(); updateProductDetails();
         }
 
@@ -643,32 +807,104 @@
             
             container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => {
                 const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); const dMeas = formatSpec(item.measIn, item.measOut, item.measLen);
-                let wHtml = item.workMethod === '자동커팅' ? `<p class="font-mono text-gray-700 text-[9px] mt-0.5">L:${item.autoLen||'-'} / 후:${item.autoSpeed||'-'} / 누:${item.autoPress||'-'}</p>` : `<p class="font-mono text-gray-700 text-[9px] leading-tight mt-0.5">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</p>`;
+                
+                let wHtml = item.workMethod === '자동커팅' 
+                    ? `<div class="bg-white p-2.5 rounded-lg border border-gray-100 mt-1 shadow-sm"><span class="text-gray-400 font-bold block mb-1 text-[10px]"><i data-lucide="scissors-line-dashed" class="w-3 h-3 inline pb-0.5"></i> 자동커팅</span><span class="font-mono text-gray-700 text-[11px] font-bold">L:${item.autoLen||'-'} / 후:${item.autoSpeed||'-'} / 누:${item.autoPress||'-'}</span></div>` 
+                    : `<div class="bg-white p-2.5 rounded-lg border border-gray-100 mt-1 shadow-sm"><span class="text-gray-400 font-bold block mb-1 text-[10px]"><i data-lucide="roller-coaster" class="w-3 h-3 inline pb-0.5"></i> 롤 방식</span><span class="font-mono text-gray-700 text-[10px] leading-tight font-bold">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</span></div>`;
+
                 return `
-                <div class="bg-white p-2.5 sm:p-3 rounded-lg border shadow-sm">
-                    <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-gray-100">
-                        <span class="font-bold text-[11px] sm:text-xs text-navy-text tracking-tight">${item.itemCode}</span>
-                        <span class="text-[9px] sm:text-[10px] text-navy-muted font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">${dSpec || '-'}</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-y-1.5 gap-x-1.5 text-[9px] sm:text-[10px]">
-                        <div class="bg-blue-50/50 p-1.5 rounded"><span class="text-gray-400 block mb-0.5 font-bold">실측 측정값</span><span class="font-bold text-navy-main font-mono">${dMeas || '-'}</span></div>
-                        <div class="bg-blue-50/50 p-1.5 rounded"><span class="text-gray-400 block mb-0.5 font-bold">레이저값</span><span class="font-bold text-blue-700 font-mono">${item.laser || '-'}</span></div>
-                        <div class="col-span-2 bg-amber-50/50 p-1.5 rounded flex flex-col justify-start gap-0.5 border border-amber-100">
-                            <span class="text-gray-500 font-bold">배합 요약 (기준: ${item.baseKg||20}KG)</span>
-                            <span class="leading-tight break-words text-gray-800">${item.mixture || '-'}</span>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all">
+                    <!-- 상단 데코 라인 -->
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
+                    
+                    <!-- 헤더 -->
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 pb-3 border-b border-gray-100 gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-navy-light flex items-center justify-center text-navy-main shrink-0">
+                                <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-black text-sm sm:text-lg text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
+                                <p class="text-xs text-navy-muted font-medium mt-0.5">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-1.5 mt-1.5 pt-1.5 border-t border-navy-borderLight/30 text-[9px] sm:text-[10px]">
-                        <div class="bg-gray-50 p-1 rounded border border-gray-100"><p class="font-bold text-gray-400 mb-0.5">투입/압출 (${item.exNum||'-'})</p><p class="font-mono text-gray-700">T:${item.fdSpeed||'-'} / ${item.exTemp||'-'}℃</p></div>
-                        <div class="bg-gray-50 p-1 rounded border border-gray-100"><p class="font-bold text-gray-400 mb-0.5">건조로/수축</p><p class="font-mono text-gray-700">${item.cuTemp||'-'}℃ / ${item.shrinkage ? item.shrinkage+'%' : '-'}</p></div>
-                        <div class="col-span-2 bg-gray-50 p-1 rounded border border-gray-100"><p class="font-bold text-gray-400">후공정 <span class="font-normal">(${item.workMethod||'-'})</span></p>${wHtml}</div>
+                    
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
+                        <!-- 왼쪽: 규격 및 배합 정보 -->
+                        <div class="space-y-4">
+                            <!-- 규격 & 실측 비교 -->
+                            <div class="bg-blue-50/60 p-3 sm:p-4 rounded-xl border border-blue-100">
+                                <h5 class="text-[11px] sm:text-xs font-bold text-navy-main mb-2.5 flex items-center"><i data-lucide="ruler" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 규격 및 실측</h5>
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-blue-50/50">
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-[11px]">기준 규격</span>
+                                        <span class="font-bold text-gray-700 font-mono text-xs sm:text-sm">${dSpec || '-'}</span>
+                                    </div>
+                                    <i data-lucide="arrow-right-circle" class="w-5 h-5 text-blue-200 shrink-0"></i>
+                                    <div class="flex flex-col text-right">
+                                        <span class="text-navy-main/60 font-bold mb-1 text-[10px] sm:text-[11px]">실측 측정</span>
+                                        <span class="font-black text-navy-main font-mono text-xs sm:text-sm">${dMeas || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 배합 정보 -->
+                            <div class="bg-amber-50/60 p-3 sm:p-4 rounded-xl border border-amber-100">
+                                <h5 class="text-[11px] sm:text-xs font-bold text-amber-700 mb-2.5 flex items-center justify-between">
+                                    <span class="flex items-center"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 배합 정보</span>
+                                    <span class="text-[10px] font-black bg-amber-200/50 text-amber-700 px-2 py-0.5 rounded-md">${item.baseKg||20}KG 기준</span>
+                                </h5>
+                                <div class="bg-white p-3 sm:p-3.5 rounded-lg shadow-sm border border-amber-50 text-xs sm:text-sm text-gray-800 leading-relaxed break-keep">
+                                    ${item.mixture || '배합 정보가 없습니다.'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 오른쪽: 설비 가동 조건 -->
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-200 flex flex-col h-full">
+                            <h5 class="text-[11px] sm:text-xs font-bold text-gray-700 mb-3 flex items-center"><i data-lucide="settings-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 설비 가동 조건</h5>
+                            
+                            <div class="grid grid-cols-2 gap-2.5 sm:gap-3 flex-1 content-start">
+                                <!-- 레이저 / 수축률 -->
+                                <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-1.5 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="scan-line" class="w-3.5 h-3.5"></i> 레이저/수축률</span>
+                                    <span class="font-mono text-gray-800 font-bold text-xs sm:text-sm">${item.laser || '-'} <span class="text-gray-200 mx-1">|</span> ${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
+                                </div>
+                                <!-- 건조로 -->
+                                <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-1.5 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="thermometer" class="w-3.5 h-3.5"></i> 건조로</span>
+                                    <span class="font-mono text-gray-800 font-bold text-xs sm:text-sm">${item.cuTemp||'-'}℃ <span class="text-gray-200 mx-1">|</span> ${item.cuTime||'-'}</span>
+                                </div>
+                                <!-- 압출기 -->
+                                <div class="col-span-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm mt-1">
+                                    <span class="text-gray-500 font-bold mb-2 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="cpu" class="w-3.5 h-3.5"></i> 압출기 및 투입기 설정 <span class="ml-auto text-[9px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-400">${item.exNum||'미지정'}</span></span>
+                                    <div class="grid grid-cols-2 gap-3 mt-1.5 border-t border-gray-50 pt-2.5">
+                                        <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded"><span class="text-[10px] text-gray-400 font-bold">온도/속도</span> <span class="font-mono font-bold text-xs text-navy-main">${item.exTemp||'-'}℃ / ${item.exSpeed||'-'}</span></div>
+                                        <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded"><span class="text-[10px] text-gray-400 font-bold">투입속도</span> <span class="font-mono font-bold text-xs text-navy-main">${item.fdSpeed||'-'}</span></div>
+                                    </div>
+                                </div>
+                                <!-- 후공정 -->
+                                <div class="col-span-2 mt-1">
+                                    ${wHtml}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>`}).join('');
+                </div>`
+            }).join('');
+            lucide.createIcons();
         }
 
         // --- 공통 모달 조작 ---
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function clearSelection() { 
+            selectedProductIds.clear(); 
+            const allCbs = document.getElementById('selectAllFeedCheckbox');
+            if(allCbs) allCbs.checked = false;
+            renderProducts(); 
+        }
 
         // --- 생산 DB 저장/수정 로직 ---
         function openProductModal() {
@@ -676,11 +912,12 @@
             document.getElementById('p-date').value = new Date().toISOString().split('T')[0]; document.getElementById('p-base-kg').value = '20';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
-            document.getElementById('mixture-section').classList.remove('hidden'); // 등록 시 기본 오픈
-            
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
             addRawRow('KCC', '', '', true); addCureRow('백금AB'); addAddRow();
-            toggleWorkMethod(); openModal('productModal');
+            toggleWorkMethod(); 
+            
+            switchModalTab('mixture'); // 모달 열 때 첫번째 탭으로 초기화
+            openModal('productModal');
         }
         
         function saveProduct() {
@@ -734,9 +971,11 @@
             document.getElementById('p-roll1-jig').value = item.roll1Jig || ''; document.getElementById('p-roll1-feed').value = item.roll1Feed || ''; document.getElementById('p-roll1-accel').value = item.roll1Accel || ''; document.getElementById('p-roll1-press').value = item.roll1Press || '';
             document.getElementById('p-roll2-jig').value = item.roll2Jig || ''; document.getElementById('p-roll2-feed').value = item.roll2Feed || ''; document.getElementById('p-roll2-accel').value = item.roll2Accel || ''; document.getElementById('p-roll2-press').value = item.roll2Press || '';
             
-            document.getElementById('mixture-section').classList.remove('hidden'); // 수정 시에도 열려있도록 변경
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
-            toggleWorkMethod(); openModal('productModal'); calcBatch(); 
+            toggleWorkMethod(); 
+            switchModalTab('mixture'); // 수정 시에도 첫번째 탭으로 초기화
+            openModal('productModal'); 
+            calcBatch(); 
         }
 
         // --- 일정 / 재고 / 삭제 모달 로직 ---
@@ -746,10 +985,11 @@
             empty.classList.add('hidden');
             scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
                 const isDone = item.status === 'done'; const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
-                const iconClass = isDone ? 'text-navy-main border-navy-main bg-navy-light/50' : 'text-transparent border-gray-300 bg-white';
+                const iconClass = isDone ? 'text-blue-500 border-blue-500 bg-blue-50' : 'text-transparent border-gray-300 bg-white';
                 const card = document.createElement('div');
-                card.className = 'bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group';
-                card.innerHTML = `<div class="flex items-center gap-3 cursor-pointer flex-1" onclick="toggleScheduleStatus(${item.id})"><div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0"><i data-lucide="check" class="w-3 h-3 sm:w-3.5 sm:h-3.5 ${isDone ? 'text-navy-main' : 'hidden'}"></i></div><span class="text-xs sm:text-sm ${textStyle}">${item.task}</span></div><div class="flex gap-1 shrink-0 ml-2"><button onclick="editSchedule(${item.id})" class="p-1.5 text-gray-400 hover:text-navy-main bg-gray-50 rounded"><i data-lucide="edit-2" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i></button><button onclick="requestDelete('schedule', ${item.id})" class="p-1.5 text-gray-400 hover:text-navy-red bg-gray-50 rounded"><i data-lucide="trash-2" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i></button></div>`;
+                card.className = 'bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group cursor-pointer';
+                card.onclick = () => toggleScheduleStatus(item.id);
+                card.innerHTML = `<div class="flex items-center gap-3.5 flex-1"><div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0 transition-colors"><i data-lucide="check" class="w-4 h-4 ${isDone ? 'text-blue-500' : 'hidden'}"></i></div><span class="text-sm sm:text-base ${textStyle}">${item.task}</span></div><div class="flex gap-1.5 shrink-0 ml-3 relative z-10"><button type="button" onclick="editSchedule(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('schedule', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
@@ -774,8 +1014,8 @@
             filtered.sort((a,b) => b.id - a.id).forEach(item => {
                 const isLow = item.qty < 50; const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
                 const card = document.createElement('div');
-                card.className = 'bg-white p-3.5 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col relative group hover:border-navy-main transition-colors hover:shadow-md';
-                card.innerHTML = `<div class="absolute top-2 right-2 flex gap-1"><button onclick="editInventory(${item.id})" class="p-1 text-gray-400 hover:text-navy-main"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="requestDelete('inventory', ${item.id})" class="p-1 text-gray-400 hover:text-navy-red"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div class="mb-2"><div class="mb-1.5">${getInvBadge(item.category)}</div><h3 class="text-xs sm:text-sm font-bold text-navy-text pr-12 leading-tight">${item.name}</h3><p class="text-[9px] sm:text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 mr-0.5 inline"></i>${item.update}</p></div><div class="mt-auto border-t border-gray-100 pt-2 flex items-end justify-between"><span class="text-[9px] sm:text-[10px] font-bold text-gray-500">잔여 수량</span><div class="text-right"><span class="text-base sm:text-lg font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span><span class="text-[9px] sm:text-[10px] font-bold text-gray-400 ml-0.5">${item.unit}</span></div></div>`;
+                card.className = 'bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col relative transition-all hover:border-navy-main hover:shadow-md';
+                card.innerHTML = `<div class="absolute top-3 right-3 flex gap-1.5 z-10"><button type="button" onclick="editInventory(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-main bg-white hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-xl transition-all"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('inventory', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-red bg-white hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div class="mb-3"><div class="mb-2.5">${getInvBadge(item.category)}</div><h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3><p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p></div><div class="mt-auto border-t border-gray-100 pt-3.5 flex items-end justify-between"><span class="text-[11px] sm:text-xs font-bold text-gray-500">잔여 수량</span><div class="text-right"><span class="text-xl sm:text-2xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span><span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-1">${item.unit}</span></div></div>`;
                 if(container) container.appendChild(card);
             });
             lucide.createIcons();
