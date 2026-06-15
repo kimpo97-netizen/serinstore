@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>실리콘 통합 관리 시스템 | 반응형 UI</title>
+    <title>실리콘 통합 관리 시스템</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -18,7 +18,7 @@
                     fontFamily: {
                         sans: ['"Noto Sans KR"', 'sans-serif'],
                         mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
-                        roboto: ['"Roboto"', 'sans-serif'] /* 숫자 강조용 폰트 추가 */
+                        roboto: ['"Roboto"', 'sans-serif']
                     },
                     colors: {
                         navy: {
@@ -71,6 +71,9 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
+            <div id="loadingStatus" class="hidden items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold mr-2">
+                <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 데이터 연동 중
+            </div>
             <span class="text-xs sm:text-sm text-navy-muted font-medium hidden sm:inline-block">관리자님, 환영합니다.</span>
             <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-navy-light border border-navy-borderLight flex items-center justify-center text-navy-main font-bold text-xs sm:text-sm">
                 A
@@ -81,7 +84,6 @@
     <main class="flex-1 overflow-y-auto p-3 sm:p-6 w-full max-w-[1400px] mx-auto relative pb-20 sm:pb-6">
         
         <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-            <!-- 오늘의 일정 탭 -->
             <button onclick="switchTab('schedule')" id="tab-schedule" class="bg-white p-2.5 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
                 <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-schedule">
                     <i data-lucide="calendar-check" class="h-4 w-4 sm:h-7 sm:w-7"></i>
@@ -92,7 +94,6 @@
                 </div>
             </button>
             
-            <!-- 제품 DB 탭 (기본 활성화) -->
             <button onclick="switchTab('product')" id="tab-product" class="bg-white p-2.5 sm:p-5 shadow-tab-active border-2 border-navy-main rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
                 <div class="p-1.5 sm:p-3 rounded-full bg-navy-light text-navy-main order-first sm:order-last shrink-0" id="icon-bg-product">
                     <i data-lucide="database" class="h-4 w-4 sm:h-7 sm:w-7"></i>
@@ -103,7 +104,6 @@
                 </div>
             </button>
             
-            <!-- 재고 관리 탭 -->
             <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-white p-2.5 sm:p-5 shadow-card border-2 border-transparent rounded-xl flex flex-col sm:flex-row items-center sm:justify-between transition-all hover:shadow-md text-center sm:text-left gap-1.5 sm:gap-0">
                 <div class="p-1.5 sm:p-3 rounded-full bg-gray-50 text-gray-400 order-first sm:order-last shrink-0" id="icon-bg-inventory">
                     <i data-lucide="package" class="h-4 w-4 sm:h-7 sm:w-7"></i>
@@ -115,9 +115,7 @@
             </button>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW 1: 제품 DB (모던 피드 뷰) -->
-        <!-- ========================================== -->
+        <!-- VIEW 1: 제품 DB -->
         <div id="view-product" class="fade-in block">
             <div class="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
@@ -134,7 +132,6 @@
                 </div>
             </div>
 
-            <!-- 선택 상세뷰 패널 -->
             <div id="detailsPanel" class="hidden mb-4 bg-navy-light/50 border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
                 <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-between items-center">
                     <div class="flex items-center">
@@ -144,15 +141,11 @@
                     <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
                 <div class="p-4 sm:p-5">
-                    <div id="detailsCardContainer" class="grid grid-cols-1 gap-4 sm:gap-6">
-                        <!-- JS 렌더링 영역 -->
-                    </div>
+                    <div id="detailsCardContainer" class="grid grid-cols-1 gap-4 sm:gap-6"></div>
                 </div>
             </div>
 
-            <!-- 메인 리스트 컨테이너 -->
             <div class="bg-transparent flex flex-col overflow-hidden">
-                <!-- 컨트롤 바 -->
                 <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <label class="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-gray-200 hover:border-navy-main/50 transition-colors shadow-sm">
@@ -167,23 +160,19 @@
                     </div>
                 </div>
                 
-                <!-- JS 렌더링: 피드형 리스트 -->
-                <div id="productFeedContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-4">
-                </div>
+                <div id="productFeedContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-4"></div>
 
                 <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
                     <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
                         <i data-lucide="search-x" class="h-8 w-8 text-gray-300"></i>
                     </div>
-                    <h3 class="text-sm font-bold text-gray-700">조회된 레코드가 없습니다.</h3>
-                    <p class="text-xs text-gray-400 mt-1">다른 검색어를 입력하거나 새 데이터를 등록해주세요.</p>
+                    <h3 class="text-sm font-bold text-gray-700">조회된 데이터가 없습니다.</h3>
+                    <p class="text-xs text-gray-400 mt-1">상단의 등록 버튼을 눌러 새 데이터를 추가해 보세요.</p>
                 </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
         <!-- VIEW 2: 오늘의 일정 -->
-        <!-- ========================================== -->
         <div id="view-schedule" class="hidden fade-in">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
@@ -200,8 +189,7 @@
                     <h3 class="font-bold text-navy-text text-sm flex items-center"><i data-lucide="list-todo" class="w-4 h-4 mr-1.5 text-navy-main"></i> 작업 리스트</h3>
                     <span id="dateDisplay" class="text-[10px] sm:text-xs font-bold text-navy-muted bg-gray-50 px-2 sm:px-3 py-1 rounded-full border border-gray-200"></span>
                 </div>
-                <div id="scheduleCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                </div>
+                <div id="scheduleCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
                 <div id="emptySchedule" class="hidden py-16 text-center">
                     <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
                     <p class="text-sm font-bold text-navy-text">등록된 일정이 없습니다.</p>
@@ -209,9 +197,7 @@
             </div>
         </div>
         
-        <!-- ========================================== -->
         <!-- VIEW 3: 재고 관리 -->
-        <!-- ========================================== -->
         <div id="view-inventory" class="hidden fade-in">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
@@ -230,8 +216,7 @@
             </div>
 
             <div class="bg-transparent">
-                <div id="inventoryCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                </div>
+                <div id="inventoryCardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"></div>
                 <div id="emptyInventory" class="hidden py-16 text-center bg-white rounded-2xl border border-gray-200 mt-2 shadow-sm">
                     <i data-lucide="package-open" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
                     <p class="text-sm font-bold text-navy-text">등록된 재고 데이터가 없습니다.</p>
@@ -241,9 +226,7 @@
 
     </main>
 
-    <!-- ========================================================= -->
-    <!-- 통합 모달 (생산 레코드 등록/수정) -->
-    <!-- ========================================================= -->
+    <!-- 생산 등록 모달 -->
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-2 sm:p-4" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom));">
@@ -254,26 +237,19 @@
                     <button type="button" onclick="closeModal('productModal')" class="text-gray-400 p-1.5 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button>
                 </div>
                 
-                <!-- 폼 바디 (스크롤 영역) -->
                 <div class="px-4 sm:px-6 py-4 overflow-y-auto custom-scrollbar">
                     <form id="productForm" class="space-y-5">
                         <input type="hidden" id="p-id">
 
-                        <!-- [고정영역] 1. 기본 정보 -->
                         <div>
                             <div class="flex justify-between items-center border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
                                 <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 기본 정보</h4>
                             </div>
-                            
-                            <!-- 사진 업로드 (최대 5장) -->
                             <div class="mb-4 sm:mb-5">
                                 <label class="block text-[10px] sm:text-xs font-bold mb-1.5 text-gray-600">제품 사진 (최대 5장)</label>
-                                <div class="flex flex-wrap gap-2" id="modal-image-grid">
-                                    <!-- JS Rendering -->
-                                </div>
+                                <div class="flex flex-wrap gap-2" id="modal-image-grid"></div>
                                 <input type="file" id="p-image" accept="image/*" multiple class="hidden" onchange="handleMultipleImageUpload(event)">
                             </div>
-
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                                 <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">일자</label>
@@ -287,15 +263,16 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col min-w-0">
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">품번</label>
-                                    <div class="flex gap-1 h-9 sm:h-10">
-                                        <input type="text" id="p-code" required placeholder="SIL-X99" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-2 text-xs sm:text-sm uppercase focus:border-navy-main outline-none">
-                                        <button type="button" onclick="toggleSample()" class="px-2 sm:px-3 bg-gray-100 border border-gray-300 rounded-lg text-[10px] sm:text-xs font-bold shrink-0 active:bg-gray-200 transition-colors">샘플</button>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">회사명</label>
                                     <input type="text" id="p-company" required placeholder="고객사명" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">품번</label>
+                                    <div class="flex gap-1 h-9 sm:h-10">
+                                        <input type="text" id="p-code" required placeholder="예: 세린1234" class="w-full min-w-0 h-full border border-gray-300 rounded-lg px-2 text-xs sm:text-sm uppercase focus:border-navy-main outline-none">
+                                        <button type="button" onclick="generateAutoCode()" class="px-1.5 sm:px-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-[10px] sm:text-[11px] font-bold shrink-0 active:bg-blue-100 transition-colors whitespace-nowrap">자동생성</button>
+                                        <button type="button" onclick="toggleSample()" class="px-1.5 sm:px-2 bg-gray-100 border border-gray-300 rounded-lg text-[10px] sm:text-[11px] font-bold shrink-0 active:bg-gray-200 transition-colors whitespace-nowrap">샘플</button>
+                                    </div>
                                 </div>
                                 <div class="col-span-2 sm:col-span-4 flex flex-col min-w-0 mt-1">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">비고</label>
@@ -304,7 +281,6 @@
                             </div>
                         </div>
 
-                        <!-- [고정영역] 2. 규격 및 제원 -->
                         <div>
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-2 sm:mb-3 border-b border-gray-100 pb-1.5"><i data-lucide="ruler" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 규격 및 제원</h4>
                             <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 sm:gap-4 bg-navy-light/40 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
@@ -334,8 +310,6 @@
                                         <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
                                     </div>
                                 </div>
-                                
-                                <!-- 신규 추가: 제품 1개당 무게 및 생산 시간 -->
                                 <div class="col-span-1 lg:col-span-6 flex flex-col min-w-0 mt-1">
                                     <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">제품 1개당 무게 (g)</label>
                                     <input type="number" step="any" id="p-weight" placeholder="예: 15.5" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 bg-white rounded-lg px-2 text-xs shadow-sm outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main">
@@ -347,76 +321,9 @@
                             </div>
                         </div>
 
-                        <!-- 3. 카테고리 탭 (배합 정보 / 설비 가동 조건) -->
-                        <div class="mt-4 sm:mt-6 border-b border-gray-200">
-                            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                                <button type="button" onclick="switchModalTab('mixture')" id="modal-tab-mixture" class="border-navy-main text-navy-main font-bold whitespace-nowrap py-2 sm:py-3 px-1 border-b-2 text-xs sm:text-sm transition-colors focus:outline-none">
-                                    <i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보
-                                </button>
-                                <button type="button" onclick="switchModalTab('equipment')" id="modal-tab-equipment" class="border-transparent text-gray-500 hover:text-gray-700 font-medium whitespace-nowrap py-2 sm:py-3 px-1 border-b-2 text-xs sm:text-sm transition-colors focus:outline-none">
-                                    <i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건
-                                </button>
-                            </nav>
-                        </div>
-
-                        <!-- [탭 컨텐츠 1] 배합 정보 -->
-                        <div id="modal-pane-mixture" class="block fade-in pt-2">
-                            <div class="mb-3">
-                                <span class="text-[10px] sm:text-xs text-gray-500 font-medium">원자재 및 첨가물을 설정합니다.</span>
-                            </div>
-                            
-                            <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
-                                
-                                <!-- 기준 중량 설정 -->
-                                <div class="flex items-center gap-2 mb-4 bg-white p-2 sm:p-3 rounded-lg border border-blue-100 shadow-sm inline-flex">
-                                    <span class="text-xs font-bold text-navy-main flex items-center"><i data-lucide="scale" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>기준 중량 설정</span>
-                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-20 min-w-0 h-8 border border-navy-main bg-blue-50 rounded text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
-                                    <span class="text-xs font-bold text-gray-500">KG</span>
-                                </div>
-
-                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4">
-                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <div class="flex items-center gap-2">
-                                                <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
-                                                <!-- 비율입력 토글 버튼 -->
-                                                <label class="flex items-center gap-1 cursor-pointer bg-white border border-gray-200 px-1.5 py-0.5 rounded shadow-sm hover:border-navy-main transition-colors">
-                                                    <input type="checkbox" id="use-raw-ratio" class="w-2.5 h-2.5 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" onchange="toggleRawRatio()">
-                                                    <span class="text-[9px] font-bold text-gray-500">비율입력</span>
-                                                </label>
-                                            </div>
-                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
-                                        </div>
-                                        <div id="raw-container" class="space-y-1"></div>
-                                    </div>
-                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">경화제 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
-                                            <button type="button" onclick="addCureRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
-                                        </div>
-                                        <div id="cure-container" class="space-y-1"></div>
-                                    </div>
-                                    <div class="flex flex-col min-w-0">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">첨가제/안료 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
-                                            <button type="button" onclick="addAddRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
-                                        </div>
-                                        <div id="add-container" class="space-y-1"></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 요약 박스 -->
-                                <div class="bg-amber-50/80 p-3 sm:p-4 rounded-lg border border-amber-200 shadow-sm mt-4 flex items-start gap-2">
-                                    <i data-lucide="info" class="w-4 h-4 text-amber-600 mt-1 shrink-0"></i>
-                                    <div id="mixture-summary" class="w-full break-keep"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- [탭 컨텐츠 2] 설비 가동 조건 -->
-                        <div id="modal-pane-equipment" class="hidden fade-in pt-2">
-                            <span class="block text-[10px] sm:text-xs text-gray-500 font-medium mb-2 sm:mb-3">공정의 설비 파라미터 및 후공정을 설정합니다.</span>
-                            
+                        <!-- 설비 가동 조건 섹션 (바깥으로 꺼냄) -->
+                        <div id="modal-pane-equipment" class="mt-5 pt-5 border-t border-gray-200">
+                            <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건 및 후공정</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
                                 <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">압출기</label>
@@ -488,7 +395,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- 수동커팅 전용 입력 필드 -->
                                 <div id="fields-manual" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 hidden">
                                     <div class="grid grid-cols-2 gap-2 sm:gap-4">
                                         <div class="flex flex-col min-w-0">
@@ -506,6 +412,53 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 배합 정보 섹션 (설비 가동 조건 아래로 배치, 탭 제거) -->
+                        <div id="modal-pane-mixture" class="mt-5 pt-5 border-t border-gray-200">
+                            <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보</h4>
+                            <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
+                                <div class="flex items-center gap-2 mb-4 bg-white p-2 sm:p-3 rounded-lg border border-blue-100 shadow-sm inline-flex">
+                                    <span class="text-xs font-bold text-navy-main flex items-center"><i data-lucide="scale" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>기준 중량 설정</span>
+                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-20 min-w-0 h-8 border border-navy-main bg-blue-50 rounded text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
+                                    <span class="text-xs font-bold text-gray-500">KG</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4">
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <div class="flex items-center gap-2">
+                                                <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
+                                                <label class="flex items-center gap-1 cursor-pointer bg-white border border-gray-200 px-1.5 py-0.5 rounded shadow-sm hover:border-navy-main transition-colors">
+                                                    <input type="checkbox" id="use-raw-ratio" class="w-2.5 h-2.5 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" onchange="toggleRawRatio()">
+                                                    <span class="text-[9px] font-bold text-gray-500">비율입력</span>
+                                                </label>
+                                            </div>
+                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="raw-container" class="space-y-1"></div>
+                                    </div>
+                                    <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">경화제 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
+                                            <button type="button" onclick="addCureRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="cure-container" class="space-y-1"></div>
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="text-[11px] sm:text-xs font-bold text-gray-700">첨가제/안료 <span class="text-[9px] font-normal text-gray-400 ml-0.5">(g 자동계산)</span></label>
+                                            <button type="button" onclick="addAddRow()" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                        </div>
+                                        <div id="add-container" class="space-y-1"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-amber-50/80 p-3 sm:p-4 rounded-lg border border-amber-200 shadow-sm mt-4 flex items-start gap-2">
+                                    <i data-lucide="info" class="w-4 h-4 text-amber-600 mt-1 shrink-0"></i>
+                                    <div id="mixture-summary" class="w-full break-keep"></div>
                                 </div>
                             </div>
                         </div>
@@ -591,63 +544,138 @@
 
     <!-- JS Area -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => { 
-            lucide.createIcons();
-            const dateEl = document.getElementById('dateDisplay');
-            if(dateEl) {
-                const today = new Date();
-                dateEl.textContent = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+        // ==========================================
+        // Google Sheets 연동 설정
+        // ==========================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbznx87zOrrtOTxMwWkv6cy-oObur85_Rf0BhkE8nbnPaSSjnh6D75jc3sKZ_nD03Oeu/exec"; 
+
+        async function sendDataToGoogleSheets(action, payload) {
+            if (!GAS_URL) return;
+            try {
+                // CORS preflight를 발생시키지 않도록 text/plain Content-Type으로 구글 서버에 안전하게 POST 전송합니다.
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: action, data: payload })
+                }).catch(e => console.warn("백그라운드 전송 지연 (보안/네트워크): 로컬 데이터는 안전하게 보존되었습니다."));
+            } catch (error) { console.warn("Google Sheets 전송 에러:", error); }
+        }
+
+        // ==========================================
+        // 안전하게 로컬 스토리지에 저장하는 헬퍼 함수 (Quota 제한 에러 방지)
+        // ==========================================
+        function safeSetLocalStorage(key, dataObj, isProduct = false) {
+            try {
+                localStorage.setItem(key, JSON.stringify(dataObj));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    if (isProduct) {
+                        console.warn("로컬 스토리지 용량 초과: 이미지 데이터를 제외하고 백업을 시도합니다.");
+                        // 이미지 데이터를 빈 배열로 치환하여 저장 시도
+                        const strippedDbData = dataObj.map(item => ({...item, images: []}));
+                        try {
+                            localStorage.setItem(key, JSON.stringify(strippedDbData));
+                        } catch (err) {
+                            console.error("이미지 제외 후에도 로컬 저장 실패:", err);
+                        }
+                    } else {
+                        console.error("로컬 스토리지 용량 초과:", e);
+                    }
+                } else {
+                    console.error("로컬 저장 실패:", e);
+                }
+            }
+        }
+
+        // ==========================================
+        // 전역 데이터
+        // ==========================================
+        let dbData = [];
+        let scheduleData = [];
+        let inventoryData = [];
+
+        // 로컬 브라우저 저장소(LocalStorage)에서 데이터를 먼저 가져오는 하이브리드 로직 (초기 로딩 초고속 및 오프라인 보존)
+        function loadLocalData() {
+            try {
+                dbData = JSON.parse(localStorage.getItem('silicon_dbData')) || [];
+                scheduleData = JSON.parse(localStorage.getItem('silicon_scheduleData')) || [];
+                inventoryData = JSON.parse(localStorage.getItem('silicon_inventoryData')) || [];
+                
+                // 데이터 배합 정보 등 렌더링용 HTML 텍스트 생성
+                dbData.forEach(item => formatMixtureHTML(item));
+            } catch (e) {
+                console.error("로컬 데이터 로드 실패:", e);
+            }
+        }
+
+        // 구글 시트 웹앱 데이터 연동 및 로컬 데이터 업데이트
+        async function loadDataFromGoogleSheets() {
+            if (!GAS_URL) return;
+            const loadingStatus = document.getElementById('loadingStatus');
+            if (loadingStatus) {
+                loadingStatus.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 구글 시트 동기화 중`;
+                loadingStatus.className = 'flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold mr-2';
+                loadingStatus.classList.remove('hidden');
+                lucide.createIcons();
             }
             
-            const searchProd = document.getElementById('searchProduct');
-            if(searchProd) searchProd.addEventListener('input', renderProducts);
-            
-            const searchInv = document.getElementById('searchInventory');
-            if(searchInv) searchInv.addEventListener('input', renderInventory);
-            
-            const selectAll = document.getElementById('selectAllFeedCheckbox');
-            if(selectAll) selectAll.addEventListener('change', (e) => {
-                const cbs = document.querySelectorAll('.prod-cb');
-                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); });
-                renderProducts();
-            });
-
-            switchTab('product'); 
-        });
-
-        // 엔터키 폼 이동
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                if(e.target.tagName === 'TEXTAREA' || e.target.type === 'button' || e.target.type === 'submit') return;
-                e.preventDefault();
-                const form = e.target.closest('form');
-                if(!form) return;
-                const focusableElements = 'input:not([type="hidden"]):not([readonly]), select, button:not([type="button"])';
-                const focusable = Array.from(form.querySelectorAll(focusableElements)).filter(el => el.offsetParent !== null && !el.classList.contains('hidden') && !el.closest('.hidden'));
-                const index = focusable.indexOf(e.target);
-                if (index > -1 && index < focusable.length - 1) focusable[index + 1].focus();
+            try {
+                // 브라우저 캐싱과 Redirect 관련 오류를 근본적으로 차단하기 위해 순수 GET 방식으로 요청
+                // 단, Google Apps Script 서버가 배포될 때 접근 권한이 "모든 사용자(Anyone)"로 되어있어야 완벽히 작동합니다.
+                const fetchUrl = GAS_URL + "?t=" + new Date().getTime();
+                
+                const response = await fetch(fetchUrl);
+                
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                
+                const data = await response.json();
+                let hasUpdates = false;
+                
+                if(data.products && Array.isArray(data.products)) {
+                    dbData = data.products;
+                    safeSetLocalStorage('silicon_dbData', dbData, true);
+                    hasUpdates = true;
+                }
+                if(data.schedules && Array.isArray(data.schedules)) {
+                    scheduleData = data.schedules;
+                    safeSetLocalStorage('silicon_scheduleData', scheduleData);
+                    hasUpdates = true;
+                }
+                if(data.inventories && Array.isArray(data.inventories)) {
+                    inventoryData = data.inventories;
+                    safeSetLocalStorage('silicon_inventoryData', inventoryData);
+                    hasUpdates = true;
+                }
+                
+                if (hasUpdates) {
+                    dbData.forEach(item => formatMixtureHTML(item));
+                    switchTab(currentView); // 동기화 받은 최신 데이터로 화면 갱신
+                }
+                
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = `<i data-lucide="check-circle" class="w-3 h-3"></i> 연동 완료`;
+                    loadingStatus.className = 'flex items-center gap-2 bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold mr-2';
+                    lucide.createIcons();
+                    setTimeout(() => loadingStatus.classList.add('hidden'), 3000);
+                }
+            } catch (error) {
+                // 불필요한 콘솔 오류를 경고(warn)로 낮추어 화면상 방해를 방지합니다.
+                console.warn("구글 시트 연동 지연 (앱스 스크립트 '새 배포' 필요):", error.message || error);
+                if (loadingStatus) {
+                    // 구글 연동 오류나 오프라인 모드 시에도 로컬에 완벽히 보관된 데이터로 원활한 실행 지원
+                    loadingStatus.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 text-amber-600"></i> <span class="text-amber-700 font-bold tracking-tight">로컬 저장 모드</span>`;
+                    loadingStatus.className = 'flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[11px] font-bold mr-2 border border-amber-200';
+                    lucide.createIcons();
+                }
             }
-        });
+        }
 
-        // 사진 상태 관리 배열
-        let tempImages = [];
+        // 배합 텍스트 HTML 포맷팅 헬퍼 함수
+        function formatMixtureHTML(item) {
+            if (!item.raws) item.raws = [];
+            if (!item.cures) item.cures = [];
+            if (!item.adds) item.adds = [];
 
-        // Mock 데이터
-        let dbData = [
-            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', images: [],
-              specIn: '15.0', specOut: '20.0', specLen: '50', measIn: '14.8', measOut: '19.8', measLen: '', laser: '14.9', shrinkage: '2.5', weight: '15.5', prodTime: '1.5초', baseKg: 20, useRawRatio: false,
-              workMethod: '자동커팅', exNum: '1번', exTemp: '180', exSpeed: '12', cuTemp: '200', cuTime: '4', autoHotLen: '52', autoLen: '50', autoSpeed: '15', autoPress: '20', fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30', manualLen: '', manualDry: '건조 전', remarks: '',
-              raws: [{type: 'KCC', name: '70U', pct: ''}], cures: [{type:'일반', direct:'', ratio:10}], adds: [{name:'RED', ratio:5}], 
-              mixture: '' },
-            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', images: [],
-              specIn: '10.5', specOut: '15.0', specLen: '100', measIn: '10.3', measOut: '14.9', measLen: '', laser: '10.4', shrinkage: '3.0', weight: '45.0', prodTime: '1분 20초', baseKg: 20, useRawRatio: false,
-              workMethod: '수동커팅', exNum: '2번', exTemp: '', exSpeed: '', cuTemp: '', cuTime: '', roll1Jig: '', roll1Feed: '', roll1Accel: '', roll1Press: '', roll2Jig: '', roll2Feed: '', roll2Accel: '', roll2Press: '', fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-', manualLen: '100', manualDry: '건조 후', remarks: '',
-              raws: [{type: '어울림', name: 'HC-80', pct: ''}, {type: '대일소재', name: 'HC-60', pct: ''}], cures: [{type:'일반', direct:'', ratio:15}], adds: [], 
-              mixture: '' }
-        ];
-        
-        // 초기 렌더링을 위해 초기 데이터에 대해서도 mixture 문자열을 한 번씩 갱신합니다.
-        dbData.forEach(item => {
             let rawItems = [];
             item.raws.forEach(r => {
                 let fN = r.name ? `${r.type} ${r.name}` : r.type;
@@ -678,11 +706,49 @@
                         <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
                     </div>
                 </div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { 
+            lucide.createIcons();
+            const dateEl = document.getElementById('dateDisplay');
+            if(dateEl) {
+                const today = new Date();
+                dateEl.textContent = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+            }
+            
+            const searchProd = document.getElementById('searchProduct');
+            if(searchProd) searchProd.addEventListener('input', renderProducts);
+            
+            const searchInv = document.getElementById('searchInventory');
+            if(searchInv) searchInv.addEventListener('input', renderInventory);
+            
+            const selectAll = document.getElementById('selectAllFeedCheckbox');
+            if(selectAll) selectAll.addEventListener('change', (e) => {
+                const cbs = document.querySelectorAll('.prod-cb');
+                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); });
+                renderProducts();
+            });
+
+            loadLocalData(); // 1단계: 로컬 스토리지를 읽어 즉시 로딩 (화면 깜빡임 및 빈페이지 방지)
+            switchTab('product'); 
+            loadDataFromGoogleSheets(); // 2단계: 백그라운드에서 실시간으로 구글 시트 원본 동기화
         });
 
-        let scheduleData = [{ id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' }, { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' }];
-        let inventoryData = [{ id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' }];
-        
+        // 엔터키 폼 이동
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if(e.target.tagName === 'TEXTAREA' || e.target.type === 'button' || e.target.type === 'submit') return;
+                e.preventDefault();
+                const form = e.target.closest('form');
+                if(!form) return;
+                const focusableElements = 'input:not([type="hidden"]):not([readonly]), select, button:not([type="button"])';
+                const focusable = Array.from(form.querySelectorAll(focusableElements)).filter(el => el.offsetParent !== null && !el.classList.contains('hidden') && !el.closest('.hidden'));
+                const index = focusable.indexOf(e.target);
+                if (index > -1 && index < focusable.length - 1) focusable[index + 1].focus();
+            }
+        });
+
+        let tempImages = [];
         let currentView = 'product'; let deleteInfo = { type: null, id: null }; let selectedProductIds = new Set();
 
         function switchTab(view) {
@@ -703,77 +769,72 @@
             lucide.createIcons();
         }
 
-        // --- 생산 모달 내 탭 전환 로직 ---
-        function switchModalTab(tabName) {
-            const tabs = ['mixture', 'equipment'];
-            tabs.forEach(t => {
-                const pane = document.getElementById('modal-pane-' + t);
-                const btn = document.getElementById('modal-tab-' + t);
-                if(t === tabName) {
-                    pane.classList.remove('hidden');
-                    btn.classList.add('border-navy-main', 'text-navy-main', 'font-bold');
-                    btn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
-                } else {
-                    pane.classList.add('hidden');
-                    btn.classList.remove('border-navy-main', 'text-navy-main', 'font-bold');
-                    btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
-                }
-            });
-        }
-
-        // --- 다중 사진 업로드 핸들러 ---
+        // 이미지를 압축 및 리사이징하여 로컬 스토리지 한도를 절약합니다.
         function handleMultipleImageUpload(event) {
             const files = Array.from(event.target.files);
             if (!files.length) return;
-
             const remainingSlots = 5 - tempImages.length;
             const filesToProcess = files.slice(0, remainingSlots);
-
             let loadedCount = 0;
+            
             filesToProcess.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    tempImages.push(e.target.result);
-                    loadedCount++;
-                    if (loadedCount === filesToProcess.length) {
-                        renderModalImages();
-                    }
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 최대 해상도 800px로 리사이징
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // JPEG 형식으로 압축 (용량 크게 감소)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        tempImages.push(dataUrl);
+                        
+                        loadedCount++;
+                        if (loadedCount === filesToProcess.length) renderModalImages();
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
-            event.target.value = ''; // Reset file input
+            event.target.value = ''; 
         }
 
         function renderModalImages() {
             const grid = document.getElementById('modal-image-grid');
             let html = '';
             tempImages.forEach((img, idx) => {
-                html += `
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 shadow-sm relative group overflow-hidden shrink-0">
-                    <img src="${img}" class="w-full h-full object-cover">
-                    <button type="button" onclick="removeTempImage(${idx})" class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                </div>
-                `;
+                html += `<div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 shadow-sm relative group overflow-hidden shrink-0"><img src="${img}" class="w-full h-full object-cover"><button type="button" onclick="removeTempImage(${idx})" class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;
             });
-            
             if (tempImages.length < 5) {
-                html += `
-                <div onclick="document.getElementById('p-image').click()" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-navy-main hover:bg-navy-light transition-colors group shrink-0">
-                    <div class="text-center flex flex-col items-center text-gray-400 group-hover:text-navy-main transition-colors">
-                        <i data-lucide="camera" class="w-5 h-5 mb-0.5"></i>
-                        <span class="text-[9px] font-bold"><span>${tempImages.length}</span>/5</span>
-                    </div>
-                </div>
-                `;
+                html += `<div onclick="document.getElementById('p-image').click()" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-navy-main hover:bg-navy-light transition-colors group shrink-0"><div class="text-center flex flex-col items-center text-gray-400 group-hover:text-navy-main transition-colors"><i data-lucide="camera" class="w-5 h-5 mb-0.5"></i><span class="text-[9px] font-bold"><span>${tempImages.length}</span>/5</span></div></div>`;
             }
             grid.innerHTML = html;
             lucide.createIcons();
         }
 
-        function removeTempImage(idx) {
-            tempImages.splice(idx, 1);
-            renderModalImages();
-        }
+        function removeTempImage(idx) { tempImages.splice(idx, 1); renderModalImages(); }
 
         function openLargeImage(id, index) {
             const item = dbData.find(i => i.id === id);
@@ -791,6 +852,14 @@
             const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value;
             ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st;
         }
+        
+        // 품번 자동 생성 기능 (회사명 앞 1~2글자 + 랜덤 숫자 4자리)
+        function generateAutoCode() {
+            const companyInput = document.getElementById('p-company').value.trim();
+            const prefix = companyInput ? companyInput.replace(/\s+/g, '').substring(0, 2) : '';
+            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            document.getElementById('p-code').value = prefix + randomNum;
+        }
 
         function toggleWorkMethod() {
             const m = document.querySelector('input[name="p-work"]:checked')?.value;
@@ -807,29 +876,21 @@
             else if (m === '수동커팅') { manualF.classList.remove('hidden'); manualF.classList.add('block'); }
         }
 
-        // 비율 토글 로직
         function toggleRawRatio() {
             const ratioCb = document.getElementById('use-raw-ratio');
             if(!ratioCb) return;
             const isChecked = ratioCb.checked;
             document.querySelectorAll('.raw-ratio-wrapper').forEach(wrapper => {
-                if(isChecked) {
-                    wrapper.classList.remove('hidden');
-                } else {
-                    wrapper.classList.add('hidden');
-                }
+                if(isChecked) { wrapper.classList.remove('hidden'); } else { wrapper.classList.add('hidden'); }
             });
-            calcBatch(); // 비율 표시/숨김에 따라 요약 텍스트 갱신
+            calcBatch(); 
         }
 
-        // --- 배합 동적 폼 (비율/명칭 칸 너비 Flex 유연하게 자동 조절) ---
         function addRawRow(type = 'KCC', name = '', pct = '', autoCalc = true) {
             const container = document.getElementById('raw-container');
             const row = document.createElement('div');
             row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0';
-            
             const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
-            
             row.innerHTML = `
                 <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white">
                     <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option>
@@ -943,8 +1004,6 @@
             `;
         }
         
-        // --- 생산 계산기 헬퍼 함수 ---
-        // 1. 시간 파싱 (초 단위 변환) - 소수점 완벽 지원
         function parseTimeToSeconds(timeStr) {
             if (!timeStr) return 0;
             let seconds = 0;
@@ -961,13 +1020,11 @@
             return seconds;
         }
 
-        // 2. 초 -> 예쁜 시간 문자열로 포맷팅 (소수점 유지)
         function formatTimeFromSeconds(totalSec) {
             if (totalSec === 0) return '0초';
             const h = Math.floor(totalSec / 3600);
             const m = Math.floor((totalSec % 3600) / 60);
             
-            // 부동소수점 오차 보정을 위해 toFixed 처리 후 parseFloat 적용
             let s = totalSec % 60;
             s = parseFloat(s.toFixed(2));
             
@@ -978,39 +1035,28 @@
             return res.join(' ');
         }
         
-        // 3. 무게 단위 자동 변환 포맷팅 (G -> KG)
         function formatWeightFromGrams(totalGrams) {
             if (totalGrams === 0) return '0G';
-            if (totalGrams >= 1000) {
-                return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG';
-            }
+            if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG';
             return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G';
         }
 
-        // 4. 입력 시 실시간 계산
         function calculateProduction(id) {
             const qtyInput = document.getElementById('calc-qty-' + id);
             const weightEl = document.getElementById('calc-weight-' + id);
             const timeEl = document.getElementById('calc-time-' + id);
-            
             if(!qtyInput || !weightEl || !timeEl) return;
             
             const qty = parseFloat(qtyInput.value) || 0;
             const item = dbData.find(i => i.id === id);
             if(!item) return;
 
-            // 무게 계산
             const unitWeight = parseFloat(item.weight) || 0;
-            const totalWeightGrams = unitWeight * qty;
-            weightEl.textContent = formatWeightFromGrams(totalWeightGrams);
-
-            // 시간 계산
+            weightEl.textContent = formatWeightFromGrams(unitWeight * qty);
             const unitTimeSec = parseTimeToSeconds(item.prodTime);
-            const totalTimeSec = unitTimeSec * qty;
-            timeEl.textContent = formatTimeFromSeconds(totalTimeSec);
+            timeEl.textContent = formatTimeFromSeconds(unitTimeSec * qty);
         }
 
-        // --- 1. 제품 DB (통합 피드 리스트 렌더링) ---
         function renderProducts() {
             const term = document.getElementById('searchProduct')?.value.toLowerCase() || '';
             const filtered = dbData.filter(i => {
@@ -1037,7 +1083,6 @@
                         const card = document.createElement('div'); 
                         card.className = `p-3.5 sm:p-5 rounded-2xl border cursor-pointer relative transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group ${activeClass}`;
                         
-                        // 카드 영역 클릭 시 체크박스 토글
                         card.onclick = (e) => { 
                             if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox' || e.target.tagName === 'INPUT') return; 
                             const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); 
@@ -1079,7 +1124,6 @@
                 });
             }
             
-            // 데이터 총 개수 업데이트
             const countEl = document.getElementById('totalProductCount');
             if(countEl) countEl.textContent = filtered.length;
 
@@ -1099,9 +1143,8 @@
             
             container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => {
                 const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); 
-                const dMeas = formatSpec(item.measIn, item.measOut, ''); // 금형에는 길이(measLen) 제외
+                const dMeas = formatSpec(item.measIn, item.measOut, ''); 
                 
-                // 작업 계산기 기본값 계산 (수량 1개 기준)
                 const unitWeight = parseFloat(item.weight) || 0;
                 const defaultWeightStr = formatWeightFromGrams(unitWeight * 1);
                 const unitTimeSec = parseTimeToSeconds(item.prodTime);
@@ -1146,10 +1189,7 @@
 
                 return `
                 <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all flex flex-col">
-                    <!-- 상단 데코 라인 -->
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
-                    
-                    <!-- 헤더 영역 (사진 포함) -->
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-gray-100 gap-3 shrink-0">
                         <div class="flex items-start sm:items-center gap-4">
                             ${imgHtml}
@@ -1161,9 +1201,8 @@
                     </div>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 flex-1">
-                        <!-- 왼쪽: 규격 및 배합 정보 -->
+                        <!-- Left Column: 스펙 및 설비 가동 조건 (위로 배치) -->
                         <div class="space-y-5 flex flex-col">
-                            <!-- 규격 & 실측 비교 (세로형 변경) -->
                             <div class="bg-blue-50/60 p-4 sm:p-5 rounded-xl border border-blue-100 flex-1 flex flex-col">
                                 <h5 class="text-sm sm:text-base font-bold text-navy-main mb-3 flex items-center shrink-0"><i data-lucide="ruler" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 규격 및 실측</h5>
                                 <div class="flex flex-col items-center justify-center bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-blue-50/50 flex-1 gap-3">
@@ -1178,7 +1217,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 신규 무게/시간 -->
                                 <div class="grid grid-cols-2 gap-3 mt-3">
                                     <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-50/50 flex flex-col items-center text-center">
                                         <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">1개당 무게(g)</span>
@@ -1190,7 +1228,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 작업 계산기 추가 -->
                                 <div class="mt-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 shadow-sm">
                                     <h6 class="text-xs sm:text-sm font-bold text-indigo-800 mb-2 flex items-center gap-1.5"><i data-lucide="calculator" class="w-4 h-4"></i> 작업 계산기</h6>
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-3 bg-white p-2.5 sm:p-3 rounded-lg border border-indigo-100 shadow-sm">
@@ -1212,9 +1249,54 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- 배합 정보 -->
-                            <div class="bg-amber-50/60 p-4 sm:p-5 rounded-xl border border-amber-100 shrink-0">
+
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-xl border border-gray-200 flex flex-col">
+                                <h5 class="text-sm sm:text-base font-bold text-gray-700 mb-4 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 설비 가동 조건</h5>
+                                
+                                <div class="grid grid-cols-2 gap-3 sm:gap-4 content-start">
+                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="scan-line" class="w-4 h-4"></i> 치수(레이저)</span>
+                                        <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.laser || '-'}</span>
+                                    </div>
+                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="minimize" class="w-4 h-4"></i> 수축률</span>
+                                        <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
+                                    </div>
+                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="thermometer" class="w-4 h-4"></i> 건조</span>
+                                        <div class="font-roboto text-gray-800 font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
+                                            <span>${item.cuTemp ? item.cuTemp+'℃' : '-'}</span>
+                                            <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">|</span>
+                                            <span>${item.cuTime ? item.cuTime+'시간' : '-'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm w-full justify-between"><span class="flex items-center gap-1"><i data-lucide="cpu" class="w-4 h-4"></i> 압출기</span> <span class="text-[10px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-400 font-sans">${item.exNum||'미지정'}</span></span>
+                                        <div class="font-roboto text-navy-main font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
+                                            <span>${item.exTemp ? item.exTemp+'℃' : '-'}</span>
+                                            <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">/</span>
+                                            <span>${item.exSpeed ? item.exSpeed+' RPM' : '-'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-2 bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
+                                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="settings" class="w-4 h-4"></i> 자동 투입 기계</span>
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
+                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">투입속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSpeed||'-'}</span></div>
+                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">다량감속</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdDecel||'-'}</span></div>
+                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">역회전</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdRev||'-'}</span></div>
+                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">싱글속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSingle||'-'}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-2">
+                                        ${wHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: 배합 정보 (설비 가동 조건 다음으로 배치) -->
+                        <div class="space-y-5 flex flex-col h-full">
+                            <div class="bg-amber-50/60 p-4 sm:p-5 rounded-xl border border-amber-100 flex-1">
                                 <h5 class="text-sm sm:text-base font-bold text-amber-700 mb-3 flex items-center justify-between">
                                     <span class="flex items-center"><i data-lucide="beaker" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 배합 정보</span>
                                 </h5>
@@ -1236,56 +1318,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- 오른쪽: 설비 가동 조건 -->
-                        <div class="bg-gray-50 p-4 sm:p-5 rounded-xl border border-gray-200 flex flex-col h-full">
-                            <h5 class="text-sm sm:text-base font-bold text-gray-700 mb-4 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 설비 가동 조건</h5>
-                            
-                            <div class="grid grid-cols-2 gap-3 sm:gap-4 flex-1 content-start">
-                                <!-- 치수 -->
-                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="scan-line" class="w-4 h-4"></i> 치수(레이저)</span>
-                                    <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.laser || '-'}</span>
-                                </div>
-                                <!-- 수축률 -->
-                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="minimize" class="w-4 h-4"></i> 수축률</span>
-                                    <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
-                                </div>
-                                <!-- 건조로 (절반 크기) -->
-                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="thermometer" class="w-4 h-4"></i> 건조</span>
-                                    <div class="font-roboto text-gray-800 font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
-                                        <span>${item.cuTemp ? item.cuTemp+'℃' : '-'}</span>
-                                        <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">|</span>
-                                        <span>${item.cuTime ? item.cuTime+'시간' : '-'}</span>
-                                    </div>
-                                </div>
-                                <!-- 압출기 (절반 크기) -->
-                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm w-full justify-between"><span class="flex items-center gap-1"><i data-lucide="cpu" class="w-4 h-4"></i> 압출기</span> <span class="text-[10px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-400 font-sans">${item.exNum||'미지정'}</span></span>
-                                    <div class="font-roboto text-navy-main font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
-                                        <span>${item.exTemp ? item.exTemp+'℃' : '-'}</span>
-                                        <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">/</span>
-                                        <span>${item.exSpeed ? item.exSpeed+' RPM' : '-'}</span>
-                                    </div>
-                                </div>
-                                <!-- 자동 투입 기계 (기존 압출기 자리 대체) -->
-                                <div class="col-span-2 bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
-                                    <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="settings" class="w-4 h-4"></i> 자동 투입 기계</span>
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
-                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">투입속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSpeed||'-'}</span></div>
-                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">다량감속</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdDecel||'-'}</span></div>
-                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">역회전</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdRev||'-'}</span></div>
-                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">싱글속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSingle||'-'}</span></div>
-                                    </div>
-                                </div>
-                                <!-- 후공정 -->
-                                <div class="col-span-2">
-                                    ${wHtml}
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     ${remarksHtml}
                 </div>`
@@ -1293,7 +1325,6 @@
             lucide.createIcons();
         }
 
-        // --- 공통 모달 조작 ---
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function clearSelection() { 
@@ -1303,7 +1334,6 @@
             renderProducts(); 
         }
 
-        // --- 생산 DB 저장/수정 로직 ---
         function openProductModal() {
             document.getElementById('productForm').reset(); document.getElementById('p-id').value = '';
             document.getElementById('p-date').value = new Date().toISOString().split('T')[0]; document.getElementById('p-base-kg').value = '20';
@@ -1311,26 +1341,13 @@
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
-            
-            // 모달을 열 때 체크박스 초기화 (기본값: 언체크)
-            const ratioCb = document.getElementById('use-raw-ratio');
-            if(ratioCb) { ratioCb.checked = false; }
-            
-            // 모달 열 때 압출기 번호 1번 기본, 수동커팅 건조 전 기본
-            const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]');
-            if(exNumRadio) exNumRadio.checked = true;
-            const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]');
-            if(manualDryRadio) manualDryRadio.checked = true;
+            const ratioCb = document.getElementById('use-raw-ratio'); if(ratioCb) ratioCb.checked = false;
+            const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]'); if(exNumRadio) exNumRadio.checked = true;
+            const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]'); if(manualDryRadio) manualDryRadio.checked = true;
             document.getElementById('p-manual-len').value = '';
-            
-            tempImages = []; renderModalImages(); // 사진 미리보기 초기화
-
+            tempImages = []; renderModalImages(); 
             addRawRow('KCC', '', '', true); addCureRow('백금AB'); addAddRow();
-            toggleWorkMethod(); 
-            toggleRawRatio(); // 비율 입력칸 상태 업데이트
-            
-            switchModalTab('mixture'); // 모달 열 때 첫번째 탭으로 초기화
-            openModal('productModal');
+            toggleWorkMethod(); toggleRawRatio(); openModal('productModal');
         }
         
         function saveProduct() {
@@ -1346,20 +1363,15 @@
             const exNumEl = document.querySelector('input[name="p-ex-num"]:checked');
             const manualDryEl = document.querySelector('input[name="p-manual-dry"]:checked');
 
-            // 시간 '초' 자동 삽입 (숫자(소수점 포함)만 있을 경우)
             let prodTimeVal = document.getElementById('p-prod-time').value.trim();
-            if (/^[\d.]+$/.test(prodTimeVal)) {
-                prodTimeVal += '초';
-            }
+            if (/^[\d.]+$/.test(prodTimeVal)) prodTimeVal += '초';
 
             const data = {
                 date: document.getElementById('p-date').value, type: typeEl ? typeEl.value : '압출',
-                itemCode: document.getElementById('p-code').value.trim(), company: document.getElementById('p-company').value,
-                images: [...tempImages], // 다중 이미지 추가
+                itemCode: document.getElementById('p-code').value.trim(), company: document.getElementById('p-company').value, images: [...tempImages], 
                 specIn: document.getElementById('p-spec-in').value, specOut: document.getElementById('p-spec-out').value, specLen: document.getElementById('p-spec-len').value,
                 measIn: document.getElementById('p-meas-in').value, measOut: document.getElementById('p-meas-out').value, measLen: '',
-                laser: document.getElementById('p-laser').value, shrinkage: document.getElementById('p-shrink').value,
-                weight: document.getElementById('p-weight').value, prodTime: prodTimeVal, remarks: document.getElementById('p-remarks').value,
+                laser: document.getElementById('p-laser').value, shrinkage: document.getElementById('p-shrink').value, weight: document.getElementById('p-weight').value, prodTime: prodTimeVal, remarks: document.getElementById('p-remarks').value,
                 baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, useRawRatio: useRawRatio, raws: raws, cures: cures, adds: adds, mixture: document.getElementById('mixture-summary').innerHTML,
                 workMethod: workEl ? workEl.value : '자동커팅',
                 exNum: exNumEl ? exNumEl.value : '1번', exTemp: document.getElementById('p-ex-temp').value, exSpeed: document.getElementById('p-ex-speed').value,
@@ -1371,16 +1383,26 @@
                 manualLen: document.getElementById('p-manual-len').value, manualDry: manualDryEl ? manualDryEl.value : '건조 전'
             };
             
-            if(id) Object.assign(dbData.find(i=>i.id==id), data); else dbData.push({ id: Date.now(), ...data });
+            formatMixtureHTML(data); // 화면 표시용 HTML 업데이트
+
+            if(id) {
+                const foundIndex = dbData.findIndex(i=>i.id==id);
+                if (foundIndex > -1) dbData[foundIndex] = { ...dbData[foundIndex], ...data };
+            } else {
+                dbData.push({ id: Date.now(), ...data }); 
+            }
+            
+            // 로컬 스토리지 보존 및 구글 백그라운드 전송
+            safeSetLocalStorage('silicon_dbData', dbData, true);
+            sendDataToGoogleSheets('saveProduct', { id: id || Date.now(), ...data });
+            
             closeModal('productModal'); renderProducts();
         }
         
         function editProduct(id) {
             const item = dbData.find(i => i.id === id); document.getElementById('p-id').value = item.id;
-            
             const tr = document.querySelector(`input[name="p-type"][value="${item.type}"]`); if(tr) tr.checked = true;
             const wr = document.querySelector(`input[name="p-work"][value="${item.workMethod}"]`); if(wr) wr.checked = true;
-            
             ['date','company'].forEach(k => document.getElementById(`p-${k}`).value = item[k]||''); document.getElementById('p-code').value = item.itemCode;
             document.getElementById('p-spec-in').value = item.specIn || ''; document.getElementById('p-spec-out').value = item.specOut || ''; document.getElementById('p-spec-len').value = item.specLen || '';
             document.getElementById('p-meas-in').value = item.measIn || ''; document.getElementById('p-meas-out').value = item.measOut || ''; 
@@ -1388,21 +1410,14 @@
             document.getElementById('p-weight').value = item.weight || ''; document.getElementById('p-prod-time').value = item.prodTime || '';
             document.getElementById('p-base-kg').value = item.baseKg || 20; document.getElementById('p-remarks').value = item.remarks || '';
             
-            // 기존 데이터의 비율 사용 여부 로드
-            const ratioCb = document.getElementById('use-raw-ratio');
-            if(ratioCb) { ratioCb.checked = item.useRawRatio === true; }
+            const ratioCb = document.getElementById('use-raw-ratio'); if(ratioCb) ratioCb.checked = item.useRawRatio === true;
+            tempImages = item.images && item.images.length > 0 ? [...item.images] : (item.image ? [item.image] : []); renderModalImages();
 
-            // 이미지 정보 로드 (다중 이미지)
-            tempImages = item.images && item.images.length > 0 ? [...item.images] : (item.image ? [item.image] : []);
-            renderModalImages();
-
-            document.getElementById('raw-container').innerHTML = ''; if(item.raws && item.raws.length > 0) { item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); } else { addRawRow('KCC', '', '100', false); }
-            document.getElementById('cure-container').innerHTML = ''; if(item.cures && item.cures.length > 0) { item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); } else { addCureRow('백금AB'); }
-            document.getElementById('add-container').innerHTML = ''; if(item.adds && item.adds.length > 0) { item.adds.forEach(a => addAddRow(a.name, a.ratio)); } else { addAddRow(); }
+            document.getElementById('raw-container').innerHTML = ''; if(item.raws && item.raws.length > 0) item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); else addRawRow('KCC', '', '100', false);
+            document.getElementById('cure-container').innerHTML = ''; if(item.cures && item.cures.length > 0) item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); else addCureRow('백금AB');
+            document.getElementById('add-container').innerHTML = ''; if(item.adds && item.adds.length > 0) item.adds.forEach(a => addAddRow(a.name, a.ratio)); else addAddRow();
             
-            const en = document.querySelector(`input[name="p-ex-num"][value="${item.exNum || '1번'}"]`);
-            if(en) en.checked = true;
-
+            const en = document.querySelector(`input[name="p-ex-num"][value="${item.exNum || '1번'}"]`); if(en) en.checked = true;
             document.getElementById('p-ex-temp').value = item.exTemp || ''; document.getElementById('p-ex-speed').value = item.exSpeed || '';
             document.getElementById('p-cu-temp').value = item.cuTemp || ''; document.getElementById('p-cu-time').value = item.cuTime || '';
             document.getElementById('p-fd-speed').value = item.fdSpeed || ''; document.getElementById('p-fd-decel').value = item.fdDecel || ''; document.getElementById('p-fd-rev').value = item.fdRev || ''; document.getElementById('p-fd-single').value = item.fdSingle || '';
@@ -1411,18 +1426,12 @@
             document.getElementById('p-roll2-jig').value = item.roll2Jig || ''; document.getElementById('p-roll2-feed').value = item.roll2Feed || ''; document.getElementById('p-roll2-accel').value = item.roll2Accel || ''; document.getElementById('p-roll2-press').value = item.roll2Press || '';
             
             document.getElementById('p-manual-len').value = item.manualLen || '';
-            const md = document.querySelector(`input[name="p-manual-dry"][value="${item.manualDry || '건조 전'}"]`);
-            if(md) md.checked = true;
+            const md = document.querySelector(`input[name="p-manual-dry"][value="${item.manualDry || '건조 전'}"]`); if(md) md.checked = true;
 
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
-            toggleWorkMethod(); 
-            toggleRawRatio(); // 비율 입력칸 상태 업데이트
-            switchModalTab('mixture'); // 수정 시에도 첫번째 탭으로 초기화
-            openModal('productModal'); 
-            calcBatch(); 
+            toggleWorkMethod(); toggleRawRatio(); openModal('productModal'); calcBatch(); 
         }
 
-        // --- 일정 / 재고 / 삭제 모달 로직 ---
         function renderSchedule() {
             const container = document.getElementById('scheduleCardContainer'); const empty = document.getElementById('emptySchedule'); container.innerHTML = '';
             if(scheduleData.length === 0) { empty.classList.remove('hidden'); return; }
@@ -1438,14 +1447,36 @@
             });
             lucide.createIcons();
         }
-        function toggleScheduleStatus(id) { const idx = scheduleData.findIndex(i => i.id === id); if(idx > -1) { scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done'; renderSchedule(); } }
+
+        function toggleScheduleStatus(id) { 
+            const idx = scheduleData.findIndex(i => i.id === id); 
+            if(idx > -1) { 
+                scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done'; 
+                safeSetLocalStorage('silicon_scheduleData', scheduleData);
+                sendDataToGoogleSheets('saveSchedule', scheduleData[idx]); renderSchedule(); 
+            } 
+        }
+
         function openScheduleModal() { document.getElementById('scheduleForm').reset(); document.getElementById('s-id').value = ''; document.getElementById('scheduleModalTitle').textContent = '일정 추가'; openModal('scheduleModal'); }
+
         function saveSchedule() {
             const form = document.getElementById('scheduleForm'); if(!form.checkValidity()) return form.reportValidity();
-            const id = document.getElementById('s-id').value; const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
-            if(id) { Object.assign(scheduleData.find(i=>i.id==id), data); } else { scheduleData.push({ id: Date.now(), ...data }); }
+            const id = document.getElementById('s-id').value; 
+            const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
+            
+            if(id) {
+                const foundIndex = scheduleData.findIndex(i=>i.id==id);
+                if (foundIndex > -1) scheduleData[foundIndex] = { ...scheduleData[foundIndex], ...data };
+            } else {
+                scheduleData.push({ id: Date.now(), ...data });
+            }
+            
+            safeSetLocalStorage('silicon_scheduleData', scheduleData);
+            sendDataToGoogleSheets('saveSchedule', { id: id || Date.now(), ...data });
+            
             closeModal('scheduleModal'); renderSchedule();
         }
+
         function editSchedule(id) { const item = scheduleData.find(i => i.id === id); document.getElementById('s-id').value = item.id; document.getElementById('s-task').value = item.task; document.getElementById('s-status').value = item.status; document.getElementById('scheduleModalTitle').textContent = '일정 수정'; openModal('scheduleModal'); }
 
         function renderInventory() {
@@ -1464,21 +1495,50 @@
             });
             lucide.createIcons();
         }
+
         function openInventoryModal() { document.getElementById('inventoryForm').reset(); document.getElementById('i-id').value = ''; document.getElementById('inventoryModalTitle').textContent = '재고 등록'; openModal('inventoryModal'); }
+        
         function saveInventory() {
             const form = document.getElementById('inventoryForm'); if(!form.checkValidity()) return form.reportValidity();
-            const id = document.getElementById('i-id').value; const data = { category: document.getElementById('i-category').value, name: document.getElementById('i-name').value, qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value, update: new Date().toISOString().split('T')[0] };
-            if(id) { Object.assign(inventoryData.find(i=>i.id==id), data); } else { inventoryData.push({ id: Date.now(), ...data }); }
+            const id = document.getElementById('i-id').value; 
+            const data = { category: document.getElementById('i-category').value, name: document.getElementById('i-name').value, qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value, update: new Date().toISOString().split('T')[0] };
+            
+            if(id) {
+                const foundIndex = inventoryData.findIndex(i=>i.id==id);
+                if (foundIndex > -1) inventoryData[foundIndex] = { ...inventoryData[foundIndex], ...data };
+            } else {
+                inventoryData.push({ id: Date.now(), ...data });
+            }
+            
+            safeSetLocalStorage('silicon_inventoryData', inventoryData);
+            sendDataToGoogleSheets('saveInventory', { id: id || Date.now(), ...data });
+            
             closeModal('inventoryModal'); renderInventory();
         }
+
         function editInventory(id) { const item = inventoryData.find(i => i.id === id); document.getElementById('i-id').value = item.id; document.getElementById('i-category').value = item.category; document.getElementById('i-name').value = item.name; document.getElementById('i-qty').value = item.qty; document.getElementById('i-unit').value = item.unit; document.getElementById('inventoryModalTitle').textContent = '재고 수정'; openModal('inventoryModal'); }
 
         function requestDelete(type, id) { deleteInfo = { type, id }; openModal('deleteModal'); }
         function closeDeleteModal() { deleteInfo = { type: null, id: null }; closeModal('deleteModal'); }
+        
         document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-            if(deleteInfo.type === 'product') { dbData = dbData.filter(i => i.id !== deleteInfo.id); selectedProductIds.delete(deleteInfo.id); renderProducts(); }
-            if(deleteInfo.type === 'schedule') { scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); renderSchedule(); }
-            if(deleteInfo.type === 'inventory') { inventoryData = inventoryData.filter(i => i.id !== deleteInfo.id); renderInventory(); }
+            if(deleteInfo.type === 'product') { 
+                dbData = dbData.filter(i => i.id !== deleteInfo.id); 
+                selectedProductIds.delete(deleteInfo.id); 
+                safeSetLocalStorage('silicon_dbData', dbData, true);
+                renderProducts(); 
+            }
+            if(deleteInfo.type === 'schedule') { 
+                scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); 
+                safeSetLocalStorage('silicon_scheduleData', scheduleData);
+                renderSchedule(); 
+            }
+            if(deleteInfo.type === 'inventory') { 
+                inventoryData = inventoryData.filter(i => i.id !== deleteInfo.id); 
+                safeSetLocalStorage('silicon_inventoryData', inventoryData);
+                renderInventory(); 
+            }
+            sendDataToGoogleSheets('delete', { type: deleteInfo.type, id: deleteInfo.id });
             closeDeleteModal();
         });
 
