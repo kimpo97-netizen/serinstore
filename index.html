@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Fonts: Noto Sans KR -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Noto Sans KR (기본 텍스트) & Roboto (숫자/치수용) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -17,7 +17,8 @@
                 extend: {
                     fontFamily: {
                         sans: ['"Noto Sans KR"', 'sans-serif'],
-                        mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace']
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
+                        roboto: ['"Roboto"', 'sans-serif'] /* 숫자 강조용 폰트 추가 */
                     },
                     colors: {
                         navy: {
@@ -143,7 +144,7 @@
                     <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
                 <div class="p-4 sm:p-5">
-                    <div id="detailsCardContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div id="detailsCardContainer" class="grid grid-cols-1 gap-4 sm:gap-6">
                         <!-- JS 렌더링 영역 -->
                     </div>
                 </div>
@@ -241,7 +242,7 @@
     </main>
 
     <!-- ========================================================= -->
-    <!-- 통합 모달 (생산 레코드 등록/수정) - 유연한 입력 필드(Flex) 적용 -->
+    <!-- 통합 모달 (생산 레코드 등록/수정) -->
     <!-- ========================================================= -->
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
@@ -263,6 +264,16 @@
                             <div class="flex justify-between items-center border-b border-gray-100 pb-1.5 mb-2 sm:mb-3">
                                 <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 기본 정보</h4>
                             </div>
+                            
+                            <!-- 사진 업로드 (최대 5장) -->
+                            <div class="mb-4 sm:mb-5">
+                                <label class="block text-[10px] sm:text-xs font-bold mb-1.5 text-gray-600">제품 사진 (최대 5장)</label>
+                                <div class="flex flex-wrap gap-2" id="modal-image-grid">
+                                    <!-- JS Rendering -->
+                                </div>
+                                <input type="file" id="p-image" accept="image/*" multiple class="hidden" onchange="handleMultipleImageUpload(event)">
+                            </div>
+
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                                 <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">일자</label>
@@ -286,6 +297,10 @@
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">회사명</label>
                                     <input type="text" id="p-company" required placeholder="고객사명" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
                                 </div>
+                                <div class="col-span-2 sm:col-span-4 flex flex-col min-w-0 mt-1">
+                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">비고</label>
+                                    <textarea id="p-remarks" rows="2" placeholder="특이사항을 입력하세요" class="w-full min-w-0 border border-gray-300 rounded-lg p-2 text-xs sm:text-sm focus:border-navy-main outline-none resize-y"></textarea>
+                                </div>
                             </div>
                         </div>
 
@@ -302,15 +317,14 @@
                                     </div>
                                 </div>
                                 <div class="col-span-2 lg:col-span-4 flex flex-col min-w-0">
-                                    <label class="block text-[10px] sm:text-xs font-bold text-navy-main mb-1 flex justify-between">실측 측정값 <span class="font-normal text-navy-main/60">내/외/길이</span></label>
-                                    <div class="grid grid-cols-3 gap-1 h-9 sm:h-10">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-navy-main mb-1 flex justify-between">금형 <span class="font-normal text-navy-main/60">내/외</span></label>
+                                    <div class="grid grid-cols-2 gap-1 h-9 sm:h-10">
                                         <input type="text" id="p-meas-in" placeholder="내경" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
                                         <input type="text" id="p-meas-out" placeholder="외경" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
-                                        <input type="text" id="p-meas-len" placeholder="길이" class="w-full min-w-0 h-full border border-navy-borderLight bg-white rounded-lg px-1 text-xs text-center shadow-sm outline-none focus:border-navy-main">
                                     </div>
                                 </div>
                                 <div class="col-span-1 lg:col-span-2 flex flex-col min-w-0">
-                                    <label class="block text-[10px] sm:text-xs font-bold text-blue-600 mb-1">레이저값</label>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-blue-600 mb-1">치수값</label>
                                     <input type="text" id="p-laser" placeholder="14.9" class="w-full min-w-0 h-9 sm:h-10 border border-blue-200 bg-white rounded-lg px-2 text-xs shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                 </div>
                                 <div class="col-span-1 lg:col-span-2 flex flex-col min-w-0">
@@ -319,6 +333,16 @@
                                         <input type="number" id="p-shrink" step="0.1" placeholder="2.5" class="w-full min-w-0 h-full border border-gray-300 rounded-lg pl-2 pr-6 text-xs text-right outline-none focus:border-navy-main">
                                         <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
                                     </div>
+                                </div>
+                                
+                                <!-- 신규 추가: 제품 1개당 무게 및 생산 시간 -->
+                                <div class="col-span-1 lg:col-span-6 flex flex-col min-w-0 mt-1">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">제품 1개당 무게 (g)</label>
+                                    <input type="number" step="any" id="p-weight" placeholder="예: 15.5" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 bg-white rounded-lg px-2 text-xs shadow-sm outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main">
+                                </div>
+                                <div class="col-span-1 lg:col-span-6 flex flex-col min-w-0 mt-1">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">제품 1개당 생산 시간</label>
+                                    <input type="text" id="p-prod-time" placeholder="예: 30 (숫자만 입력 시 '초' 자동추가)" onblur="if(/^[\d.]+$/.test(this.value.trim())) this.value = this.value.trim() + '초';" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 bg-white rounded-lg px-2 text-xs shadow-sm outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main">
                                 </div>
                             </div>
                         </div>
@@ -335,21 +359,32 @@
                             </nav>
                         </div>
 
-                        <!-- [탭 컨텐츠 1] 배합 정보 (순수 Flex 적용) -->
+                        <!-- [탭 컨텐츠 1] 배합 정보 -->
                         <div id="modal-pane-mixture" class="block fade-in pt-2">
-                            <div class="flex justify-between items-end mb-2 sm:mb-3">
+                            <div class="mb-3">
                                 <span class="text-[10px] sm:text-xs text-gray-500 font-medium">원자재 및 첨가물을 설정합니다.</span>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <span class="text-[10px] sm:text-[11px] font-bold text-gray-600">기준 중량(KG)</span>
-                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-16 sm:w-20 min-w-0 h-8 sm:h-9 border border-navy-main bg-blue-50 rounded-lg px-2 text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
-                                </div>
                             </div>
                             
                             <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
+                                
+                                <!-- 기준 중량 설정 (위로 이동됨) -->
+                                <div class="flex items-center gap-2 mb-4 bg-white p-2 sm:p-3 rounded-lg border border-blue-100 shadow-sm inline-flex">
+                                    <span class="text-xs font-bold text-navy-main flex items-center"><i data-lucide="scale" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>기준 중량 설정</span>
+                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-20 min-w-0 h-8 border border-navy-main bg-blue-50 rounded text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
+                                    <span class="text-xs font-bold text-gray-500">KG</span>
+                                </div>
+
                                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4">
                                     <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
                                         <div class="flex justify-between items-center mb-1">
-                                            <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
+                                            <div class="flex items-center gap-2">
+                                                <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
+                                                <!-- 비율입력 토글 버튼 -->
+                                                <label class="flex items-center gap-1 cursor-pointer bg-white border border-gray-200 px-1.5 py-0.5 rounded shadow-sm hover:border-navy-main transition-colors">
+                                                    <input type="checkbox" id="use-raw-ratio" class="w-2.5 h-2.5 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" onchange="toggleRawRatio()">
+                                                    <span class="text-[9px] font-bold text-gray-500">비율입력</span>
+                                                </label>
+                                            </div>
                                             <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
                                         </div>
                                         <div id="raw-container" class="space-y-1"></div>
@@ -384,9 +419,15 @@
                                 <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">압출기</label>
                                     <div class="grid grid-cols-2 gap-1.5">
-                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">번호</span><input type="text" id="p-ex-num" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0 col-span-2">
+                                            <span class="text-[9px] font-bold text-gray-400 mb-0.5">번호</span>
+                                            <div class="flex gap-1 h-8 w-full">
+                                                <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-ex-num" value="1번" class="peer sr-only" checked><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">1번</div></label>
+                                                <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-ex-num" value="2번" class="peer sr-only"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">2번</div></label>
+                                            </div>
+                                        </div>
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-ex-temp" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
-                                        <div class="flex flex-col col-span-2 min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">속도</span><input type="text" id="p-ex-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">속도</span><input type="text" id="p-ex-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
                                     </div>
                                 </div>
                                 <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
@@ -408,17 +449,19 @@
                             </div>
                             
                             <div class="border-t border-gray-100 pt-3">
-                                <div class="flex justify-between items-center mb-2">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
                                     <h4 class="text-xs sm:text-sm font-bold text-navy-main"><i data-lucide="scissors" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1"></i> 후공정</h4>
-                                    <div class="flex gap-1 w-28 sm:w-36 h-8">
+                                    <div class="flex gap-1 h-8 w-full sm:w-[260px] shrink-0">
                                         <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-work" value="자동커팅" class="peer sr-only" checked onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">자동커팅</div></label>
                                         <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-work" value="롤 방식" class="peer sr-only" onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">롤방식</div></label>
+                                        <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-work" value="수동커팅" class="peer sr-only" onchange="toggleWorkMethod()"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] sm:text-[11px] font-bold text-gray-500 peer-checked:bg-navy-main peer-checked:border-navy-main peer-checked:text-white transition-colors bg-white shadow-sm">수동커팅</div></label>
                                     </div>
                                 </div>
                                 
                                 <div id="fields-auto" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 block">
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">길이</span><input type="text" id="p-auto-len" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">커팅길이(뜨거울때)</span><input type="text" id="p-auto-hot-len" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">설정길이</span><input type="text" id="p-auto-len" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">후진속도</span><input type="text" id="p-auto-speed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">누름</span><input type="text" id="p-auto-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
                                     </div>
@@ -443,6 +486,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- 수동커팅 전용 입력 필드 -->
+                                <div id="fields-manual" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 hidden">
+                                    <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="text-[9px] font-bold text-gray-400 mb-0.5">커팅길이</span>
+                                            <div class="flex items-center gap-1.5 h-8 w-full">
+                                                <input type="number" step="any" id="p-manual-len" class="h-full w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none text-right">
+                                                <span class="text-[11px] font-bold text-gray-500 shrink-0">m</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="text-[9px] font-bold text-gray-400 mb-0.5">건조 상태</span>
+                                            <div class="flex gap-1 h-8">
+                                                <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-manual-dry" value="건조 전" class="peer sr-only" checked><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] font-bold text-gray-500 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500 transition-colors bg-white shadow-sm">건조 전</div></label>
+                                                <label class="flex-1 cursor-pointer h-full min-w-0"><input type="radio" name="p-manual-dry" value="건조 후" class="peer sr-only"><div class="flex items-center justify-center h-full border border-gray-300 rounded text-[10px] font-bold text-gray-500 peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500 transition-colors bg-white shadow-sm">건조 후</div></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -454,6 +516,15 @@
                     <button type="button" onclick="saveProduct()" class="flex-1 sm:flex-none px-6 py-2.5 bg-navy-main text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-navy-hover transition-colors shadow-sm">저장하기</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 이미지 크게 보기 모달 -->
+    <div id="imagePreviewModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6">
+        <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" onclick="closeModal('imagePreviewModal')"></div>
+        <div class="relative w-full max-w-4xl max-h-[90vh] flex flex-col items-center justify-center fade-in z-10">
+            <button type="button" onclick="closeModal('imagePreviewModal')" class="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 transition-colors"><i data-lucide="x" class="w-8 h-8"></i></button>
+            <img id="largeImagePreview" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl border-4 border-white/10">
         </div>
     </div>
 
@@ -556,19 +627,57 @@
             }
         });
 
+        // 사진 상태 관리 배열
+        let tempImages = [];
+
         // Mock 데이터
         let dbData = [
-            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', 
-              specIn: '15.0', specOut: '20.0', specLen: '50', measIn: '14.8', measOut: '19.8', measLen: '49.5', laser: '14.9', shrinkage: '2.5', baseKg: 20, 
-              workMethod: '자동커팅', exNum: '1호기', exTemp: '180', exSpeed: '12', cuTemp: '200', cuTime: '4', autoLen: '50', autoSpeed: '15', autoPress: '20', fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30',
-              raws: [{type: 'KCC', name: '70U', pct: '100'}], cures: [{type:'백금AB', direct:'', ratio:10}], adds: [{name:'RED', ratio:5}], 
-              mixture: '<span class="text-gray-700 mr-1.5">기본 원자재: <b>KCC 70U [100%]</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">백금AB [200g] + RED [100g]</span>' },
-            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', 
-              specIn: '10.5', specOut: '15.0', specLen: '100', measIn: '10.3', measOut: '14.9', measLen: '99.0', laser: '10.4', shrinkage: '3.0', baseKg: 20, 
-              workMethod: '롤 방식', roll1Jig: 'J-01', roll1Feed: '10', roll1Accel: '2', roll1Press: '5', roll2Jig: 'J-02', roll2Feed: '12', roll2Accel: '1', roll2Press: '4', fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-',
-              raws: [{type: '어울림', name: 'HC-80', pct: '70'}, {type: '대일소재', name: 'HC-60', pct: '30'}], cures: [{type:'과산화물(일반)', direct:'', ratio:15}], adds: [], 
-              mixture: '<span class="text-gray-700 mr-1.5">기본 원자재: <b>어울림 HC-80 [70%], 대일소재 HC-60 [30%]</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">과산화물(일반) [300g]</span>' }
+            { id: 4, date: '2026-06-11', type: '압출', itemCode: 'SIL-X99 (샘플)', company: '대한정공(주)', images: [],
+              specIn: '15.0', specOut: '20.0', specLen: '50', measIn: '14.8', measOut: '19.8', measLen: '', laser: '14.9', shrinkage: '2.5', weight: '15.5', prodTime: '1.5초', baseKg: 20, useRawRatio: false,
+              workMethod: '자동커팅', exNum: '1번', exTemp: '180', exSpeed: '12', cuTemp: '200', cuTime: '4', autoHotLen: '52', autoLen: '50', autoSpeed: '15', autoPress: '20', fdSpeed: '50', fdDecel: '10', fdRev: '5', fdSingle: '30', manualLen: '', manualDry: '건조 전', remarks: '',
+              raws: [{type: 'KCC', name: '70U', pct: ''}], cures: [{type:'일반', direct:'', ratio:10}], adds: [{name:'RED', ratio:5}], 
+              mixture: '' },
+            { id: 3, date: '2026-06-11', type: '프레스', itemCode: 'SIL-W60', company: '(주)미래건설', images: [],
+              specIn: '10.5', specOut: '15.0', specLen: '100', measIn: '10.3', measOut: '14.9', measLen: '', laser: '10.4', shrinkage: '3.0', weight: '45.0', prodTime: '1분 20초', baseKg: 20, useRawRatio: false,
+              workMethod: '수동커팅', exNum: '2번', exTemp: '', exSpeed: '', cuTemp: '', cuTime: '', roll1Jig: '', roll1Feed: '', roll1Accel: '', roll1Press: '', roll2Jig: '', roll2Feed: '', roll2Accel: '', roll2Press: '', fdSpeed: '-', fdDecel: '-', fdRev: '-', fdSingle: '-', manualLen: '100', manualDry: '건조 후', remarks: '',
+              raws: [{type: '어울림', name: 'HC-80', pct: ''}, {type: '대일소재', name: 'HC-60', pct: ''}], cures: [{type:'일반', direct:'', ratio:15}], adds: [], 
+              mixture: '' }
         ];
+        
+        // 초기 렌더링을 위해 초기 데이터에 대해서도 mixture 문자열을 한 번씩 갱신합니다.
+        dbData.forEach(item => {
+            let rawItems = [];
+            item.raws.forEach(r => {
+                let fN = r.name ? `${r.type} ${r.name}` : r.type;
+                if(fN) rawItems.push((item.useRawRatio === true && r.pct) ? `${fN} ${r.pct}%` : fN);
+            });
+            let sumItems = [];
+            item.cures.forEach(c => {
+                let nm = c.type === '직접입력' ? c.direct : c.type;
+                let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20);
+                if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`);
+            });
+            item.adds.forEach(a => {
+                let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20);
+                if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`);
+            });
+            
+            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨';
+            let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
+            item.mixture = `
+                <div class="flex flex-col gap-1.5 w-full">
+                    <div class="flex items-start gap-2">
+                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span>
+                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span>
+                    </div>
+                    <div class="w-full h-px bg-amber-200/50 my-0.5"></div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span>
+                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
+                    </div>
+                </div>`;
+        });
+
         let scheduleData = [{ id: 1, task: '1호기 실린더 세척 및 온도 체크', status: 'done' }, { id: 2, task: 'SIL-X99 샘플 고객사 발송', status: 'pending' }];
         let inventoryData = [{ id: 1, category: '원자재 (생고무)', name: 'KCC-70U', qty: 450, unit: 'Kg', update: '2026-06-11' }];
         
@@ -610,6 +719,68 @@
             });
         }
 
+        // --- 다중 사진 업로드 핸들러 ---
+        function handleMultipleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+
+            const remainingSlots = 5 - tempImages.length;
+            const filesToProcess = files.slice(0, remainingSlots);
+
+            let loadedCount = 0;
+            filesToProcess.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    tempImages.push(e.target.result);
+                    loadedCount++;
+                    if (loadedCount === filesToProcess.length) {
+                        renderModalImages();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = ''; // Reset file input
+        }
+
+        function renderModalImages() {
+            const grid = document.getElementById('modal-image-grid');
+            let html = '';
+            tempImages.forEach((img, idx) => {
+                html += `
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 shadow-sm relative group overflow-hidden shrink-0">
+                    <img src="${img}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeTempImage(${idx})" class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                </div>
+                `;
+            });
+            
+            if (tempImages.length < 5) {
+                html += `
+                <div onclick="document.getElementById('p-image').click()" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-navy-main hover:bg-navy-light transition-colors group shrink-0">
+                    <div class="text-center flex flex-col items-center text-gray-400 group-hover:text-navy-main transition-colors">
+                        <i data-lucide="camera" class="w-5 h-5 mb-0.5"></i>
+                        <span class="text-[9px] font-bold"><span>${tempImages.length}</span>/5</span>
+                    </div>
+                </div>
+                `;
+            }
+            grid.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function removeTempImage(idx) {
+            tempImages.splice(idx, 1);
+            renderModalImages();
+        }
+
+        function openLargeImage(id, index) {
+            const item = dbData.find(i => i.id === id);
+            if(item && item.images && item.images[index]) {
+                document.getElementById('largeImagePreview').src = item.images[index];
+                openModal('imagePreviewModal');
+            }
+        }
+
         const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
         const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
         const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
@@ -621,9 +792,32 @@
 
         function toggleWorkMethod() {
             const m = document.querySelector('input[name="p-work"]:checked')?.value;
-            const autoF = document.getElementById('fields-auto'); const rollF = document.getElementById('fields-roll');
-            if (m === '자동커팅') { autoF.classList.remove('hidden'); autoF.classList.add('block'); rollF.classList.add('hidden'); rollF.classList.remove('grid'); } 
-            else { autoF.classList.add('hidden'); autoF.classList.remove('block'); rollF.classList.remove('hidden'); rollF.classList.add('grid'); }
+            const autoF = document.getElementById('fields-auto'); 
+            const rollF = document.getElementById('fields-roll');
+            const manualF = document.getElementById('fields-manual');
+            
+            autoF.classList.add('hidden'); autoF.classList.remove('block'); 
+            rollF.classList.add('hidden'); rollF.classList.remove('grid'); 
+            manualF.classList.add('hidden'); manualF.classList.remove('block');
+            
+            if (m === '자동커팅') { autoF.classList.remove('hidden'); autoF.classList.add('block'); } 
+            else if (m === '롤 방식') { rollF.classList.remove('hidden'); rollF.classList.add('grid'); }
+            else if (m === '수동커팅') { manualF.classList.remove('hidden'); manualF.classList.add('block'); }
+        }
+
+        // 비율 토글 로직
+        function toggleRawRatio() {
+            const ratioCb = document.getElementById('use-raw-ratio');
+            if(!ratioCb) return;
+            const isChecked = ratioCb.checked;
+            document.querySelectorAll('.raw-ratio-wrapper').forEach(wrapper => {
+                if(isChecked) {
+                    wrapper.classList.remove('hidden');
+                } else {
+                    wrapper.classList.add('hidden');
+                }
+            });
+            calcBatch(); // 비율 표시/숨김에 따라 요약 텍스트 갱신
         }
 
         // --- 배합 동적 폼 (비율/명칭 칸 너비 Flex 유연하게 자동 조절) ---
@@ -631,6 +825,9 @@
             const container = document.getElementById('raw-container');
             const row = document.createElement('div');
             row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0';
+            
+            const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
+            
             row.innerHTML = `
                 <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white">
                     <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option>
@@ -638,7 +835,7 @@
                     <option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
                 </select>
                 <input type="text" class="raw-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none bg-white" placeholder="명칭" value="${name}" oninput="calcBatch()">
-                <div class="relative flex-[3] min-w-0 h-9">
+                <div class="raw-ratio-wrapper relative flex-[3] min-w-0 h-9 ${useRatio ? '' : 'hidden'}">
                     <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-4 text-[11px] sm:text-xs text-right focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${pct}" oninput="calcBatch()">
                     <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
                 </div>
@@ -664,7 +861,7 @@
             row.innerHTML = `
                 <select class="cure-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white" onchange="toggleCureDirect(this)">
                     <option value="백금AB" ${type==='백금AB'?'selected':''}>백금AB</option>
-                    <option value="과산화물(일반)" ${type==='과산화물(일반)'?'selected':''}>과산화물(일반)</option>
+                    <option value="일반" ${type==='일반'?'selected':''}>일반</option>
                     <option value="직접입력" ${type==='직접입력'?'selected':''}>직접입력</option>
                 </select>
                 <div class="direct-container flex-[4] min-w-0 h-9 ${type==='직접입력'?'':'hidden'}">
@@ -699,11 +896,16 @@
 
         function calcBatch() {
             const baseKg = parseFloat(document.getElementById('p-base-kg').value) || 0;
+            const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
             
             let rawItems = [];
             document.querySelectorAll('.raw-row').forEach(row => {
                 const type = row.querySelector('.raw-type').value; const name = row.querySelector('.raw-name').value.trim(); const pct = row.querySelector('.raw-percent').value;
-                let fN = name ? `${type} ${name}` : type; if(fN) rawItems.push(pct ? `${fN} [${pct}%]` : fN);
+                let fN = name ? `${type} ${name}` : type; 
+                if(fN) {
+                    if (useRatio && pct) rawItems.push(`${fN} ${pct}%`);
+                    else rawItems.push(fN);
+                }
             });
 
             let sumItems = [];
@@ -711,19 +913,99 @@
                 const sel = row.querySelector('.cure-type'); const dir = row.querySelector('.cure-direct'); const rat = parseFloat(row.querySelector('.cure-ratio').value) || 0;
                 let nm = sel.value === '직접입력' ? dir.value.trim() : sel.value; let tot = rat * baseKg;
                 row.querySelector('.cure-total').value = tot > 0 ? Math.round(tot) + 'g' : '0g';
-                if (nm && tot > 0) sumItems.push(`${nm} [${Math.round(tot)}g]`);
+                if (nm && tot > 0) sumItems.push(`${nm} ${Math.round(tot)}g`);
             });
 
             document.querySelectorAll('.add-row').forEach(row => {
                 const ni = row.querySelector('.add-name'); const rat = parseFloat(row.querySelector('.add-ratio').value) || 0;
                 let nm = ni.value.trim(); let tot = rat * baseKg;
                 row.querySelector('.add-total').value = tot > 0 ? Math.round(tot) + 'g' : '0g';
-                if (nm && tot > 0) sumItems.push(`${nm} [${Math.round(tot)}g]`);
+                if (nm && tot > 0) sumItems.push(`${nm} ${Math.round(tot)}g`);
             });
 
             const sumEl = document.getElementById('mixture-summary');
             let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
-            sumEl.innerHTML = `<span class="text-gray-700 mr-1.5">기본 원자재: <b>${rawStr}</b></span> <span class="mx-1 text-gray-400">|</span> <span class="text-red-600 ml-1.5">${addStr}</span>`;
+            
+            sumEl.innerHTML = `
+                <div class="flex flex-col gap-1.5 w-full">
+                    <div class="flex items-start gap-2">
+                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span>
+                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span>
+                    </div>
+                    <div class="w-full h-px bg-amber-200/50 my-0.5"></div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span>
+                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- 생산 계산기 헬퍼 함수 ---
+        // 1. 시간 파싱 (초 단위 변환) - 소수점 완벽 지원
+        function parseTimeToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            let seconds = 0;
+            const hMatch = timeStr.match(/([\d.]+)\s*시간/);
+            const mMatch = timeStr.match(/([\d.]+)\s*분/);
+            const sMatch = timeStr.match(/([\d.]+)\s*초/);
+            
+            if (!hMatch && !mMatch && !sMatch && !isNaN(parseFloat(timeStr))) return parseFloat(timeStr);
+            
+            if (hMatch) seconds += parseFloat(hMatch[1]) * 3600;
+            if (mMatch) seconds += parseFloat(mMatch[1]) * 60;
+            if (sMatch) seconds += parseFloat(sMatch[1]);
+            
+            return seconds;
+        }
+
+        // 2. 초 -> 예쁜 시간 문자열로 포맷팅 (소수점 유지)
+        function formatTimeFromSeconds(totalSec) {
+            if (totalSec === 0) return '0초';
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            
+            // 부동소수점 오차 보정을 위해 toFixed 처리 후 parseFloat 적용
+            let s = totalSec % 60;
+            s = parseFloat(s.toFixed(2));
+            
+            let res = [];
+            if (h > 0) res.push(h + '시간');
+            if (m > 0) res.push(m + '분');
+            if (s > 0 || res.length === 0) res.push(s + '초');
+            return res.join(' ');
+        }
+        
+        // 3. 무게 단위 자동 변환 포맷팅 (G -> KG)
+        function formatWeightFromGrams(totalGrams) {
+            if (totalGrams === 0) return '0G';
+            if (totalGrams >= 1000) {
+                return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG';
+            }
+            return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G';
+        }
+
+        // 4. 입력 시 실시간 계산
+        function calculateProduction(id) {
+            const qtyInput = document.getElementById('calc-qty-' + id);
+            const weightEl = document.getElementById('calc-weight-' + id);
+            const timeEl = document.getElementById('calc-time-' + id);
+            
+            if(!qtyInput || !weightEl || !timeEl) return;
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const item = dbData.find(i => i.id === id);
+            if(!item) return;
+
+            // 무게 계산
+            const unitWeight = parseFloat(item.weight) || 0;
+            const totalWeightGrams = unitWeight * qty;
+            weightEl.textContent = formatWeightFromGrams(totalWeightGrams);
+
+            // 시간 계산
+            const unitTimeSec = parseTimeToSeconds(item.prodTime);
+            const totalTimeSec = unitTimeSec * qty;
+            timeEl.textContent = formatTimeFromSeconds(totalTimeSec);
         }
 
         // --- 1. 제품 DB (통합 피드 리스트 렌더링) ---
@@ -743,6 +1025,11 @@
                 filtered.sort((a,b) => b.id - a.id).forEach(item => {
                     const isChecked = selectedProductIds.has(item.id); const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
                     
+                    let mainImg = (item.images && item.images.length > 0) ? item.images[0] : null;
+                    let thumbnailHtml = mainImg 
+                        ? `<img src="${mainImg}" class="w-full h-full object-cover">` 
+                        : `<i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-300"></i>`;
+
                     if(feedCon) {
                         const activeClass = isChecked ? 'border-navy-main bg-blue-50/20 shadow-md ring-1 ring-navy-main' : 'border-gray-200 bg-white hover:shadow-md';
                         const card = document.createElement('div'); 
@@ -750,7 +1037,7 @@
                         
                         // 카드 영역 클릭 시 체크박스 토글
                         card.onclick = (e) => { 
-                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox') return; 
+                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox' || e.target.tagName === 'INPUT') return; 
                             const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); 
                         };
                         
@@ -759,7 +1046,10 @@
                                 <div class="p-1 shrink-0" onclick="event.stopPropagation()">
                                     <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
                                 </div>
-                                <div class="flex flex-col gap-1 min-w-0 flex-1">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                                    ${thumbnailHtml}
+                                </div>
+                                <div class="flex flex-col gap-1 min-w-0 flex-1 ml-1">
                                     <div class="flex items-center gap-2">
                                         ${getBadge(item.type)}
                                         <h4 class="text-sm sm:text-base font-bold text-navy-text truncate">${item.itemCode}</h4>
@@ -769,11 +1059,11 @@
                                         <span class="font-medium truncate max-w-[120px] sm:max-w-[200px] text-gray-600">${item.company}</span>
                                         <span class="text-gray-300">|</span>
                                         <i data-lucide="ruler" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0"></i>
-                                        <span class="font-mono text-gray-700 font-bold truncate">${displaySpec || '-'}</span>
+                                        <span class="font-roboto text-gray-700 font-black tracking-wide truncate">${displaySpec || '-'}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity justify-end sm:justify-start w-full sm:w-auto">
+                            <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0">
                                 <button type="button" onclick="editProduct(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors active:bg-gray-200">
                                     <i data-lucide="edit-2" class="w-4 h-4"></i>
                                 </button>
@@ -806,91 +1096,186 @@
             panel.classList.remove('hidden'); document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
             container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => {
-                const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); const dMeas = formatSpec(item.measIn, item.measOut, item.measLen);
+                const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); 
+                const dMeas = formatSpec(item.measIn, item.measOut, ''); // 금형에는 길이(measLen) 제외
                 
-                let wHtml = item.workMethod === '자동커팅' 
-                    ? `<div class="bg-white p-2.5 rounded-lg border border-gray-100 mt-1 shadow-sm"><span class="text-gray-400 font-bold block mb-1 text-[10px]"><i data-lucide="scissors-line-dashed" class="w-3 h-3 inline pb-0.5"></i> 자동커팅</span><span class="font-mono text-gray-700 text-[11px] font-bold">L:${item.autoLen||'-'} / 후:${item.autoSpeed||'-'} / 누:${item.autoPress||'-'}</span></div>` 
-                    : `<div class="bg-white p-2.5 rounded-lg border border-gray-100 mt-1 shadow-sm"><span class="text-gray-400 font-bold block mb-1 text-[10px]"><i data-lucide="roller-coaster" class="w-3 h-3 inline pb-0.5"></i> 롤 방식</span><span class="font-mono text-gray-700 text-[10px] leading-tight font-bold">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</span></div>`;
+                // 작업 계산기 기본값 계산 (수량 1개 기준)
+                const unitWeight = parseFloat(item.weight) || 0;
+                const defaultWeightStr = formatWeightFromGrams(unitWeight * 1);
+                const unitTimeSec = parseTimeToSeconds(item.prodTime);
+                const defaultTimeStr = formatTimeFromSeconds(unitTimeSec * 1);
+                
+                let wHtml = '';
+                if (item.workMethod === '자동커팅') {
+                    wHtml = `<div class="bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
+                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="scissors-line-dashed" class="w-4 h-4"></i> 자동커팅</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5 text-center leading-tight">커팅길이<br>(뜨거울때)</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoHotLen||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">설정길이</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoLen||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">후진속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoSpeed||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">누름</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoPress||'-'}</span></div>
+                        </div>
+                    </div>`;
+                } else if (item.workMethod === '롤 방식') {
+                    wHtml = `<div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm mt-1"><span class="text-gray-400 font-bold block mb-1.5 text-xs"><i data-lucide="roller-coaster" class="w-4 h-4 inline pb-0.5"></i> 롤 방식</span><span class="font-roboto text-navy-main text-sm sm:text-base leading-relaxed font-black block tracking-wide">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</span></div>`;
+                } else if (item.workMethod === '수동커팅') {
+                    wHtml = `<div class="bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
+                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="scissors" class="w-4 h-4"></i> 수동커팅</span>
+                        <div class="grid grid-cols-2 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">커팅길이</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.manualLen ? item.manualLen + 'm' : '-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">건조 상태</span> <span class="font-roboto font-black text-sm sm:text-base ${item.manualDry==='건조 후'?'text-amber-600':'text-blue-600'} tracking-wide">${item.manualDry||'건조 전'}</span></div>
+                        </div>
+                    </div>`;
+                }
+
+                let imgHtml = '';
+                if (item.images && item.images.length > 0) {
+                    imgHtml = `<div class="flex gap-2 flex-wrap">` + item.images.map((img, idx) => `
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0 overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-navy-main transition-all group" onclick="openLargeImage(${item.id}, ${idx})" title="사진 크게 보기">
+                            <img src="${img}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center transition-all"><i data-lucide="zoom-in" class="w-4 h-4 text-white drop-shadow-md"></i></div>
+                        </div>
+                    `).join('') + `</div>`;
+                } else {
+                    imgHtml = `<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0"><i data-lucide="image" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>`;
+                }
+
+                let remarksHtml = item.remarks ? `<div class="mt-4 sm:mt-5 bg-gray-50 p-3.5 sm:p-4 rounded-xl border border-gray-200"><h6 class="text-xs sm:text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><i data-lucide="file-edit" class="w-4 h-4 text-gray-400"></i> 비고</h6><p class="text-xs sm:text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">${item.remarks}</p></div>` : '';
 
                 return `
-                <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all flex flex-col">
                     <!-- 상단 데코 라인 -->
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
                     
-                    <!-- 헤더 -->
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 pb-3 border-b border-gray-100 gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-navy-light flex items-center justify-center text-navy-main shrink-0">
-                                <i data-lucide="file-check-2" class="w-5 h-5"></i>
-                            </div>
+                    <!-- 헤더 영역 (사진 포함) -->
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-gray-100 gap-3 shrink-0">
+                        <div class="flex items-start sm:items-center gap-4">
+                            ${imgHtml}
                             <div>
-                                <h4 class="font-black text-sm sm:text-lg text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
-                                <p class="text-xs text-navy-muted font-medium mt-0.5">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
+                                <h4 class="font-black text-base sm:text-xl text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
+                                <p class="text-sm text-navy-muted font-medium mt-1">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 flex-1">
                         <!-- 왼쪽: 규격 및 배합 정보 -->
-                        <div class="space-y-4">
-                            <!-- 규격 & 실측 비교 -->
-                            <div class="bg-blue-50/60 p-3 sm:p-4 rounded-xl border border-blue-100">
-                                <h5 class="text-[11px] sm:text-xs font-bold text-navy-main mb-2.5 flex items-center"><i data-lucide="ruler" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 규격 및 실측</h5>
-                                <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-blue-50/50">
-                                    <div class="flex flex-col">
-                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-[11px]">기준 규격</span>
-                                        <span class="font-bold text-gray-700 font-mono text-xs sm:text-sm">${dSpec || '-'}</span>
+                        <div class="space-y-5 flex flex-col">
+                            <!-- 규격 & 실측 비교 (세로형 변경) -->
+                            <div class="bg-blue-50/60 p-4 sm:p-5 rounded-xl border border-blue-100 flex-1 flex flex-col">
+                                <h5 class="text-sm sm:text-base font-bold text-navy-main mb-3 flex items-center shrink-0"><i data-lucide="ruler" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 규격 및 실측</h5>
+                                <div class="flex flex-col items-center justify-center bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-blue-50/50 flex-1 gap-3">
+                                    <div class="flex flex-col items-center text-center">
+                                        <span class="text-gray-400 font-bold mb-1.5 text-xs sm:text-sm">기준 규격</span>
+                                        <span class="font-black text-gray-700 font-roboto text-base sm:text-lg tracking-wide">${dSpec || '-'}</span>
                                     </div>
-                                    <i data-lucide="arrow-right-circle" class="w-5 h-5 text-blue-200 shrink-0"></i>
-                                    <div class="flex flex-col text-right">
-                                        <span class="text-navy-main/60 font-bold mb-1 text-[10px] sm:text-[11px]">실측 측정</span>
-                                        <span class="font-black text-navy-main font-mono text-xs sm:text-sm">${dMeas || '-'}</span>
+                                    <i data-lucide="arrow-down-circle" class="w-6 h-6 text-blue-200 shrink-0 my-1"></i>
+                                    <div class="flex flex-col items-center text-center">
+                                        <span class="text-navy-main/60 font-bold mb-1.5 text-xs sm:text-sm">금형</span>
+                                        <span class="font-black text-navy-main font-roboto text-2xl sm:text-3xl tracking-tight">${dMeas || '-'}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 신규 무게/시간 -->
+                                <div class="grid grid-cols-2 gap-3 mt-3">
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-50/50 flex flex-col items-center text-center">
+                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">1개당 무게(g)</span>
+                                        <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.weight ? item.weight + ' g' : '-'}</span>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-50/50 flex flex-col items-center text-center">
+                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">생산 시간</span>
+                                        <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.prodTime || '-'}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 작업 계산기 추가 -->
+                                <div class="mt-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 shadow-sm">
+                                    <h6 class="text-xs sm:text-sm font-bold text-indigo-800 mb-2 flex items-center gap-1.5"><i data-lucide="calculator" class="w-4 h-4"></i> 작업 계산기</h6>
+                                    <div class="flex items-center gap-2 sm:gap-3 mb-3 bg-white p-2 rounded-lg border border-indigo-100 shadow-sm">
+                                        <span class="text-[10px] sm:text-xs font-bold text-indigo-600 w-14 sm:w-16 shrink-0 pl-1">작업 수량</span>
+                                        <input type="number" id="calc-qty-${item.id}" value="1" oninput="calculateProduction(${item.id})" placeholder="수량 입력" class="flex-1 h-8 px-2 text-xs sm:text-sm font-bold border-b border-indigo-200 focus:outline-none focus:border-indigo-500 bg-transparent text-right text-indigo-900">
+                                        <span class="text-[10px] sm:text-xs font-bold text-indigo-400 pr-1">EA</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="bg-white p-2.5 rounded border border-indigo-100/50 flex flex-col justify-center shadow-sm">
+                                            <span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5">총 무게</span>
+                                            <span id="calc-weight-${item.id}" class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${defaultWeightStr}</span>
+                                        </div>
+                                        <div class="bg-white p-2.5 rounded border border-indigo-100/50 flex flex-col justify-center shadow-sm">
+                                            <span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5">예상 소요시간</span>
+                                            <span id="calc-time-${item.id}" class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${defaultTimeStr}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- 배합 정보 -->
-                            <div class="bg-amber-50/60 p-3 sm:p-4 rounded-xl border border-amber-100">
-                                <h5 class="text-[11px] sm:text-xs font-bold text-amber-700 mb-2.5 flex items-center justify-between">
-                                    <span class="flex items-center"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 배합 정보</span>
-                                    <span class="text-[10px] font-black bg-amber-200/50 text-amber-700 px-2 py-0.5 rounded-md">${item.baseKg||20}KG 기준</span>
+                            <div class="bg-amber-50/60 p-4 sm:p-5 rounded-xl border border-amber-100 shrink-0">
+                                <h5 class="text-sm sm:text-base font-bold text-amber-700 mb-3 flex items-center justify-between">
+                                    <span class="flex items-center"><i data-lucide="beaker" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 배합 정보</span>
                                 </h5>
-                                <div class="bg-white p-3 sm:p-3.5 rounded-lg shadow-sm border border-amber-50 text-xs sm:text-sm text-gray-800 leading-relaxed break-keep">
-                                    ${item.mixture || '배합 정보가 없습니다.'}
+                                
+                                <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-amber-50 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                                    <div class="flex items-center gap-1.5 bg-amber-50/80 px-3 py-2 rounded border border-amber-200 shrink-0">
+                                        <i data-lucide="scale" class="w-4 h-4 text-amber-600"></i>
+                                        <div class="flex flex-col text-center">
+                                            <span class="text-[9px] font-bold text-amber-700">기준 중량</span>
+                                            <span class="font-roboto font-black text-sm sm:text-base text-amber-800">${item.baseKg||20}KG</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="w-full h-px sm:w-px sm:h-12 bg-amber-100 shrink-0 hidden sm:block"></div>
+                                    
+                                    <div class="text-gray-800 break-keep w-full flex-1">
+                                        ${item.mixture || '배합 정보가 없습니다.'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 오른쪽: 설비 가동 조건 -->
-                        <div class="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-200 flex flex-col h-full">
-                            <h5 class="text-[11px] sm:text-xs font-bold text-gray-700 mb-3 flex items-center"><i data-lucide="settings-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5"></i> 설비 가동 조건</h5>
+                        <div class="bg-gray-50 p-4 sm:p-5 rounded-xl border border-gray-200 flex flex-col h-full">
+                            <h5 class="text-sm sm:text-base font-bold text-gray-700 mb-4 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 설비 가동 조건</h5>
                             
-                            <div class="grid grid-cols-2 gap-2.5 sm:gap-3 flex-1 content-start">
-                                <!-- 레이저 / 수축률 -->
-                                <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-1.5 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="scan-line" class="w-3.5 h-3.5"></i> 레이저/수축률</span>
-                                    <span class="font-mono text-gray-800 font-bold text-xs sm:text-sm">${item.laser || '-'} <span class="text-gray-200 mx-1">|</span> ${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
+                            <div class="grid grid-cols-2 gap-3 sm:gap-4 flex-1 content-start">
+                                <!-- 치수 -->
+                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="scan-line" class="w-4 h-4"></i> 치수(레이저)</span>
+                                    <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.laser || '-'}</span>
                                 </div>
-                                <!-- 건조로 -->
-                                <div class="bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                    <span class="text-gray-400 font-bold mb-1.5 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="thermometer" class="w-3.5 h-3.5"></i> 건조로</span>
-                                    <span class="font-mono text-gray-800 font-bold text-xs sm:text-sm">${item.cuTemp||'-'}℃ <span class="text-gray-200 mx-1">|</span> ${item.cuTime||'-'}</span>
+                                <!-- 수축률 -->
+                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="minimize" class="w-4 h-4"></i> 수축률</span>
+                                    <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
                                 </div>
-                                <!-- 압출기 -->
-                                <div class="col-span-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm mt-1">
-                                    <span class="text-gray-500 font-bold mb-2 flex items-center gap-1 text-[10px] sm:text-[11px]"><i data-lucide="cpu" class="w-3.5 h-3.5"></i> 압출기 및 투입기 설정 <span class="ml-auto text-[9px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-400">${item.exNum||'미지정'}</span></span>
-                                    <div class="grid grid-cols-2 gap-3 mt-1.5 border-t border-gray-50 pt-2.5">
-                                        <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded"><span class="text-[10px] text-gray-400 font-bold">온도/속도</span> <span class="font-mono font-bold text-xs text-navy-main">${item.exTemp||'-'}℃ / ${item.exSpeed||'-'}</span></div>
-                                        <div class="flex justify-between items-center bg-gray-50 p-1.5 rounded"><span class="text-[10px] text-gray-400 font-bold">투입속도</span> <span class="font-mono font-bold text-xs text-navy-main">${item.fdSpeed||'-'}</span></div>
+                                <!-- 건조로 (절반 크기) -->
+                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="thermometer" class="w-4 h-4"></i> 건조</span>
+                                    <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.cuTemp ? item.cuTemp+'℃' : '-'} <span class="text-gray-200 mx-1 sm:mx-2 font-normal">|</span> ${item.cuTime ? item.cuTime+'시간' : '-'}</span>
+                                </div>
+                                <!-- 압출기 (절반 크기) -->
+                                <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="cpu" class="w-4 h-4"></i> 압출기 <span class="ml-auto text-[10px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-400 font-sans">${item.exNum||'미지정'}</span></span>
+                                    <span class="font-roboto text-navy-main font-black text-base sm:text-lg tracking-wide">${item.exTemp ? item.exTemp+'℃' : '-'} <span class="text-gray-200 mx-1 sm:mx-2 font-normal">/</span> ${item.exSpeed ? item.exSpeed+' RPM' : '-'}</span>
+                                </div>
+                                <!-- 자동 투입 기계 (기존 압출기 자리 대체) -->
+                                <div class="col-span-2 bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
+                                    <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="settings" class="w-4 h-4"></i> 자동 투입 기계</span>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
+                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">투입속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSpeed||'-'}</span></div>
+                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">다량감속</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdDecel||'-'}</span></div>
+                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">역회전</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdRev||'-'}</span></div>
+                                        <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">싱글속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSingle||'-'}</span></div>
                                     </div>
                                 </div>
                                 <!-- 후공정 -->
-                                <div class="col-span-2 mt-1">
+                                <div class="col-span-2">
                                     ${wHtml}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    ${remarksHtml}
                 </div>`
             }).join('');
             lucide.createIcons();
@@ -910,11 +1295,27 @@
         function openProductModal() {
             document.getElementById('productForm').reset(); document.getElementById('p-id').value = '';
             document.getElementById('p-date').value = new Date().toISOString().split('T')[0]; document.getElementById('p-base-kg').value = '20';
+            document.getElementById('p-remarks').value = '';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
+            
+            // 모달을 열 때 체크박스 초기화 (기본값: 언체크)
+            const ratioCb = document.getElementById('use-raw-ratio');
+            if(ratioCb) { ratioCb.checked = false; }
+            
+            // 모달 열 때 압출기 번호 1번 기본, 수동커팅 건조 전 기본
+            const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]');
+            if(exNumRadio) exNumRadio.checked = true;
+            const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]');
+            if(manualDryRadio) manualDryRadio.checked = true;
+            document.getElementById('p-manual-len').value = '';
+            
+            tempImages = []; renderModalImages(); // 사진 미리보기 초기화
+
             addRawRow('KCC', '', '', true); addCureRow('백금AB'); addAddRow();
             toggleWorkMethod(); 
+            toggleRawRatio(); // 비율 입력칸 상태 업데이트
             
             switchModalTab('mixture'); // 모달 열 때 첫번째 탭으로 초기화
             openModal('productModal');
@@ -929,20 +1330,33 @@
             let cures = []; document.querySelectorAll('.cure-row').forEach(row => cures.push({type: row.querySelector('.cure-type').value, direct: row.querySelector('.cure-direct').value.trim(), ratio: row.querySelector('.cure-ratio').value}));
             let adds = []; document.querySelectorAll('.add-row').forEach(row => adds.push({name: row.querySelector('.add-name').value.trim(), ratio: row.querySelector('.add-ratio').value}));
 
+            const useRawRatio = document.getElementById('use-raw-ratio') ? document.getElementById('use-raw-ratio').checked : false;
+            const exNumEl = document.querySelector('input[name="p-ex-num"]:checked');
+            const manualDryEl = document.querySelector('input[name="p-manual-dry"]:checked');
+
+            // 시간 '초' 자동 삽입 (숫자(소수점 포함)만 있을 경우)
+            let prodTimeVal = document.getElementById('p-prod-time').value.trim();
+            if (/^[\d.]+$/.test(prodTimeVal)) {
+                prodTimeVal += '초';
+            }
+
             const data = {
                 date: document.getElementById('p-date').value, type: typeEl ? typeEl.value : '압출',
                 itemCode: document.getElementById('p-code').value.trim(), company: document.getElementById('p-company').value,
+                images: [...tempImages], // 다중 이미지 추가
                 specIn: document.getElementById('p-spec-in').value, specOut: document.getElementById('p-spec-out').value, specLen: document.getElementById('p-spec-len').value,
-                measIn: document.getElementById('p-meas-in').value, measOut: document.getElementById('p-meas-out').value, measLen: document.getElementById('p-meas-len').value,
+                measIn: document.getElementById('p-meas-in').value, measOut: document.getElementById('p-meas-out').value, measLen: '',
                 laser: document.getElementById('p-laser').value, shrinkage: document.getElementById('p-shrink').value,
-                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, raws: raws, cures: cures, adds: adds, mixture: document.getElementById('mixture-summary').innerHTML,
+                weight: document.getElementById('p-weight').value, prodTime: prodTimeVal, remarks: document.getElementById('p-remarks').value,
+                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, useRawRatio: useRawRatio, raws: raws, cures: cures, adds: adds, mixture: document.getElementById('mixture-summary').innerHTML,
                 workMethod: workEl ? workEl.value : '자동커팅',
-                exNum: document.getElementById('p-ex-num').value, exTemp: document.getElementById('p-ex-temp').value, exSpeed: document.getElementById('p-ex-speed').value,
+                exNum: exNumEl ? exNumEl.value : '1번', exTemp: document.getElementById('p-ex-temp').value, exSpeed: document.getElementById('p-ex-speed').value,
                 cuTemp: document.getElementById('p-cu-temp').value, cuTime: document.getElementById('p-cu-time').value,
                 fdSpeed: document.getElementById('p-fd-speed').value, fdDecel: document.getElementById('p-fd-decel').value, fdRev: document.getElementById('p-fd-rev').value, fdSingle: document.getElementById('p-fd-single').value,
-                autoLen: document.getElementById('p-auto-len').value, autoSpeed: document.getElementById('p-auto-speed').value, autoPress: document.getElementById('p-auto-press').value,
+                autoHotLen: document.getElementById('p-auto-hot-len').value, autoLen: document.getElementById('p-auto-len').value, autoSpeed: document.getElementById('p-auto-speed').value, autoPress: document.getElementById('p-auto-press').value,
                 roll1Jig: document.getElementById('p-roll1-jig').value, roll1Feed: document.getElementById('p-roll1-feed').value, roll1Accel: document.getElementById('p-roll1-accel').value, roll1Press: document.getElementById('p-roll1-press').value,
                 roll2Jig: document.getElementById('p-roll2-jig').value, roll2Feed: document.getElementById('p-roll2-feed').value, roll2Accel: document.getElementById('p-roll2-accel').value, roll2Press: document.getElementById('p-roll2-press').value,
+                manualLen: document.getElementById('p-manual-len').value, manualDry: manualDryEl ? manualDryEl.value : '건조 전'
             };
             
             if(id) Object.assign(dbData.find(i=>i.id==id), data); else dbData.push({ id: Date.now(), ...data });
@@ -957,22 +1371,40 @@
             
             ['date','company'].forEach(k => document.getElementById(`p-${k}`).value = item[k]||''); document.getElementById('p-code').value = item.itemCode;
             document.getElementById('p-spec-in').value = item.specIn || ''; document.getElementById('p-spec-out').value = item.specOut || ''; document.getElementById('p-spec-len').value = item.specLen || '';
-            document.getElementById('p-meas-in').value = item.measIn || ''; document.getElementById('p-meas-out').value = item.measOut || ''; document.getElementById('p-meas-len').value = item.measLen || '';
-            document.getElementById('p-laser').value = item.laser || ''; document.getElementById('p-shrink').value = item.shrinkage || ''; document.getElementById('p-base-kg').value = item.baseKg || 20;
+            document.getElementById('p-meas-in').value = item.measIn || ''; document.getElementById('p-meas-out').value = item.measOut || ''; 
+            document.getElementById('p-laser').value = item.laser || ''; document.getElementById('p-shrink').value = item.shrinkage || '';
+            document.getElementById('p-weight').value = item.weight || ''; document.getElementById('p-prod-time').value = item.prodTime || '';
+            document.getElementById('p-base-kg').value = item.baseKg || 20; document.getElementById('p-remarks').value = item.remarks || '';
             
+            // 기존 데이터의 비율 사용 여부 로드
+            const ratioCb = document.getElementById('use-raw-ratio');
+            if(ratioCb) { ratioCb.checked = item.useRawRatio === true; }
+
+            // 이미지 정보 로드 (다중 이미지)
+            tempImages = item.images && item.images.length > 0 ? [...item.images] : (item.image ? [item.image] : []);
+            renderModalImages();
+
             document.getElementById('raw-container').innerHTML = ''; if(item.raws && item.raws.length > 0) { item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); } else { addRawRow('KCC', '', '100', false); }
             document.getElementById('cure-container').innerHTML = ''; if(item.cures && item.cures.length > 0) { item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); } else { addCureRow('백금AB'); }
             document.getElementById('add-container').innerHTML = ''; if(item.adds && item.adds.length > 0) { item.adds.forEach(a => addAddRow(a.name, a.ratio)); } else { addAddRow(); }
             
-            document.getElementById('p-ex-num').value = item.exNum || ''; document.getElementById('p-ex-temp').value = item.exTemp || ''; document.getElementById('p-ex-speed').value = item.exSpeed || '';
+            const en = document.querySelector(`input[name="p-ex-num"][value="${item.exNum || '1번'}"]`);
+            if(en) en.checked = true;
+
+            document.getElementById('p-ex-temp').value = item.exTemp || ''; document.getElementById('p-ex-speed').value = item.exSpeed || '';
             document.getElementById('p-cu-temp').value = item.cuTemp || ''; document.getElementById('p-cu-time').value = item.cuTime || '';
             document.getElementById('p-fd-speed').value = item.fdSpeed || ''; document.getElementById('p-fd-decel').value = item.fdDecel || ''; document.getElementById('p-fd-rev').value = item.fdRev || ''; document.getElementById('p-fd-single').value = item.fdSingle || '';
-            document.getElementById('p-auto-len').value = item.autoLen || ''; document.getElementById('p-auto-speed').value = item.autoSpeed || ''; document.getElementById('p-auto-press').value = item.autoPress || '';
+            document.getElementById('p-auto-hot-len').value = item.autoHotLen || ''; document.getElementById('p-auto-len').value = item.autoLen || ''; document.getElementById('p-auto-speed').value = item.autoSpeed || ''; document.getElementById('p-auto-press').value = item.autoPress || '';
             document.getElementById('p-roll1-jig').value = item.roll1Jig || ''; document.getElementById('p-roll1-feed').value = item.roll1Feed || ''; document.getElementById('p-roll1-accel').value = item.roll1Accel || ''; document.getElementById('p-roll1-press').value = item.roll1Press || '';
             document.getElementById('p-roll2-jig').value = item.roll2Jig || ''; document.getElementById('p-roll2-feed').value = item.roll2Feed || ''; document.getElementById('p-roll2-accel').value = item.roll2Accel || ''; document.getElementById('p-roll2-press').value = item.roll2Press || '';
             
+            document.getElementById('p-manual-len').value = item.manualLen || '';
+            const md = document.querySelector(`input[name="p-manual-dry"][value="${item.manualDry || '건조 전'}"]`);
+            if(md) md.checked = true;
+
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
             toggleWorkMethod(); 
+            toggleRawRatio(); // 비율 입력칸 상태 업데이트
             switchModalTab('mixture'); // 수정 시에도 첫번째 탭으로 초기화
             openModal('productModal'); 
             calcBatch(); 
