@@ -156,11 +156,11 @@
                     </div>
                     <div class="relative w-full sm:max-w-md">
                         <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
-                        <input type="text" id="searchProduct" placeholder="품번, 규격, 회사명 검색" class="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main transition-all shadow-sm">
+                        <input type="text" id="searchProduct" placeholder="회사명, 품번, 금형, 비고 검색" class="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main transition-all shadow-sm">
                     </div>
                 </div>
                 
-                <div id="productFeedContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-4"></div>
+                <div id="productFeedContainer" class="grid grid-cols-1 gap-3 sm:gap-4 pb-4"></div>
 
                 <div id="emptyProduct" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
                     <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
@@ -230,14 +230,14 @@
     <div id="productModal" class="fixed inset-0 z-[60] hidden">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('productModal')"></div>
         <div class="fixed inset-0 z-10 flex items-center justify-center p-2 sm:p-4" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-            <div class="relative w-full max-w-[1000px] bg-white rounded-xl sm:rounded-2xl shadow-2xl flex flex-col max-h-full fade-in">
+            <div class="relative w-full max-w-[1000px] bg-white rounded-xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[95vh] lg:max-h-[90vh] fade-in">
                 
                 <div class="bg-white px-4 sm:px-6 py-3 sm:py-4 border-b flex justify-between items-center shrink-0 rounded-t-xl sm:rounded-t-2xl">
                     <h3 class="text-sm sm:text-lg font-bold text-navy-text flex items-center"><span class="w-1.5 h-4 sm:h-5 bg-navy-main rounded-full mr-2"></span><span id="productModalTitle">생산 등록</span></h3>
                     <button type="button" onclick="closeModal('productModal')" class="text-gray-400 p-1.5 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button>
                 </div>
                 
-                <div class="px-4 sm:px-6 py-4 overflow-y-auto custom-scrollbar">
+                <div class="px-4 sm:px-6 py-4 overflow-y-auto custom-scrollbar flex-1">
                     <form id="productForm" class="space-y-5">
                         <input type="hidden" id="p-id">
 
@@ -250,11 +250,7 @@
                                 <div class="flex flex-wrap gap-2" id="modal-image-grid"></div>
                                 <input type="file" id="p-image" accept="image/*" multiple class="hidden" onchange="handleMultipleImageUpload(event)">
                             </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                                <div class="flex flex-col min-w-0">
-                                    <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">일자</label>
-                                    <input type="date" id="p-date" required class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
-                                </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
                                 <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">구분</label>
                                     <div class="flex gap-1 h-9 sm:h-10">
@@ -274,7 +270,7 @@
                                         <button type="button" onclick="toggleSample()" class="px-1.5 sm:px-2 bg-gray-100 border border-gray-300 rounded-lg text-[10px] sm:text-[11px] font-bold shrink-0 active:bg-gray-200 transition-colors whitespace-nowrap">샘플</button>
                                     </div>
                                 </div>
-                                <div class="col-span-2 sm:col-span-4 flex flex-col min-w-0 mt-1">
+                                <div class="col-span-1 sm:col-span-3 flex flex-col min-w-0 mt-1">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">비고</label>
                                     <textarea id="p-remarks" rows="2" placeholder="특이사항을 입력하세요" class="w-full min-w-0 border border-gray-300 rounded-lg p-2 text-xs sm:text-sm focus:border-navy-main outline-none resize-y"></textarea>
                                 </div>
@@ -321,7 +317,7 @@
                             </div>
                         </div>
 
-                        <!-- 설비 가동 조건 섹션 (바깥으로 꺼냄) -->
+                        <!-- 설비 가동 조건 섹션 (위로 배치됨) -->
                         <div id="modal-pane-equipment" class="mt-5 pt-5 border-t border-gray-200">
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건 및 후공정</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
@@ -349,7 +345,7 @@
                                     </div>
                                 </div>
                                 <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">건조로</label>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-gray-700 mb-1.5">건조</label>
                                     <div class="grid grid-cols-2 gap-1.5">
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">온도</span><input type="text" id="p-cu-temp" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">시간</span><input type="text" id="p-cu-time" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] outline-none focus:border-navy-main bg-white"></div>
@@ -375,33 +371,35 @@
                                         <div class="flex flex-col min-w-0"><span class="text-[9px] font-bold text-gray-400 mb-0.5">누름</span><input type="text" id="p-auto-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none"></div>
                                     </div>
                                 </div>
-                                <div id="fields-roll" class="grid grid-cols-1 sm:grid-cols-2 gap-2 hidden">
-                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
-                                        <label class="block text-[10px] font-bold text-gray-700 mb-1">큐텍스 #1</label>
-                                        <div class="grid grid-cols-4 gap-1.5">
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll1-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll1-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll1-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll1-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                        </div>
+                                <div id="fields-roll" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0 hidden">
+                                    <label class="block text-[10px] font-bold text-gray-700 mb-1">큐텍스 #1</label>
+                                    <div class="grid grid-cols-4 gap-1.5">
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll1-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll1-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll1-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll1-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
                                     </div>
-                                    <div class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 flex flex-col min-w-0">
-                                        <label class="block text-[10px] font-bold text-gray-700 mb-1">큐텍스 #2</label>
-                                        <div class="grid grid-cols-4 gap-1.5">
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll2-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll2-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll2-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                            <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll2-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
-                                        </div>
+                                    <label class="block text-[10px] font-bold text-gray-700 mb-1 mt-2">큐텍스 #2</label>
+                                    <div class="grid grid-cols-4 gap-1.5">
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">지그</span><input type="text" id="p-roll2-jig" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">피딩</span><input type="text" id="p-roll2-feed" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">가감속</span><input type="text" id="p-roll2-accel" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
+                                        <div class="flex flex-col min-w-0"><span class="text-[8px] sm:text-[9px] text-gray-400">누름</span><input type="text" id="p-roll2-press" class="h-8 w-full min-w-0 border border-gray-300 rounded px-1 text-[11px]"></div>
                                     </div>
                                 </div>
                                 <div id="fields-manual" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200 hidden">
-                                    <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div class="grid grid-cols-3 gap-2 sm:gap-4">
                                         <div class="flex flex-col min-w-0">
                                             <span class="text-[9px] font-bold text-gray-400 mb-0.5">커팅길이</span>
                                             <div class="flex items-center gap-1.5 h-8 w-full">
                                                 <input type="number" step="any" id="p-manual-len" class="h-full w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none text-right">
                                                 <span class="text-[11px] font-bold text-gray-500 shrink-0">m</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="text-[9px] font-bold text-gray-400 mb-0.5">인장기</span>
+                                            <div class="flex items-center gap-1.5 h-8 w-full">
+                                                <input type="text" id="p-manual-ten" class="h-full w-full min-w-0 border border-gray-300 rounded px-1.5 text-[11px] focus:border-navy-main outline-none text-center">
                                             </div>
                                         </div>
                                         <div class="flex flex-col min-w-0">
@@ -416,7 +414,7 @@
                             </div>
                         </div>
 
-                        <!-- 배합 정보 섹션 (설비 가동 조건 아래로 배치, 탭 제거) -->
+                        <!-- 배합 정보 섹션 -->
                         <div id="modal-pane-mixture" class="mt-5 pt-5 border-t border-gray-200">
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보</h4>
                             <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
@@ -542,73 +540,65 @@
         </div>
     </div>
 
-    <!-- JS Area -->
     <script>
         // ==========================================
-        // Google Sheets 연동 설정
+        // Google Sheets 연동 및 로컬 스토리지
         // ==========================================
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbznx87zOrrtOTxMwWkv6cy-oObur85_Rf0BhkE8nbnPaSSjnh6D75jc3sKZ_nD03Oeu/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbygVHLdYfEIN4WzEGCmltksAe-bzeS8oTTjQicU_goQqQY3f2FZ1FRtejONOoMFZKH_/exec"; 
 
         async function sendDataToGoogleSheets(action, payload) {
             if (!GAS_URL) return;
             try {
-                // CORS preflight를 발생시키지 않도록 text/plain Content-Type으로 구글 서버에 안전하게 POST 전송합니다.
                 fetch(GAS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: action, data: payload })
-                }).catch(e => console.warn("백그라운드 전송 지연 (보안/네트워크): 로컬 데이터는 안전하게 보존되었습니다."));
+                }).catch(e => console.warn("백그라운드 전송 지연 발생"));
             } catch (error) { console.warn("Google Sheets 전송 에러:", error); }
         }
 
-        // ==========================================
-        // 안전하게 로컬 스토리지에 저장하는 헬퍼 함수 (Quota 제한 에러 방지)
-        // ==========================================
-        function safeSetLocalStorage(key, dataObj, isProduct = false) {
+        // [중요 버그 수정]: 로컬 데이터 저장 시 안정성을 위해 예외처리 및 이미지 제거 로직 강화
+        function safeSetLocalStorage(key, dataObj) {
             try {
                 localStorage.setItem(key, JSON.stringify(dataObj));
             } catch (e) {
-                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    if (isProduct) {
-                        console.warn("로컬 스토리지 용량 초과: 이미지 데이터를 제외하고 백업을 시도합니다.");
-                        // 이미지 데이터를 빈 배열로 치환하여 저장 시도
-                        const strippedDbData = dataObj.map(item => ({...item, images: []}));
-                        try {
-                            localStorage.setItem(key, JSON.stringify(strippedDbData));
-                        } catch (err) {
-                            console.error("이미지 제외 후에도 로컬 저장 실패:", err);
-                        }
-                    } else {
-                        console.error("로컬 스토리지 용량 초과:", e);
-                    }
-                } else {
-                    console.error("로컬 저장 실패:", e);
+                if (e.name === 'QuotaExceededError') {
+                    const strippedData = dataObj.map(item => ({...item, images: []}));
+                    try { localStorage.setItem(key, JSON.stringify(strippedData)); } catch (err) {}
                 }
             }
         }
 
         // ==========================================
-        // 전역 데이터
+        // 전역 변수
         // ==========================================
         let dbData = [];
         let scheduleData = [];
         let inventoryData = [];
+        let currentView = 'product'; 
+        let deleteInfo = { type: null, id: null }; 
+        let selectedProductIds = new Set();
+        let tempImages = [];
 
-        // 로컬 브라우저 저장소(LocalStorage)에서 데이터를 먼저 가져오는 하이브리드 로직 (초기 로딩 초고속 및 오프라인 보존)
+        // ==========================================
+        // 초기화 및 데이터 로드
+        // ==========================================
         function loadLocalData() {
             try {
                 dbData = JSON.parse(localStorage.getItem('silicon_dbData')) || [];
                 scheduleData = JSON.parse(localStorage.getItem('silicon_scheduleData')) || [];
                 inventoryData = JSON.parse(localStorage.getItem('silicon_inventoryData')) || [];
                 
-                // 데이터 배합 정보 등 렌더링용 HTML 텍스트 생성
-                dbData.forEach(item => formatMixtureHTML(item));
-            } catch (e) {
-                console.error("로컬 데이터 로드 실패:", e);
-            }
+                // [버그 수정]: 불러올 때 혹시나 ID가 없을 경우 강제 주입하여 전체 삭제 버그 원천 차단
+                dbData.forEach(item => { 
+                    if(!item.id) item.id = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000); 
+                    formatMixtureHTML(item); 
+                });
+                scheduleData.forEach(item => { if(!item.id) item.id = "SCH_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000); });
+                inventoryData.forEach(item => { if(!item.id) item.id = "INV_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000); });
+            } catch (e) { console.error(e); }
         }
 
-        // 구글 시트 웹앱 데이터 연동 및 로컬 데이터 업데이트
         async function loadDataFromGoogleSheets() {
             if (!GAS_URL) return;
             const loadingStatus = document.getElementById('loadingStatus');
@@ -620,20 +610,14 @@
             }
             
             try {
-                // 브라우저 캐싱과 Redirect 관련 오류를 근본적으로 차단하기 위해 순수 GET 방식으로 요청
-                // 단, Google Apps Script 서버가 배포될 때 접근 권한이 "모든 사용자(Anyone)"로 되어있어야 완벽히 작동합니다.
-                const fetchUrl = GAS_URL + "?t=" + new Date().getTime();
-                
-                const response = await fetch(fetchUrl);
-                
+                const response = await fetch(GAS_URL + "?t=" + new Date().getTime());
                 if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                
                 const data = await response.json();
                 let hasUpdates = false;
                 
                 if(data.products && Array.isArray(data.products)) {
                     dbData = data.products;
-                    safeSetLocalStorage('silicon_dbData', dbData, true);
+                    safeSetLocalStorage('silicon_dbData', dbData);
                     hasUpdates = true;
                 }
                 if(data.schedules && Array.isArray(data.schedules)) {
@@ -649,7 +633,7 @@
                 
                 if (hasUpdates) {
                     dbData.forEach(item => formatMixtureHTML(item));
-                    switchTab(currentView); // 동기화 받은 최신 데이터로 화면 갱신
+                    switchTab(currentView);
                 }
                 
                 if (loadingStatus) {
@@ -659,53 +643,13 @@
                     setTimeout(() => loadingStatus.classList.add('hidden'), 3000);
                 }
             } catch (error) {
-                // 불필요한 콘솔 오류를 경고(warn)로 낮추어 화면상 방해를 방지합니다.
-                console.warn("구글 시트 연동 지연 (앱스 스크립트 '새 배포' 필요):", error.message || error);
+                console.warn("구글 연동 대기 중:", error.message);
                 if (loadingStatus) {
-                    // 구글 연동 오류나 오프라인 모드 시에도 로컬에 완벽히 보관된 데이터로 원활한 실행 지원
                     loadingStatus.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 text-amber-600"></i> <span class="text-amber-700 font-bold tracking-tight">로컬 저장 모드</span>`;
                     loadingStatus.className = 'flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[11px] font-bold mr-2 border border-amber-200';
                     lucide.createIcons();
                 }
             }
-        }
-
-        // 배합 텍스트 HTML 포맷팅 헬퍼 함수
-        function formatMixtureHTML(item) {
-            if (!item.raws) item.raws = [];
-            if (!item.cures) item.cures = [];
-            if (!item.adds) item.adds = [];
-
-            let rawItems = [];
-            item.raws.forEach(r => {
-                let fN = r.name ? `${r.type} ${r.name}` : r.type;
-                if(fN) rawItems.push((item.useRawRatio === true && r.pct) ? `${fN} ${r.pct}%` : fN);
-            });
-            let sumItems = [];
-            item.cures.forEach(c => {
-                let nm = c.type === '직접입력' ? c.direct : c.type;
-                let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20);
-                if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`);
-            });
-            item.adds.forEach(a => {
-                let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20);
-                if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`);
-            });
-            
-            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨';
-            let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
-            item.mixture = `
-                <div class="flex flex-col gap-1.5 w-full">
-                    <div class="flex items-start gap-2">
-                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span>
-                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span>
-                    </div>
-                    <div class="w-full h-px bg-amber-200/50 my-0.5"></div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span>
-                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
-                    </div>
-                </div>`;
         }
 
         document.addEventListener('DOMContentLoaded', () => { 
@@ -716,25 +660,20 @@
                 dateEl.textContent = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
             }
             
-            const searchProd = document.getElementById('searchProduct');
-            if(searchProd) searchProd.addEventListener('input', renderProducts);
+            document.getElementById('searchProduct')?.addEventListener('input', renderProducts);
+            document.getElementById('searchInventory')?.addEventListener('input', renderInventory);
             
-            const searchInv = document.getElementById('searchInventory');
-            if(searchInv) searchInv.addEventListener('input', renderInventory);
-            
-            const selectAll = document.getElementById('selectAllFeedCheckbox');
-            if(selectAll) selectAll.addEventListener('change', (e) => {
+            document.getElementById('selectAllFeedCheckbox')?.addEventListener('change', (e) => {
                 const cbs = document.querySelectorAll('.prod-cb');
-                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(parseInt(c.value)) : selectedProductIds.delete(parseInt(c.value)); });
+                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(String(c.value)) : selectedProductIds.delete(String(c.value)); });
                 renderProducts();
             });
 
-            loadLocalData(); // 1단계: 로컬 스토리지를 읽어 즉시 로딩 (화면 깜빡임 및 빈페이지 방지)
+            loadLocalData(); 
             switchTab('product'); 
-            loadDataFromGoogleSheets(); // 2단계: 백그라운드에서 실시간으로 구글 시트 원본 동기화
+            loadDataFromGoogleSheets(); 
         });
 
-        // 엔터키 폼 이동
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 if(e.target.tagName === 'TEXTAREA' || e.target.type === 'button' || e.target.type === 'submit') return;
@@ -748,9 +687,9 @@
             }
         });
 
-        let tempImages = [];
-        let currentView = 'product'; let deleteInfo = { type: null, id: null }; let selectedProductIds = new Set();
-
+        // ==========================================
+        // 공통 UI 함수
+        // ==========================================
         function switchTab(view) {
             currentView = view;
             ['product', 'schedule', 'inventory'].forEach(v => {
@@ -769,7 +708,56 @@
             lucide.createIcons();
         }
 
-        // 이미지를 압축 및 리사이징하여 로컬 스토리지 한도를 절약합니다.
+        function switchModalTab(tabName) {
+            const tabs = ['mixture', 'equipment'];
+            tabs.forEach(t => {
+                const pane = document.getElementById('modal-pane-' + t);
+                const btn = document.getElementById('modal-tab-' + t);
+                if(t === tabName) {
+                    pane.classList.remove('hidden');
+                    btn.classList.add('border-navy-main', 'text-navy-main', 'font-bold');
+                    btn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
+                } else {
+                    pane.classList.add('hidden');
+                    btn.classList.remove('border-navy-main', 'text-navy-main', 'font-bold');
+                    btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
+                }
+            });
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // ==========================================
+        // 유틸리티 함수
+        // ==========================================
+        function getNowFormattedString() {
+            const now = new Date();
+            return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
+
+        function formatTimeFromSeconds(s) { if(!s) return '0초'; const m=Math.floor(s/60), sec=parseFloat((s%60).toFixed(1)); return (m>0?m+'분 ':'')+(sec>0?sec+'초':'0초'); }
+        function parseTimeToSeconds(t) { if(!t) return 0; let s=0; const m=t.match(/([\d.]+)\s*분/), sec=t.match(/([\d.]+)\s*초/); if(m) s+=parseFloat(m[1])*60; if(sec) s+=parseFloat(sec[1]); return s||parseFloat(t)||0; }
+        function formatWeightFromGrams(totalGrams) { if (totalGrams === 0) return '0G'; if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG'; return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G'; }
+
+        const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
+        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
+        const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
+
+        function formatMixtureHTML(item) {
+            if (!item.raws) item.raws = []; if (!item.cures) item.cures = []; if (!item.adds) item.adds = [];
+            let rawItems = [];
+            item.raws.forEach(r => { let fN = r.name ? `${r.type} ${r.name}` : r.type; if(fN) rawItems.push((item.useRawRatio === true && r.pct) ? `${fN} ${r.pct}%` : fN); });
+            let sumItems = [];
+            item.cures.forEach(c => { let nm = c.type === '직접입력' ? c.direct : c.type; let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
+            item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
+            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
+            item.mixture = `<div class="flex flex-col gap-1.5 w-full"><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span></div><div class="w-full h-px bg-amber-200/50 my-0.5"></div><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span></div></div>`;
+        }
+
+        // ==========================================
+        // 이미지 처리 기능
+        // ==========================================
         function handleMultipleImageUpload(event) {
             const files = Array.from(event.target.files);
             if (!files.length) return;
@@ -782,35 +770,13 @@
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // 최대 해상도 800px로 리사이징
-                        const MAX_WIDTH = 800;
-                        const MAX_HEIGHT = 800;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // JPEG 형식으로 압축 (용량 크게 감소)
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                        tempImages.push(dataUrl);
-                        
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                        let width = img.width; let height = img.height;
+                        if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                        else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                        canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+                        tempImages.push(canvas.toDataURL('image/jpeg', 0.6));
                         loadedCount++;
                         if (loadedCount === filesToProcess.length) renderModalImages();
                     };
@@ -822,91 +788,106 @@
         }
 
         function renderModalImages() {
-            const grid = document.getElementById('modal-image-grid');
-            let html = '';
+            const grid = document.getElementById('modal-image-grid'); let html = '';
             tempImages.forEach((img, idx) => {
                 html += `<div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 shadow-sm relative group overflow-hidden shrink-0"><img src="${img}" class="w-full h-full object-cover"><button type="button" onclick="removeTempImage(${idx})" class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;
             });
             if (tempImages.length < 5) {
                 html += `<div onclick="document.getElementById('p-image').click()" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-navy-main hover:bg-navy-light transition-colors group shrink-0"><div class="text-center flex flex-col items-center text-gray-400 group-hover:text-navy-main transition-colors"><i data-lucide="camera" class="w-5 h-5 mb-0.5"></i><span class="text-[9px] font-bold"><span>${tempImages.length}</span>/5</span></div></div>`;
             }
-            grid.innerHTML = html;
-            lucide.createIcons();
+            grid.innerHTML = html; lucide.createIcons();
         }
 
         function removeTempImage(idx) { tempImages.splice(idx, 1); renderModalImages(); }
 
         function openLargeImage(id, index) {
-            const item = dbData.find(i => i.id === id);
+            const item = dbData.find(i => String(i.id) === String(id));
             if(item && item.images && item.images[index]) {
                 document.getElementById('largeImagePreview').src = item.images[index];
                 openModal('imagePreviewModal');
             }
         }
 
-        const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
-        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
-        const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
+        // ==========================================
+        // [수정 완벽 대응]: 삭제 공통 기능 (단일 이벤트 리스너)
+        // ==========================================
+        function requestDelete(type, id) { 
+            deleteInfo = { type: type, id: String(id) }; 
+            openModal('deleteModal'); 
+        }
+        function closeDeleteModal() { 
+            deleteInfo = { type: null, id: null }; 
+            closeModal('deleteModal'); 
+        }
 
-        function toggleSample() {
-            const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value;
-            ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st;
-        }
-        
-        // 품번 자동 생성 기능 (회사명 앞 1~2글자 + 랜덤 숫자 4자리)
-        function generateAutoCode() {
-            const companyInput = document.getElementById('p-company').value.trim();
-            const prefix = companyInput ? companyInput.replace(/\s+/g, '').substring(0, 2) : '';
-            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            document.getElementById('p-code').value = prefix + randomNum;
-        }
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            const delType = deleteInfo.type;
+            const delId = String(deleteInfo.id);
+            
+            if (!delType || !delId || delId === "null") return; // 오류 방지 가드
+
+            if(delType === 'product') { 
+                dbData = dbData.filter(i => String(i.id) !== delId); 
+                selectedProductIds.delete(delId); 
+                safeSetLocalStorage('silicon_dbData', dbData); 
+                renderProducts(); 
+            }
+            if(delType === 'schedule') { 
+                scheduleData = scheduleData.filter(i => String(i.id) !== delId); 
+                safeSetLocalStorage('silicon_scheduleData', scheduleData); 
+                renderSchedule(); 
+            }
+            if(delType === 'inventory') { 
+                inventoryData = inventoryData.filter(i => String(i.id) !== delId); 
+                safeSetLocalStorage('silicon_inventoryData', inventoryData); 
+                renderInventory(); 
+            }
+            
+            sendDataToGoogleSheets('delete', { type: delType, id: delId });
+            closeDeleteModal();
+        });
+
+        // ==========================================
+        // 제품 DB 기능
+        // ==========================================
+        function clearSelection() { selectedProductIds.clear(); const allCbs = document.getElementById('selectAllFeedCheckbox'); if(allCbs) allCbs.checked = false; renderProducts(); }
+
+        function toggleSample() { const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value; ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st; }
+        function generateAutoCode() { const companyInput = document.getElementById('p-company').value.trim(); const prefix = companyInput ? companyInput.replace(/\s+/g, '').substring(0, 2) : ''; const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); document.getElementById('p-code').value = prefix + randomNum; }
 
         function toggleWorkMethod() {
             const m = document.querySelector('input[name="p-work"]:checked')?.value;
-            const autoF = document.getElementById('fields-auto'); 
-            const rollF = document.getElementById('fields-roll');
-            const manualF = document.getElementById('fields-manual');
-            
-            autoF.classList.add('hidden'); autoF.classList.remove('block'); 
-            rollF.classList.add('hidden'); rollF.classList.remove('grid'); 
-            manualF.classList.add('hidden'); manualF.classList.remove('block');
-            
-            if (m === '자동커팅') { autoF.classList.remove('hidden'); autoF.classList.add('block'); } 
-            else if (m === '롤 방식') { rollF.classList.remove('hidden'); rollF.classList.add('grid'); }
-            else if (m === '수동커팅') { manualF.classList.remove('hidden'); manualF.classList.add('block'); }
+            const autoF = document.getElementById('fields-auto'); const rollF = document.getElementById('fields-roll'); const manualF = document.getElementById('fields-manual');
+            autoF.classList.add('hidden'); rollF.classList.add('hidden'); manualF.classList.add('hidden');
+            if (m === '자동커팅') autoF.classList.remove('hidden'); 
+            else if (m === '롤 방식') rollF.classList.remove('hidden'); 
+            else if (m === '수동커팅') manualF.classList.remove('hidden'); 
         }
 
         function toggleRawRatio() {
-            const ratioCb = document.getElementById('use-raw-ratio');
-            if(!ratioCb) return;
-            const isChecked = ratioCb.checked;
-            document.querySelectorAll('.raw-ratio-wrapper').forEach(wrapper => {
-                if(isChecked) { wrapper.classList.remove('hidden'); } else { wrapper.classList.add('hidden'); }
-            });
+            const ratioCb = document.getElementById('use-raw-ratio'); if(!ratioCb) return;
+            document.querySelectorAll('.raw-ratio-wrapper').forEach(wrapper => { if(ratioCb.checked) wrapper.classList.remove('hidden'); else wrapper.classList.add('hidden'); });
             calcBatch(); 
         }
 
         function addRawRow(type = 'KCC', name = '', pct = '', autoCalc = true) {
-            const container = document.getElementById('raw-container');
-            const row = document.createElement('div');
-            row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0';
+            const container = document.getElementById('raw-container'); const row = document.createElement('div');
+            row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 mt-1.5';
             const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
             row.innerHTML = `
-                <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white">
-                    <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option>
-                    <option value="어울림" ${type==='어울림'?'selected':''}>어울림</option>
-                    <option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
+                <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs bg-white outline-none">
+                    <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option><option value="어울림" ${type==='어울림'?'selected':''}>어울림</option><option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
                 </select>
-                <input type="text" class="raw-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none bg-white" placeholder="명칭" value="${name}" oninput="calcBatch()">
+                <input type="text" class="raw-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs bg-white outline-none" placeholder="명칭" value="${name}" oninput="calcBatch()">
                 <div class="raw-ratio-wrapper relative flex-[3] min-w-0 h-9 ${useRatio ? '' : 'hidden'}">
-                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-4 text-[11px] sm:text-xs text-right focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${pct}" oninput="calcBatch()">
+                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-4 text-[11px] sm:text-xs text-right bg-white outline-none" placeholder="비율" value="${pct}" oninput="calcBatch()">
                     <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
                 </div>
-                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
-            container.appendChild(row); lucide.createIcons(); 
-            if(autoCalc) autoDistributeRawPercents(); calcBatch();
+            container.appendChild(row); lucide.createIcons(); if(autoCalc) autoDistributeRawPercents(); calcBatch();
         }
+        
         function autoDistributeRawPercents() {
             const rows = document.querySelectorAll('.raw-row'); if (rows.length === 0) return;
             const pct = (100 / rows.length).toFixed(1).replace(/\.0$/, ''); rows.forEach(row => row.querySelector('.raw-percent').value = pct);
@@ -918,41 +899,35 @@
         }
 
         function addCureRow(type = '백금AB', direct = '', ratio = '') {
-            const container = document.getElementById('cure-container');
-            const row = document.createElement('div');
-            row.className = 'cure-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0 relative';
+            const container = document.getElementById('cure-container'); const row = document.createElement('div');
+            row.className = 'cure-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 mt-1.5 relative';
             row.innerHTML = `
-                <select class="cure-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs outline-none focus:border-blue-500 bg-white" onchange="toggleCureDirect(this)">
-                    <option value="백금AB" ${type==='백금AB'?'selected':''}>백금AB</option>
-                    <option value="일반" ${type==='일반'?'selected':''}>일반</option>
-                    <option value="직접입력" ${type==='직접입력'?'selected':''}>직접입력</option>
+                <select class="cure-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs bg-white outline-none" onchange="toggleCureDirect(this)">
+                    <option value="백금AB" ${type==='백금AB'?'selected':''}>백금AB</option><option value="일반" ${type==='일반'?'selected':''}>일반</option><option value="직접입력" ${type==='직접입력'?'selected':''}>직접입력</option>
                 </select>
-                <div class="direct-container flex-[4] min-w-0 h-9 ${type==='직접입력'?'':'hidden'}">
-                    <input type="text" class="cure-direct w-full h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none" placeholder="이름" value="${direct}" oninput="calcBatch()">
-                </div>
+                <div class="direct-container flex-[4] min-w-0 h-9 ${type==='직접입력'?'':'hidden'}"><input type="text" class="cure-direct w-full h-full border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs" placeholder="이름" value="${direct}" oninput="calcBatch()"></div>
                 <div class="flex-1 min-w-0 ${type==='직접입력'?'hidden':''}"></div>
                 <div class="flex items-center gap-1 flex-[4] min-w-0 h-9">
-                    <input type="number" step="any" class="cure-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <input type="number" step="any" class="cure-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center bg-white outline-none" placeholder="비율" value="${ratio}" oninput="calcBatch()">
                     <span class="text-[10px] font-bold text-gray-400 shrink-0">=</span>
-                    <input type="text" class="cure-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-gray-700 outline-none cursor-default" readonly placeholder="0g">
+                    <input type="text" class="cure-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-gray-700 outline-none" readonly placeholder="0g">
                 </div>
-                <button type="button" onclick="this.closest('.cure-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                <button type="button" onclick="this.closest('.cure-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
             container.appendChild(row); lucide.createIcons(); calcBatch();
         }
 
         function addAddRow(name = '', ratio = '') {
-            const container = document.getElementById('add-container');
-            const row = document.createElement('div');
-            row.className = 'add-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 first:border-0 first:pt-0 mt-1.5 first:mt-0 relative';
+            const container = document.getElementById('add-container'); const row = document.createElement('div');
+            row.className = 'add-row flex items-center gap-1.5 w-full pt-1 border-t border-gray-100 mt-1.5 relative';
             row.innerHTML = `
-                <input type="text" class="add-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs focus:border-blue-500 outline-none bg-white" placeholder="명칭(영문)" oninput="this.value = this.value.toUpperCase(); calcBatch();" value="${name}">
+                <input type="text" class="add-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs bg-white outline-none" placeholder="명칭(영문)" oninput="this.value = this.value.toUpperCase(); calcBatch();" value="${name}">
                 <div class="flex items-center gap-1 flex-[4] min-w-0 h-9">
-                    <input type="number" step="any" class="add-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center focus:border-blue-500 outline-none bg-white" placeholder="비율" value="${ratio}" oninput="calcBatch()">
+                    <input type="number" step="any" class="add-ratio flex-1 min-w-0 h-full border border-gray-300 rounded-lg px-1 text-[11px] sm:text-xs text-center bg-white outline-none" placeholder="비율" value="${ratio}" oninput="calcBatch()">
                     <span class="text-[10px] font-bold text-gray-400 shrink-0">=</span>
-                    <input type="text" class="add-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-blue-600 outline-none cursor-default" readonly placeholder="0g">
+                    <input type="text" class="add-total flex-1 min-w-0 h-full border border-gray-200 bg-gray-50 rounded-lg px-1 text-[11px] sm:text-xs text-right font-bold text-blue-600 outline-none" readonly placeholder="0g">
                 </div>
-                <button type="button" onclick="this.closest('.add-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                <button type="button" onclick="this.closest('.add-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
             container.appendChild(row); lucide.createIcons(); calcBatch();
         }
@@ -965,10 +940,7 @@
             document.querySelectorAll('.raw-row').forEach(row => {
                 const type = row.querySelector('.raw-type').value; const name = row.querySelector('.raw-name').value.trim(); const pct = row.querySelector('.raw-percent').value;
                 let fN = name ? `${type} ${name}` : type; 
-                if(fN) {
-                    if (useRatio && pct) rawItems.push(`${fN} ${pct}%`);
-                    else rawItems.push(fN);
-                }
+                if(fN) { if (useRatio && pct) rawItems.push(`${fN} ${pct}%`); else rawItems.push(fN); }
             });
 
             let sumItems = [];
@@ -989,79 +961,36 @@
             const sumEl = document.getElementById('mixture-summary');
             let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
             
-            sumEl.innerHTML = `
-                <div class="flex flex-col gap-1.5 w-full">
-                    <div class="flex items-start gap-2">
-                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span>
-                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span>
+            if (sumEl) {
+                sumEl.innerHTML = `
+                    <div class="flex flex-col gap-1.5 w-full">
+                        <div class="flex items-start gap-2">
+                            <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span>
+                            <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span>
+                        </div>
+                        <div class="w-full h-px bg-amber-200/50 my-0.5"></div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span>
+                            <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
+                        </div>
                     </div>
-                    <div class="w-full h-px bg-amber-200/50 my-0.5"></div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span>
-                        <span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function parseTimeToSeconds(timeStr) {
-            if (!timeStr) return 0;
-            let seconds = 0;
-            const hMatch = timeStr.match(/([\d.]+)\s*시간/);
-            const mMatch = timeStr.match(/([\d.]+)\s*분/);
-            const sMatch = timeStr.match(/([\d.]+)\s*초/);
-            
-            if (!hMatch && !mMatch && !sMatch && !isNaN(parseFloat(timeStr))) return parseFloat(timeStr);
-            
-            if (hMatch) seconds += parseFloat(hMatch[1]) * 3600;
-            if (mMatch) seconds += parseFloat(mMatch[1]) * 60;
-            if (sMatch) seconds += parseFloat(sMatch[1]);
-            
-            return seconds;
-        }
-
-        function formatTimeFromSeconds(totalSec) {
-            if (totalSec === 0) return '0초';
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            
-            let s = totalSec % 60;
-            s = parseFloat(s.toFixed(2));
-            
-            let res = [];
-            if (h > 0) res.push(h + '시간');
-            if (m > 0) res.push(m + '분');
-            if (s > 0 || res.length === 0) res.push(s + '초');
-            return res.join(' ');
-        }
-        
-        function formatWeightFromGrams(totalGrams) {
-            if (totalGrams === 0) return '0G';
-            if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG';
-            return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G';
+                `;
+            }
         }
 
         function calculateProduction(id) {
-            const qtyInput = document.getElementById('calc-qty-' + id);
-            const weightEl = document.getElementById('calc-weight-' + id);
-            const timeEl = document.getElementById('calc-time-' + id);
+            const qtyInput = document.getElementById('calc-qty-' + id); const weightEl = document.getElementById('calc-weight-' + id); const timeEl = document.getElementById('calc-time-' + id);
             if(!qtyInput || !weightEl || !timeEl) return;
-            
-            const qty = parseFloat(qtyInput.value) || 0;
-            const item = dbData.find(i => i.id === id);
-            if(!item) return;
-
-            const unitWeight = parseFloat(item.weight) || 0;
-            weightEl.textContent = formatWeightFromGrams(unitWeight * qty);
-            const unitTimeSec = parseTimeToSeconds(item.prodTime);
-            timeEl.textContent = formatTimeFromSeconds(unitTimeSec * qty);
+            const qty = parseFloat(qtyInput.value) || 0; const item = dbData.find(i => String(i.id) === String(id)); if(!item) return;
+            weightEl.textContent = formatWeightFromGrams((parseFloat(item.weight) || 0) * qty);
+            timeEl.textContent = formatTimeFromSeconds(parseTimeToSeconds(item.prodTime) * qty);
         }
 
         function renderProducts() {
             const term = document.getElementById('searchProduct')?.value.toLowerCase() || '';
             const filtered = dbData.filter(i => {
-                const specStr = formatSpec(i.specIn, i.specOut, i.specLen).toLowerCase();
-                return i.itemCode.toLowerCase().includes(term) || specStr.includes(term) || i.company.toLowerCase().includes(term);
+                const searchStr = `${i.company || ''} ${i.itemCode || ''} ${i.measIn || ''} ${i.measOut || ''} ${i.remarks || ''}`.toLowerCase();
+                return searchStr.includes(term);
             });
             
             const feedCon = document.getElementById('productFeedContainer'); const empty = document.getElementById('emptyProduct');
@@ -1071,20 +1000,16 @@
             else {
                 if(empty) { empty.classList.add('hidden'); empty.classList.remove('flex'); }
                 filtered.sort((a,b) => b.id - a.id).forEach(item => {
-                    const isChecked = selectedProductIds.has(item.id); const displaySpec = formatSpec(item.specIn, item.specOut, item.specLen);
-                    
-                    let mainImg = (item.images && item.images.length > 0) ? item.images[0] : null;
-                    let thumbnailHtml = mainImg 
-                        ? `<img src="${mainImg}" class="w-full h-full object-cover">` 
-                        : `<i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-300"></i>`;
+                    const isChecked = selectedProductIds.has(String(item.id));
+                    let thumbnailHtml = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 text-gray-300"></i>`;
 
                     if(feedCon) {
                         const activeClass = isChecked ? 'border-navy-main bg-blue-50/20 shadow-md ring-1 ring-navy-main' : 'border-gray-200 bg-white hover:shadow-md';
                         const card = document.createElement('div'); 
-                        card.className = `p-3.5 sm:p-5 rounded-2xl border cursor-pointer relative transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 group ${activeClass}`;
+                        card.className = `p-3.5 sm:p-5 rounded-2xl border cursor-pointer transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${activeClass}`;
                         
                         card.onclick = (e) => { 
-                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox' || e.target.tagName === 'INPUT') return; 
+                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox') return; 
                             const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); 
                         };
                         
@@ -1105,16 +1030,19 @@
                                     <div class="flex items-center gap-2 text-[11px] sm:text-xs text-gray-500 truncate">
                                         <span class="font-medium truncate max-w-[120px] sm:max-w-[200px] text-gray-600">${item.company}</span>
                                         <span class="text-gray-300">|</span>
-                                        <i data-lucide="ruler" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0"></i>
-                                        <span class="font-roboto text-gray-700 font-black tracking-wide truncate">${displaySpec || '-'}</span>
+                                        <i data-lucide="ruler" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
+                                        <span class="font-roboto text-gray-700 font-black tracking-wide truncate">${formatSpec(item.specIn, item.specOut, item.specLen) || '-'}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity justify-end sm:justify-start w-full sm:w-auto mt-2 sm:mt-0">
-                                <button type="button" onclick="editProduct(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors active:bg-gray-200">
+                            <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 justify-end mt-2 sm:mt-0">
+                                <button type="button" onclick="duplicateProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl" title="복사">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" onclick="editProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl" title="수정">
                                     <i data-lucide="edit-2" class="w-4 h-4"></i>
                                 </button>
-                                <button type="button" onclick="requestDelete('product', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl transition-colors active:bg-gray-200">
+                                <button type="button" onclick="requestDelete('product', '${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl" title="삭제">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -1127,7 +1055,7 @@
             const countEl = document.getElementById('totalProductCount');
             if(countEl) countEl.textContent = filtered.length;
 
-            document.querySelectorAll('.prod-cb').forEach(cb => { cb.addEventListener('change', e => { e.target.checked ? selectedProductIds.add(parseInt(e.target.value)) : selectedProductIds.delete(parseInt(e.target.value)); renderProducts(); }); });
+            document.querySelectorAll('.prod-cb').forEach(cb => { cb.addEventListener('change', e => { e.target.checked ? selectedProductIds.add(String(e.target.value)) : selectedProductIds.delete(String(e.target.value)); renderProducts(); }); });
             const allCbs = document.getElementById('selectAllFeedCheckbox');
             if (allCbs) {
                 const cbs = document.querySelectorAll('.prod-cb'); 
@@ -1141,7 +1069,7 @@
             if(selectedProductIds.size === 0) { panel.classList.add('hidden'); return; }
             panel.classList.remove('hidden'); document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
-            container.innerHTML = dbData.filter(i => selectedProductIds.has(i.id)).sort((a,b)=>b.id-a.id).map(item => {
+            container.innerHTML = dbData.filter(i => selectedProductIds.has(String(i.id))).sort((a,b)=>b.id-a.id).map(item => {
                 const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); 
                 const dMeas = formatSpec(item.measIn, item.measOut, ''); 
                 
@@ -1166,8 +1094,9 @@
                 } else if (item.workMethod === '수동커팅') {
                     wHtml = `<div class="bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
                         <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="scissors" class="w-4 h-4"></i> 수동커팅</span>
-                        <div class="grid grid-cols-2 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
+                        <div class="grid grid-cols-3 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
                             <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">커팅길이</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.manualLen ? item.manualLen + 'm' : '-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">인장기</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.manualTen || '-'}</span></div>
                             <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">건조 상태</span> <span class="font-roboto font-black text-sm sm:text-base ${item.manualDry==='건조 후'?'text-amber-600':'text-blue-600'} tracking-wide">${item.manualDry||'건조 전'}</span></div>
                         </div>
                     </div>`;
@@ -1176,7 +1105,7 @@
                 let imgHtml = '';
                 if (item.images && item.images.length > 0) {
                     imgHtml = `<div class="flex gap-2 flex-wrap">` + item.images.map((img, idx) => `
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0 overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-navy-main transition-all group" onclick="openLargeImage(${item.id}, ${idx})" title="사진 크게 보기">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0 overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-navy-main transition-all group" onclick="openLargeImage('${item.id}', ${idx})" title="사진 크게 보기">
                             <img src="${img}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
                             <div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center transition-all"><i data-lucide="zoom-in" class="w-4 h-4 text-white drop-shadow-md"></i></div>
                         </div>
@@ -1201,8 +1130,8 @@
                     </div>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 flex-1">
-                        <!-- Left Column: 스펙 및 설비 가동 조건 (위로 배치) -->
-                        <div class="space-y-5 flex flex-col">
+                        <!-- 왼쪽 열: 제원 규격 및 배합 정보 -->
+                        <div class="space-y-5">
                             <div class="bg-blue-50/60 p-4 sm:p-5 rounded-xl border border-blue-100 flex-1 flex flex-col">
                                 <h5 class="text-sm sm:text-base font-bold text-navy-main mb-3 flex items-center shrink-0"><i data-lucide="ruler" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 규격 및 실측</h5>
                                 <div class="flex flex-col items-center justify-center bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-blue-50/50 flex-1 gap-3">
@@ -1233,7 +1162,7 @@
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-3 bg-white p-2.5 sm:p-3 rounded-lg border border-indigo-100 shadow-sm">
                                         <span class="text-[10px] sm:text-xs font-bold text-indigo-600 shrink-0 pl-1">작업 수량</span>
                                         <div class="flex items-center flex-1 w-full border-b border-indigo-200 pb-0.5">
-                                            <input type="number" id="calc-qty-${item.id}" value="1" oninput="calculateProduction(${item.id})" placeholder="수량 입력" class="flex-1 w-full min-w-0 h-7 sm:h-8 px-2 text-sm sm:text-base font-bold focus:outline-none bg-transparent text-right text-indigo-900">
+                                            <input type="number" id="calc-qty-${item.id}" value="1" oninput="calculateProduction('${item.id}')" placeholder="수량 입력" class="flex-1 w-full min-w-0 h-7 sm:h-8 px-2 text-sm sm:text-base font-bold focus:outline-none bg-transparent text-right text-indigo-900">
                                             <span class="text-[10px] sm:text-xs font-bold text-indigo-400 pr-1 shrink-0">EA</span>
                                         </div>
                                     </div>
@@ -1249,94 +1178,40 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="bg-gray-50 p-4 sm:p-5 rounded-xl border border-gray-200 flex flex-col">
-                                <h5 class="text-sm sm:text-base font-bold text-gray-700 mb-4 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 설비 가동 조건</h5>
-                                
-                                <div class="grid grid-cols-2 gap-3 sm:gap-4 content-start">
-                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="scan-line" class="w-4 h-4"></i> 치수(레이저)</span>
-                                        <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.laser || '-'}</span>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="minimize" class="w-4 h-4"></i> 수축률</span>
-                                        <span class="font-roboto text-gray-800 font-black text-base sm:text-lg tracking-wide">${item.shrinkage ? item.shrinkage+'%' : '-'}</span>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="thermometer" class="w-4 h-4"></i> 건조</span>
-                                        <div class="font-roboto text-gray-800 font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
-                                            <span>${item.cuTemp ? item.cuTemp+'℃' : '-'}</span>
-                                            <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">|</span>
-                                            <span>${item.cuTime ? item.cuTime+'시간' : '-'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center">
-                                        <span class="text-gray-400 font-bold mb-2 flex items-center gap-1 text-xs sm:text-sm w-full justify-between"><span class="flex items-center gap-1"><i data-lucide="cpu" class="w-4 h-4"></i> 압출기</span> <span class="text-[10px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-400 font-sans">${item.exNum||'미지정'}</span></span>
-                                        <div class="font-roboto text-navy-main font-black text-[13px] sm:text-base lg:text-lg tracking-wide flex flex-col xl:flex-row xl:items-center leading-snug">
-                                            <span>${item.exTemp ? item.exTemp+'℃' : '-'}</span>
-                                            <span class="text-gray-200 mx-1.5 font-normal hidden xl:block">/</span>
-                                            <span>${item.exSpeed ? item.exSpeed+' RPM' : '-'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-span-2 bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
-                                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="settings" class="w-4 h-4"></i> 자동 투입 기계</span>
-                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
-                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">투입속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSpeed||'-'}</span></div>
-                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">다량감속</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdDecel||'-'}</span></div>
-                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">역회전</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdRev||'-'}</span></div>
-                                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">싱글속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.fdSingle||'-'}</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-span-2">
-                                        ${wHtml}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: 배합 정보 (설비 가동 조건 다음으로 배치) -->
-                        <div class="space-y-5 flex flex-col h-full">
                             <div class="bg-amber-50/60 p-4 sm:p-5 rounded-xl border border-amber-100 flex-1">
                                 <h5 class="text-sm sm:text-base font-bold text-amber-700 mb-3 flex items-center justify-between">
-                                    <span class="flex items-center"><i data-lucide="beaker" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 배합 정보</span>
+                                    <span class="flex items-center"><i data-lucide="beaker" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 배합 정보 <span class="text-[10px] text-amber-600 ml-1.5">기준: ${item.baseKg||20}KG</span></span>
                                 </h5>
                                 
                                 <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-amber-50 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                                    <div class="flex items-center gap-1.5 bg-amber-50/80 px-3 py-2 rounded border border-amber-200 shrink-0">
-                                        <i data-lucide="scale" class="w-4 h-4 text-amber-600"></i>
-                                        <div class="flex flex-col text-center">
-                                            <span class="text-[9px] font-bold text-amber-700">기준 중량</span>
-                                            <span class="font-roboto font-black text-sm sm:text-base text-amber-800">${item.baseKg||20}KG</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="w-full h-px sm:w-px sm:h-12 bg-amber-100 shrink-0 hidden sm:block"></div>
-                                    
                                     <div class="text-gray-800 break-keep w-full flex-1">
                                         ${item.mixture || '배합 정보가 없습니다.'}
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- 오른쪽 열: 설비 가동 조건 -->
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <h5 class="text-sm font-bold text-gray-700 mb-3 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 mr-1.5"></i> 설비 가동 조건</h5>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">치수 (레이저)</span><span class="font-roboto font-black text-sm">${item.laser || '-'}</span></div>
+                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">수축률</span><span class="font-roboto font-black text-sm">${item.shrinkage ? item.shrinkage+'%' : '-'}</span></div>
+                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">건조 조건</span><span class="font-roboto font-black text-[11px]">${item.cuTemp ? item.cuTemp+'℃ / ' : '-'}${item.cuTime ? item.cuTime+'시간' : ''}</span></div>
+                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">압출기 (${item.exNum||'-'})</span><span class="font-roboto font-black text-[11px]">${item.exTemp ? item.exTemp+'℃ / ' : '-'}${item.exSpeed ? item.exSpeed+'RPM' : ''}</span></div>
+                                <div class="col-span-2 bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1.5">자동 투입 기계</span><div class="grid grid-cols-4 gap-1 text-center font-mono text-[10px] font-bold"><div class="bg-gray-50 p-1 rounded">투입:${item.fdSpeed||'-'}</div><div class="bg-gray-50 p-1 rounded">감속:${item.fdDecel||'-'}</div><div class="bg-gray-50 p-1 rounded">역전:${item.fdRev||'-'}</div><div class="bg-gray-50 p-1 rounded">싱글:${item.fdSingle||'-'}</div></div></div>
+                                <div class="col-span-2">${wHtml}</div>
+                            </div>
+                        </div>
                     </div>
-                    ${remarksHtml}
-                </div>`
+                    ${item.remarks ? `<div class="mt-4 bg-gray-50 p-3 rounded-xl border border-gray-200"><p class="text-xs text-gray-600 whitespace-pre-wrap">${item.remarks}</p></div>` : ''}
+                </div>`;
             }).join('');
             lucide.createIcons();
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function clearSelection() { 
-            selectedProductIds.clear(); 
-            const allCbs = document.getElementById('selectAllFeedCheckbox');
-            if(allCbs) allCbs.checked = false;
-            renderProducts(); 
-        }
-
         function openProductModal() {
             document.getElementById('productForm').reset(); document.getElementById('p-id').value = '';
-            document.getElementById('p-date').value = new Date().toISOString().split('T')[0]; document.getElementById('p-base-kg').value = '20';
             document.getElementById('p-remarks').value = '';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
@@ -1345,9 +1220,26 @@
             const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]'); if(exNumRadio) exNumRadio.checked = true;
             const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]'); if(manualDryRadio) manualDryRadio.checked = true;
             document.getElementById('p-manual-len').value = '';
+            document.getElementById('p-manual-ten').value = ''; 
             tempImages = []; renderModalImages(); 
             addRawRow('KCC', '', '', true); addCureRow('백금AB'); addAddRow();
             toggleWorkMethod(); toggleRawRatio(); openModal('productModal');
+        }
+
+        function duplicateProduct(id) {
+            const original = dbData.find(i => String(i.id) === String(id));
+            if(!original) return;
+            
+            const duplicated = JSON.parse(JSON.stringify(original));
+            // 새로운 독립적인 ID 부여
+            duplicated.id = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
+            duplicated.itemCode = duplicated.itemCode + " (복사)";
+            duplicated.date = getNowFormattedString();
+            
+            dbData.push(duplicated);
+            safeSetLocalStorage('silicon_dbData', dbData);
+            sendDataToGoogleSheets('saveProduct', duplicated);
+            renderProducts();
         }
         
         function saveProduct() {
@@ -1366,13 +1258,19 @@
             let prodTimeVal = document.getElementById('p-prod-time').value.trim();
             if (/^[\d.]+$/.test(prodTimeVal)) prodTimeVal += '초';
 
+            // [버그 방지]: 로컬 저장용과 서버 전송용 ID를 변수에 고정하여 일치시킵니다.
+            const newId = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
+            const currentId = id ? String(id) : newId;
+
             const data = {
-                date: document.getElementById('p-date').value, type: typeEl ? typeEl.value : '압출',
+                id: currentId,
+                date: id && dbData.find(i=>String(i.id)==String(id)) ? dbData.find(i=>String(i.id)==String(id)).date : getNowFormattedString(),
+                type: typeEl ? typeEl.value : '압출',
                 itemCode: document.getElementById('p-code').value.trim(), company: document.getElementById('p-company').value, images: [...tempImages], 
                 specIn: document.getElementById('p-spec-in').value, specOut: document.getElementById('p-spec-out').value, specLen: document.getElementById('p-spec-len').value,
                 measIn: document.getElementById('p-meas-in').value, measOut: document.getElementById('p-meas-out').value, measLen: '',
                 laser: document.getElementById('p-laser').value, shrinkage: document.getElementById('p-shrink').value, weight: document.getElementById('p-weight').value, prodTime: prodTimeVal, remarks: document.getElementById('p-remarks').value,
-                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, useRawRatio: useRawRatio, raws: raws, cures: cures, adds: adds, mixture: document.getElementById('mixture-summary').innerHTML,
+                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, useRawRatio: useRawRatio, raws: raws, cures: cures, adds: adds, mixture: '',
                 workMethod: workEl ? workEl.value : '자동커팅',
                 exNum: exNumEl ? exNumEl.value : '1번', exTemp: document.getElementById('p-ex-temp').value, exSpeed: document.getElementById('p-ex-speed').value,
                 cuTemp: document.getElementById('p-cu-temp').value, cuTime: document.getElementById('p-cu-time').value,
@@ -1380,30 +1278,29 @@
                 autoHotLen: document.getElementById('p-auto-hot-len').value, autoLen: document.getElementById('p-auto-len').value, autoSpeed: document.getElementById('p-auto-speed').value, autoPress: document.getElementById('p-auto-press').value,
                 roll1Jig: document.getElementById('p-roll1-jig').value, roll1Feed: document.getElementById('p-roll1-feed').value, roll1Accel: document.getElementById('p-roll1-accel').value, roll1Press: document.getElementById('p-roll1-press').value,
                 roll2Jig: document.getElementById('p-roll2-jig').value, roll2Feed: document.getElementById('p-roll2-feed').value, roll2Accel: document.getElementById('p-roll2-accel').value, roll2Press: document.getElementById('p-roll2-press').value,
-                manualLen: document.getElementById('p-manual-len').value, manualDry: manualDryEl ? manualDryEl.value : '건조 전'
+                manualLen: document.getElementById('p-manual-len').value, manualTen: document.getElementById('p-manual-ten').value, manualDry: manualDryEl ? manualDryEl.value : '건조 전'
             };
             
-            formatMixtureHTML(data); // 화면 표시용 HTML 업데이트
+            formatMixtureHTML(data); // 배합 텍스트 업데이트
 
             if(id) {
-                const foundIndex = dbData.findIndex(i=>i.id==id);
-                if (foundIndex > -1) dbData[foundIndex] = { ...dbData[foundIndex], ...data };
+                const foundIndex = dbData.findIndex(i=>String(i.id)===String(id));
+                if (foundIndex > -1) dbData[foundIndex] = data;
             } else {
-                dbData.push({ id: Date.now(), ...data }); 
+                dbData.push(data); 
             }
             
-            // 로컬 스토리지 보존 및 구글 백그라운드 전송
-            safeSetLocalStorage('silicon_dbData', dbData, true);
-            sendDataToGoogleSheets('saveProduct', { id: id || Date.now(), ...data });
-            
+            safeSetLocalStorage('silicon_dbData', dbData);
+            sendDataToGoogleSheets('saveProduct', data);
             closeModal('productModal'); renderProducts();
         }
         
         function editProduct(id) {
-            const item = dbData.find(i => i.id === id); document.getElementById('p-id').value = item.id;
+            const item = dbData.find(i => String(i.id) === String(id)); document.getElementById('p-id').value = item.id;
             const tr = document.querySelector(`input[name="p-type"][value="${item.type}"]`); if(tr) tr.checked = true;
             const wr = document.querySelector(`input[name="p-work"][value="${item.workMethod}"]`); if(wr) wr.checked = true;
-            ['date','company'].forEach(k => document.getElementById(`p-${k}`).value = item[k]||''); document.getElementById('p-code').value = item.itemCode;
+            document.getElementById('p-company').value = item.company || ''; 
+            document.getElementById('p-code').value = item.itemCode;
             document.getElementById('p-spec-in').value = item.specIn || ''; document.getElementById('p-spec-out').value = item.specOut || ''; document.getElementById('p-spec-len').value = item.specLen || '';
             document.getElementById('p-meas-in').value = item.measIn || ''; document.getElementById('p-meas-out').value = item.measOut || ''; 
             document.getElementById('p-laser').value = item.laser || ''; document.getElementById('p-shrink').value = item.shrinkage || '';
@@ -1411,7 +1308,7 @@
             document.getElementById('p-base-kg').value = item.baseKg || 20; document.getElementById('p-remarks').value = item.remarks || '';
             
             const ratioCb = document.getElementById('use-raw-ratio'); if(ratioCb) ratioCb.checked = item.useRawRatio === true;
-            tempImages = item.images && item.images.length > 0 ? [...item.images] : (item.image ? [item.image] : []); renderModalImages();
+            tempImages = item.images && item.images.length > 0 ? [...item.images] : []; renderModalImages();
 
             document.getElementById('raw-container').innerHTML = ''; if(item.raws && item.raws.length > 0) item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); else addRawRow('KCC', '', '100', false);
             document.getElementById('cure-container').innerHTML = ''; if(item.cures && item.cures.length > 0) item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); else addCureRow('백금AB');
@@ -1426,32 +1323,37 @@
             document.getElementById('p-roll2-jig').value = item.roll2Jig || ''; document.getElementById('p-roll2-feed').value = item.roll2Feed || ''; document.getElementById('p-roll2-accel').value = item.roll2Accel || ''; document.getElementById('p-roll2-press').value = item.roll2Press || '';
             
             document.getElementById('p-manual-len').value = item.manualLen || '';
+            document.getElementById('p-manual-ten').value = item.manualTen || '';
             const md = document.querySelector(`input[name="p-manual-dry"][value="${item.manualDry || '건조 전'}"]`); if(md) md.checked = true;
 
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
             toggleWorkMethod(); toggleRawRatio(); openModal('productModal'); calcBatch(); 
         }
 
+        // ==========================================
+        // 일정 관리 기능
+        // ==========================================
         function renderSchedule() {
             const container = document.getElementById('scheduleCardContainer'); const empty = document.getElementById('emptySchedule'); container.innerHTML = '';
-            if(scheduleData.length === 0) { empty.classList.remove('hidden'); return; }
-            empty.classList.add('hidden');
+            if(scheduleData.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
+            if(empty) empty.classList.add('hidden');
             scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
                 const isDone = item.status === 'done'; const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
                 const iconClass = isDone ? 'text-blue-500 border-blue-500 bg-blue-50' : 'text-transparent border-gray-300 bg-white';
                 const card = document.createElement('div');
-                card.className = 'bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group cursor-pointer';
-                card.onclick = () => toggleScheduleStatus(item.id);
-                card.innerHTML = `<div class="flex items-center gap-3.5 flex-1"><div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0 transition-colors"><i data-lucide="check" class="w-4 h-4 ${isDone ? 'text-blue-500' : 'hidden'}"></i></div><span class="text-sm sm:text-base ${textStyle}">${item.task}</span></div><div class="flex gap-1.5 shrink-0 ml-3 relative z-10"><button type="button" onclick="editSchedule(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('schedule', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                card.className = 'bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group cursor-pointer';
+                card.onclick = () => toggleScheduleStatus(String(item.id));
+                card.innerHTML = `<div class="flex items-center gap-3.5 flex-1"><div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0"><i data-lucide="check" class="w-4 h-4 ${isDone ? 'text-blue-500' : 'hidden'}"></i></div><div class="flex flex-col"><span class="text-sm sm:text-base ${textStyle}">${item.task}</span><span class="text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 inline pb-0.5"></i> ${item.date || ''}</span></div></div><div class="flex gap-1.5 shrink-0 ml-3 relative z-10"><button type="button" onclick="editSchedule('${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('schedule', '${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
         }
 
         function toggleScheduleStatus(id) { 
-            const idx = scheduleData.findIndex(i => i.id === id); 
+            const idx = scheduleData.findIndex(i => String(i.id) === String(id)); 
             if(idx > -1) { 
-                scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done'; 
+                scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done';
+                scheduleData[idx].date = getNowFormattedString(); // 상태 변경 시에도 현재 시간 업데이트
                 safeSetLocalStorage('silicon_scheduleData', scheduleData);
                 sendDataToGoogleSheets('saveSchedule', scheduleData[idx]); renderSchedule(); 
             } 
@@ -1462,23 +1364,29 @@
         function saveSchedule() {
             const form = document.getElementById('scheduleForm'); if(!form.checkValidity()) return form.reportValidity();
             const id = document.getElementById('s-id').value; 
-            const data = { task: document.getElementById('s-task').value, status: document.getElementById('s-status').value };
+            
+            const newId = "SCH_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
+            const currentId = id ? String(id) : newId;
+
+            const data = { id: currentId, task: document.getElementById('s-task').value, status: document.getElementById('s-status').value, date: getNowFormattedString() };
             
             if(id) {
-                const foundIndex = scheduleData.findIndex(i=>i.id==id);
-                if (foundIndex > -1) scheduleData[foundIndex] = { ...scheduleData[foundIndex], ...data };
+                const foundIndex = scheduleData.findIndex(i=>String(i.id)===String(id));
+                if (foundIndex > -1) scheduleData[foundIndex] = data;
             } else {
-                scheduleData.push({ id: Date.now(), ...data });
+                scheduleData.push(data);
             }
             
             safeSetLocalStorage('silicon_scheduleData', scheduleData);
-            sendDataToGoogleSheets('saveSchedule', { id: id || Date.now(), ...data });
-            
+            sendDataToGoogleSheets('saveSchedule', data);
             closeModal('scheduleModal'); renderSchedule();
         }
 
-        function editSchedule(id) { const item = scheduleData.find(i => i.id === id); document.getElementById('s-id').value = item.id; document.getElementById('s-task').value = item.task; document.getElementById('s-status').value = item.status; document.getElementById('scheduleModalTitle').textContent = '일정 수정'; openModal('scheduleModal'); }
+        function editSchedule(id) { const item = scheduleData.find(i => String(i.id) === String(id)); document.getElementById('s-id').value = item.id; document.getElementById('s-task').value = item.task; document.getElementById('s-status').value = item.status; document.getElementById('scheduleModalTitle').textContent = '일정 수정'; openModal('scheduleModal'); }
 
+        // ==========================================
+        // 재고 관리 기능
+        // ==========================================
         function renderInventory() {
             const term = document.getElementById('searchInventory') ? document.getElementById('searchInventory').value.toLowerCase() : '';
             const filtered = inventoryData.filter(i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term));
@@ -1490,7 +1398,7 @@
                 const isLow = item.qty < 50; const qtyStyle = isLow ? 'text-navy-red' : 'text-navy-text';
                 const card = document.createElement('div');
                 card.className = 'bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col relative transition-all hover:border-navy-main hover:shadow-md';
-                card.innerHTML = `<div class="absolute top-3 right-3 flex gap-1.5 z-10"><button type="button" onclick="editInventory(${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-main bg-white hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-xl transition-all"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('inventory', ${item.id}); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-red bg-white hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div class="mb-3"><div class="mb-2.5">${getInvBadge(item.category)}</div><h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3><p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p></div><div class="mt-auto border-t border-gray-100 pt-3.5 flex items-end justify-between"><span class="text-[11px] sm:text-xs font-bold text-gray-500">잔여 수량</span><div class="text-right"><span class="text-xl sm:text-2xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span><span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-1">${item.unit}</span></div></div>`;
+                card.innerHTML = `<div class="absolute top-3 right-3 flex gap-1.5 z-10"><button type="button" onclick="editInventory('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-main bg-white hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-xl transition-all"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('inventory', '${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-400 hover:text-navy-red bg-white hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div class="mb-3"><div class="mb-2.5">${getInvBadge(item.category)}</div><h3 class="text-sm sm:text-base font-bold text-navy-text pr-16 leading-tight">${item.name}</h3><p class="text-[10px] sm:text-xs text-gray-400 font-mono mt-1 flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>${item.update}</p></div><div class="mt-auto border-t border-gray-100 pt-3.5 flex items-end justify-between"><span class="text-[11px] sm:text-xs font-bold text-gray-500">잔여 수량</span><div class="text-right"><span class="text-xl sm:text-2xl font-mono font-black ${qtyStyle} tracking-tight">${item.qty.toLocaleString()}</span><span class="text-[11px] sm:text-xs font-bold text-gray-400 ml-1">${item.unit}</span></div></div>`;
                 if(container) container.appendChild(card);
             });
             lucide.createIcons();
@@ -1501,46 +1409,26 @@
         function saveInventory() {
             const form = document.getElementById('inventoryForm'); if(!form.checkValidity()) return form.reportValidity();
             const id = document.getElementById('i-id').value; 
-            const data = { category: document.getElementById('i-category').value, name: document.getElementById('i-name').value, qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value, update: new Date().toISOString().split('T')[0] };
+            
+            const newId = "INV_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
+            const currentId = id ? String(id) : newId;
+
+            const data = { id: currentId, category: document.getElementById('i-category').value, name: document.getElementById('i-name').value, qty: parseInt(document.getElementById('i-qty').value), unit: document.getElementById('i-unit').value, update: getNowFormattedString() };
             
             if(id) {
-                const foundIndex = inventoryData.findIndex(i=>i.id==id);
-                if (foundIndex > -1) inventoryData[foundIndex] = { ...inventoryData[foundIndex], ...data };
+                const foundIndex = inventoryData.findIndex(i=>String(i.id)===String(id));
+                if (foundIndex > -1) inventoryData[foundIndex] = data;
             } else {
-                inventoryData.push({ id: Date.now(), ...data });
+                inventoryData.push(data);
             }
             
             safeSetLocalStorage('silicon_inventoryData', inventoryData);
-            sendDataToGoogleSheets('saveInventory', { id: id || Date.now(), ...data });
+            sendDataToGoogleSheets('saveInventory', data);
             
             closeModal('inventoryModal'); renderInventory();
         }
 
-        function editInventory(id) { const item = inventoryData.find(i => i.id === id); document.getElementById('i-id').value = item.id; document.getElementById('i-category').value = item.category; document.getElementById('i-name').value = item.name; document.getElementById('i-qty').value = item.qty; document.getElementById('i-unit').value = item.unit; document.getElementById('inventoryModalTitle').textContent = '재고 수정'; openModal('inventoryModal'); }
-
-        function requestDelete(type, id) { deleteInfo = { type, id }; openModal('deleteModal'); }
-        function closeDeleteModal() { deleteInfo = { type: null, id: null }; closeModal('deleteModal'); }
-        
-        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-            if(deleteInfo.type === 'product') { 
-                dbData = dbData.filter(i => i.id !== deleteInfo.id); 
-                selectedProductIds.delete(deleteInfo.id); 
-                safeSetLocalStorage('silicon_dbData', dbData, true);
-                renderProducts(); 
-            }
-            if(deleteInfo.type === 'schedule') { 
-                scheduleData = scheduleData.filter(i => i.id !== deleteInfo.id); 
-                safeSetLocalStorage('silicon_scheduleData', scheduleData);
-                renderSchedule(); 
-            }
-            if(deleteInfo.type === 'inventory') { 
-                inventoryData = inventoryData.filter(i => i.id !== deleteInfo.id); 
-                safeSetLocalStorage('silicon_inventoryData', inventoryData);
-                renderInventory(); 
-            }
-            sendDataToGoogleSheets('delete', { type: deleteInfo.type, id: deleteInfo.id });
-            closeDeleteModal();
-        });
+        function editInventory(id) { const item = inventoryData.find(i => String(i.id) === String(id)); document.getElementById('i-id').value = item.id; document.getElementById('i-category').value = item.category; document.getElementById('i-name').value = item.name; document.getElementById('i-qty').value = item.qty; document.getElementById('i-unit').value = item.unit; document.getElementById('inventoryModalTitle').textContent = '재고 수정'; openModal('inventoryModal'); }
 
     </script>
 </body>
