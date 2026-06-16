@@ -317,7 +317,7 @@
                             </div>
                         </div>
 
-                        <!-- 설비 가동 조건 섹션 (위로 배치됨) -->
+                        <!-- 설비 가동 조건 섹션 -->
                         <div id="modal-pane-equipment" class="mt-5 pt-5 border-t border-gray-200">
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건 및 후공정</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
@@ -532,7 +532,7 @@
         <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-[320px] overflow-hidden text-center fade-in p-6">
             <div class="mx-auto w-14 h-14 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-7 h-7"></i></div>
             <h3 class="text-lg font-bold text-navy-text">데이터 삭제</h3>
-            <p class="text-sm text-gray-500 mt-2 mb-6">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
+            <p class="text-sm text-gray-500 mt-2 mb-6">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 무습니다.</p>
             <div class="flex gap-3">
                 <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold active:bg-gray-200 transition-colors">취소</button>
                 <button type="button" id="confirmDeleteBtn" class="flex-1 py-3.5 bg-red-500 text-white rounded-xl text-sm font-bold active:bg-red-600 transition-colors">삭제</button>
@@ -557,7 +557,6 @@
             } catch (error) { console.warn("Google Sheets 전송 에러:", error); }
         }
 
-        // [중요 버그 수정]: 로컬 데이터 저장 시 안정성을 위해 예외처리 및 이미지 제거 로직 강화
         function safeSetLocalStorage(key, dataObj) {
             try {
                 localStorage.setItem(key, JSON.stringify(dataObj));
@@ -589,7 +588,6 @@
                 scheduleData = JSON.parse(localStorage.getItem('silicon_scheduleData')) || [];
                 inventoryData = JSON.parse(localStorage.getItem('silicon_inventoryData')) || [];
                 
-                // [버그 수정]: 불러올 때 혹시나 ID가 없을 경우 강제 주입하여 전체 삭제 버그 원천 차단
                 dbData.forEach(item => { 
                     if(!item.id) item.id = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000); 
                     formatMixtureHTML(item); 
@@ -736,8 +734,30 @@
             return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
         }
 
-        function formatTimeFromSeconds(s) { if(!s) return '0초'; const m=Math.floor(s/60), sec=parseFloat((s%60).toFixed(1)); return (m>0?m+'분 ':'')+(sec>0?sec+'초':'0초'); }
-        function parseTimeToSeconds(t) { if(!t) return 0; let s=0; const m=t.match(/([\d.]+)\s*분/), sec=t.match(/([\d.]+)\s*초/); if(m) s+=parseFloat(m[1])*60; if(sec) s+=parseFloat(sec[1]); return s||parseFloat(t)||0; }
+        function formatTimeFromSeconds(s) {
+            if(!s) return '0초';
+            const h = Math.floor(s/3600);
+            const m = Math.floor((s%3600)/60);
+            const sec = parseFloat((s%60).toFixed(1));
+            let parts = [];
+            if(h > 0) parts.push(h + '시간');
+            if(m > 0) parts.push(m + '분');
+            if(sec > 0 || (h === 0 && m === 0)) parts.push(sec + '초');
+            return parts.join(' ');
+        }
+        
+        function parseTimeToSeconds(t) {
+            if(!t) return 0;
+            let s = 0;
+            const h = t.match(/([\d.]+)\s*시간/);
+            const m = t.match(/([\d.]+)\s*분/);
+            const sec = t.match(/([\d.]+)\s*초/);
+            if (h) s += parseFloat(h[1]) * 3600;
+            if (m) s += parseFloat(m[1]) * 60;
+            if (sec) s += parseFloat(sec[1]);
+            return s || parseFloat(t) || 0;
+        }
+        
         function formatWeightFromGrams(totalGrams) { if (totalGrams === 0) return '0G'; if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG'; return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G'; }
 
         const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
@@ -809,7 +829,7 @@
         }
 
         // ==========================================
-        // [수정 완벽 대응]: 삭제 공통 기능 (단일 이벤트 리스너)
+        // 삭제 공통 기능
         // ==========================================
         function requestDelete(type, id) { 
             deleteInfo = { type: type, id: String(id) }; 
@@ -824,7 +844,7 @@
             const delType = deleteInfo.type;
             const delId = String(deleteInfo.id);
             
-            if (!delType || !delId || delId === "null") return; // 오류 방지 가드
+            if (!delType || !delId || delId === "null") return;
 
             if(delType === 'product') { 
                 dbData = dbData.filter(i => String(i.id) !== delId); 
@@ -1080,24 +1100,27 @@
                 
                 let wHtml = '';
                 if (item.workMethod === '자동커팅') {
-                    wHtml = `<div class="bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
-                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="scissors-line-dashed" class="w-4 h-4"></i> 자동커팅</span>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5 text-center leading-tight">커팅길이<br>(뜨거울때)</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoHotLen||'-'}</span></div>
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">설정길이</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoLen||'-'}</span></div>
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">후진속도</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoSpeed||'-'}</span></div>
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5">누름</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.autoPress||'-'}</span></div>
+                    wHtml = `<div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                        <span class="text-xs text-gray-500 font-bold mb-2 flex items-center gap-1.5"><i data-lucide="scissors-line-dashed" class="w-4 h-4"></i> 자동커팅</span>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5 leading-tight">커팅길이<br>(뜨거울때)</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.autoHotLen||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">설정길이</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.autoLen||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">후진속도</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.autoSpeed||'-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">누름</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.autoPress||'-'}</span></div>
                         </div>
                     </div>`;
                 } else if (item.workMethod === '롤 방식') {
-                    wHtml = `<div class="bg-white p-3.5 rounded-lg border border-gray-100 shadow-sm mt-1"><span class="text-gray-400 font-bold block mb-1.5 text-xs"><i data-lucide="roller-coaster" class="w-4 h-4 inline pb-0.5"></i> 롤 방식</span><span class="font-roboto text-navy-main text-sm sm:text-base leading-relaxed font-black block tracking-wide">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</span></div>`;
+                    wHtml = `<div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                        <span class="text-xs text-gray-400 font-bold block mb-1"><i data-lucide="roller-coaster" class="w-4 h-4 inline pb-0.5"></i> 롤 방식</span>
+                        <span class="font-roboto text-navy-main font-black text-sm sm:text-base leading-relaxed tracking-wide block">① ${item.roll1Jig||'-'}/${item.roll1Feed||'-'}/${item.roll1Accel||'-'}/${item.roll1Press||'-'}<br>② ${item.roll2Jig||'-'}/${item.roll2Feed||'-'}/${item.roll2Accel||'-'}/${item.roll2Press||'-'}</span>
+                    </div>`;
                 } else if (item.workMethod === '수동커팅') {
-                    wHtml = `<div class="bg-white p-3.5 sm:p-4 rounded-lg border border-gray-100 shadow-sm mt-1">
-                        <span class="text-gray-500 font-bold mb-3 flex items-center gap-1.5 text-xs sm:text-sm"><i data-lucide="scissors" class="w-4 h-4"></i> 수동커팅</span>
-                        <div class="grid grid-cols-3 gap-2 sm:gap-3 border-t border-gray-50 pt-3">
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">커팅길이</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.manualLen ? item.manualLen + 'm' : '-'}</span></div>
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">인장기</span> <span class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${item.manualTen || '-'}</span></div>
-                            <div class="flex flex-col items-center justify-center bg-gray-50 p-2 rounded"><span class="text-[10px] sm:text-xs text-gray-400 font-bold mb-0.5 text-center">건조 상태</span> <span class="font-roboto font-black text-sm sm:text-base ${item.manualDry==='건조 후'?'text-amber-600':'text-blue-600'} tracking-wide">${item.manualDry||'건조 전'}</span></div>
+                    wHtml = `<div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                        <span class="text-xs text-gray-500 font-bold mb-2 flex items-center gap-1.5"><i data-lucide="scissors" class="w-4 h-4"></i> 수동커팅</span>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">커팅길이</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.manualLen ? item.manualLen + 'm' : '-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">인장기</span> <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.manualTen || '-'}</span></div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 p-1.5 rounded text-center"><span class="text-[10px] text-gray-400 font-bold mb-0.5">건조 상태</span> <span class="font-roboto font-black text-sm sm:text-base ${item.manualDry==='건조 후'?'text-amber-600':'text-blue-600'}">${item.manualDry||'건조 전'}</span></div>
                         </div>
                     </div>`;
                 }
@@ -1114,8 +1137,6 @@
                     imgHtml = `<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0"><i data-lucide="image" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>`;
                 }
 
-                let remarksHtml = item.remarks ? `<div class="mt-4 sm:mt-5 bg-gray-50 p-3.5 sm:p-4 rounded-xl border border-gray-200"><h6 class="text-xs sm:text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><i data-lucide="file-edit" class="w-4 h-4 text-gray-400"></i> 비고</h6><p class="text-xs sm:text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">${item.remarks}</p></div>` : '';
-
                 return `
                 <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all flex flex-col">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
@@ -1131,53 +1152,59 @@
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 flex-1">
                         <!-- 왼쪽 열: 제원 규격 및 배합 정보 -->
-                        <div class="space-y-5">
-                            <div class="bg-blue-50/60 p-4 sm:p-5 rounded-xl border border-blue-100 flex-1 flex flex-col">
-                                <h5 class="text-sm sm:text-base font-bold text-navy-main mb-3 flex items-center shrink-0"><i data-lucide="ruler" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 규격 및 실측</h5>
-                                <div class="flex flex-col items-center justify-center bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-blue-50/50 flex-1 gap-3">
-                                    <div class="flex flex-col items-center text-center">
-                                        <span class="text-gray-400 font-bold mb-1.5 text-xs sm:text-sm">기준 규격</span>
-                                        <span class="font-black text-gray-700 font-roboto text-base sm:text-lg tracking-wide">${dSpec || '-'}</span>
-                                    </div>
-                                    <i data-lucide="arrow-down-circle" class="w-6 h-6 text-blue-200 shrink-0 my-1"></i>
-                                    <div class="flex flex-col items-center text-center">
-                                        <span class="text-navy-main/60 font-bold mb-1.5 text-xs sm:text-sm">금형</span>
-                                        <span class="font-black text-navy-main font-roboto text-2xl sm:text-3xl tracking-tight">${dMeas || '-'}</span>
+                        <div class="space-y-5 flex flex-col">
+                            
+                            <!-- 상단 반반 분할: 규격 및 실측 / 무게,시간,작업계산기 -->
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <!-- 규격 및 실측 -->
+                                <div class="bg-blue-50/60 p-3 sm:p-4 rounded-xl border border-blue-100 flex-1 flex flex-col">
+                                    <h5 class="text-sm font-bold text-navy-main mb-3 flex items-center shrink-0"><i data-lucide="ruler" class="w-4 h-4 mr-1.5"></i> 규격 및 실측</h5>
+                                    <div class="flex flex-col items-center justify-center bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-blue-50/50 flex-1 gap-2">
+                                        <div class="flex flex-col items-center text-center">
+                                            <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">기준 규격</span>
+                                            <span class="font-black text-gray-700 font-roboto text-sm sm:text-base tracking-wide">${dSpec || '-'}</span>
+                                        </div>
+                                        <i data-lucide="arrow-down-circle" class="w-5 h-5 text-blue-200 shrink-0 my-0.5"></i>
+                                        <div class="flex flex-col items-center text-center">
+                                            <span class="text-navy-main/60 font-bold mb-1 text-[10px] sm:text-xs">금형</span>
+                                            <span class="font-black text-navy-main font-roboto text-xl sm:text-2xl tracking-tight">${dMeas || '-'}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-3 mt-3">
-                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-50/50 flex flex-col items-center text-center">
-                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">1개당 무게(g)</span>
-                                        <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.weight ? item.weight + ' g' : '-'}</span>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-50/50 flex flex-col items-center text-center">
-                                        <span class="text-gray-400 font-bold mb-1 text-[10px] sm:text-xs">생산 시간</span>
-                                        <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.prodTime || '-'}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-3 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 shadow-sm">
-                                    <h6 class="text-xs sm:text-sm font-bold text-indigo-800 mb-2 flex items-center gap-1.5"><i data-lucide="calculator" class="w-4 h-4"></i> 작업 계산기</h6>
-                                    <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-3 bg-white p-2.5 sm:p-3 rounded-lg border border-indigo-100 shadow-sm">
-                                        <span class="text-[10px] sm:text-xs font-bold text-indigo-600 shrink-0 pl-1">작업 수량</span>
-                                        <div class="flex items-center flex-1 w-full border-b border-indigo-200 pb-0.5">
-                                            <input type="number" id="calc-qty-${item.id}" value="1" oninput="calculateProduction('${item.id}')" placeholder="수량 입력" class="flex-1 w-full min-w-0 h-7 sm:h-8 px-2 text-sm sm:text-base font-bold focus:outline-none bg-transparent text-right text-indigo-900">
-                                            <span class="text-[10px] sm:text-xs font-bold text-indigo-400 pr-1 shrink-0">EA</span>
+                                <!-- 무게, 시간, 작업계산기 -->
+                                <div class="flex-1 flex flex-col gap-3">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="bg-blue-50/60 p-3 rounded-xl shadow-sm border border-blue-100 flex flex-col items-center justify-center text-center">
+                                            <span class="text-navy-main/70 font-bold mb-1 text-[10px] sm:text-xs">1개당 무게(g)</span>
+                                            <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.weight ? item.weight + ' g' : '-'}</span>
+                                        </div>
+                                        <div class="bg-blue-50/60 p-3 rounded-xl shadow-sm border border-blue-100 flex flex-col items-center justify-center text-center">
+                                            <span class="text-navy-main/70 font-bold mb-1 text-[10px] sm:text-xs">생산 시간</span>
+                                            <span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.prodTime || '-'}</span>
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="bg-white p-2.5 rounded border border-indigo-100/50 flex flex-col justify-center shadow-sm">
-                                            <span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5">총 무게</span>
-                                            <span id="calc-weight-${item.id}" class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${defaultWeightStr}</span>
+                                    <div class="bg-indigo-50/60 p-3 sm:p-4 rounded-xl border border-indigo-100 shadow-sm flex-1 flex flex-col justify-center">
+                                        <h6 class="text-[11px] sm:text-xs font-bold text-indigo-800 mb-2 flex items-center gap-1"><i data-lucide="calculator" class="w-3.5 h-3.5"></i> 작업 계산기</h6>
+                                        <div class="flex items-center gap-2 mb-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-sm">
+                                            <span class="text-[10px] font-bold text-indigo-600 shrink-0 pl-1">수량</span>
+                                            <input type="number" id="calc-qty-${item.id}" value="1" oninput="calculateProduction('${item.id}')" class="flex-1 w-full min-w-0 h-6 px-1 text-sm font-bold focus:outline-none bg-transparent text-right text-indigo-900 border-b border-indigo-200">
+                                            <span class="text-[10px] font-bold text-indigo-400 pr-1 shrink-0">EA</span>
                                         </div>
-                                        <div class="bg-white p-2.5 rounded border border-indigo-100/50 flex flex-col justify-center shadow-sm">
-                                            <span class="text-[9px] sm:text-[10px] text-gray-400 font-bold mb-0.5">예상 소요시간</span>
-                                            <span id="calc-time-${item.id}" class="font-roboto font-black text-sm sm:text-base text-navy-main tracking-wide">${defaultTimeStr}</span>
+                                        <div class="grid grid-cols-2 gap-1.5">
+                                            <div class="bg-white p-2 rounded border border-indigo-100/50 flex flex-col shadow-sm">
+                                                <span class="text-[9px] text-gray-400 font-bold mb-0.5">총 무게</span>
+                                                <span id="calc-weight-${item.id}" class="font-roboto font-black text-[11px] sm:text-xs text-navy-main">${defaultWeightStr}</span>
+                                            </div>
+                                            <div class="bg-white p-2 rounded border border-indigo-100/50 flex flex-col shadow-sm">
+                                                <span class="text-[9px] text-gray-400 font-bold mb-0.5">예상 시간</span>
+                                                <span id="calc-time-${item.id}" class="font-roboto font-black text-[11px] sm:text-xs text-navy-main">${defaultTimeStr}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="bg-amber-50/60 p-4 sm:p-5 rounded-xl border border-amber-100 flex-1">
                                 <h5 class="text-sm sm:text-base font-bold text-amber-700 mb-3 flex items-center justify-between">
                                     <span class="flex items-center"><i data-lucide="beaker" class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5"></i> 배합 정보 <span class="text-[10px] text-amber-600 ml-1.5">기준: ${item.baseKg||20}KG</span></span>
@@ -1192,15 +1219,25 @@
                         </div>
                         
                         <!-- 오른쪽 열: 설비 가동 조건 -->
-                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                            <h5 class="text-sm font-bold text-gray-700 mb-3 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 mr-1.5"></i> 설비 가동 조건</h5>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">치수 (레이저)</span><span class="font-roboto font-black text-sm">${item.laser || '-'}</span></div>
-                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">수축률</span><span class="font-roboto font-black text-sm">${item.shrinkage ? item.shrinkage+'%' : '-'}</span></div>
-                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">건조 조건</span><span class="font-roboto font-black text-[11px]">${item.cuTemp ? item.cuTemp+'℃ / ' : '-'}${item.cuTime ? item.cuTime+'시간' : ''}</span></div>
-                                <div class="bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1">압출기 (${item.exNum||'-'})</span><span class="font-roboto font-black text-[11px]">${item.exTemp ? item.exTemp+'℃ / ' : '-'}${item.exSpeed ? item.exSpeed+'RPM' : ''}</span></div>
-                                <div class="col-span-2 bg-white p-3 rounded border border-gray-100 shadow-sm"><span class="text-gray-400 font-bold block mb-1.5">자동 투입 기계</span><div class="grid grid-cols-4 gap-1 text-center font-mono text-[10px] font-bold"><div class="bg-gray-50 p-1 rounded">투입:${item.fdSpeed||'-'}</div><div class="bg-gray-50 p-1 rounded">감속:${item.fdDecel||'-'}</div><div class="bg-gray-50 p-1 rounded">역전:${item.fdRev||'-'}</div><div class="bg-gray-50 p-1 rounded">싱글:${item.fdSingle||'-'}</div></div></div>
-                                <div class="col-span-2">${wHtml}</div>
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-200">
+                            <h5 class="text-sm font-bold text-gray-700 mb-2.5 flex items-center"><i data-lucide="settings-2" class="w-4 h-4 mr-1.5"></i> 설비 가동 조건</h5>
+                            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center"><span class="text-[11px] text-gray-400 font-bold mb-0.5">치수 (레이저)</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.laser || '-'}</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center"><span class="text-[11px] text-gray-400 font-bold mb-0.5">수축률</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.shrinkage ? item.shrinkage+'%' : '-'}</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center"><span class="text-[11px] text-gray-400 font-bold mb-0.5">건조 조건</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base break-keep leading-tight">${item.cuTemp ? item.cuTemp+'℃<br>' : '-'}${item.cuTime ? item.cuTime+'시간' : ''}</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center"><span class="text-[11px] text-gray-400 font-bold mb-0.5">압출기 (${item.exNum||'-'})</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base break-keep leading-tight">${item.exTemp ? item.exTemp+'℃<br>' : '-'}${item.exSpeed ? item.exSpeed+'RPM' : ''}</span></div>
+                                
+                                <div class="col-span-3 sm:col-span-4 bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm mt-1">
+                                    <span class="text-[11px] text-gray-400 font-bold block mb-1.5">자동 투입 기계</span>
+                                    <div class="grid grid-cols-4 gap-1 text-center">
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">투입</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSpeed||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">감속</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdDecel||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">역전</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdRev||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">싱글</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSingle||'-'}</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-span-3 sm:col-span-4 mt-1">${wHtml}</div>
                             </div>
                         </div>
                     </div>
@@ -1231,7 +1268,6 @@
             if(!original) return;
             
             const duplicated = JSON.parse(JSON.stringify(original));
-            // 새로운 독립적인 ID 부여
             duplicated.id = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
             duplicated.itemCode = duplicated.itemCode + " (복사)";
             duplicated.date = getNowFormattedString();
@@ -1258,7 +1294,6 @@
             let prodTimeVal = document.getElementById('p-prod-time').value.trim();
             if (/^[\d.]+$/.test(prodTimeVal)) prodTimeVal += '초';
 
-            // [버그 방지]: 로컬 저장용과 서버 전송용 ID를 변수에 고정하여 일치시킵니다.
             const newId = "PRD_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
             const currentId = id ? String(id) : newId;
 
@@ -1281,7 +1316,7 @@
                 manualLen: document.getElementById('p-manual-len').value, manualTen: document.getElementById('p-manual-ten').value, manualDry: manualDryEl ? manualDryEl.value : '건조 전'
             };
             
-            formatMixtureHTML(data); // 배합 텍스트 업데이트
+            formatMixtureHTML(data); 
 
             if(id) {
                 const foundIndex = dbData.findIndex(i=>String(i.id)===String(id));
@@ -1353,7 +1388,7 @@
             const idx = scheduleData.findIndex(i => String(i.id) === String(id)); 
             if(idx > -1) { 
                 scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done';
-                scheduleData[idx].date = getNowFormattedString(); // 상태 변경 시에도 현재 시간 업데이트
+                scheduleData[idx].date = getNowFormattedString();
                 safeSetLocalStorage('silicon_scheduleData', scheduleData);
                 sendDataToGoogleSheets('saveSchedule', scheduleData[idx]); renderSchedule(); 
             } 
