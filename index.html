@@ -132,6 +132,7 @@
                 </div>
             </div>
 
+            <!-- 선택 상세 제원 패널 -->
             <div id="detailsPanel" class="hidden mb-4 bg-navy-light/50 border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
                 <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-between items-center">
                     <div class="flex items-center">
@@ -145,16 +146,25 @@
                 </div>
             </div>
 
+            <!-- 리스트 영역 및 정렬 기능 -->
             <div class="bg-transparent flex flex-col overflow-hidden">
                 <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-gray-200 hover:border-navy-main/50 transition-colors shadow-sm">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-gray-200 hover:border-navy-main/50 transition-colors shadow-sm shrink-0">
                             <input type="checkbox" id="selectAllFeedCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer">
                             <span class="text-xs sm:text-sm font-bold text-navy-text">전체 선택</span>
                         </label>
-                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-200 hidden sm:inline-block">총 <span id="totalProductCount" class="text-navy-main font-black">0</span>건</span>
+                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-200 hidden sm:inline-block shrink-0">총 <span id="totalProductCount" class="text-navy-main font-black">0</span>건</span>
+                        
+                        <!-- 정렬 드롭다운 -->
+                        <select id="sortProduct" onchange="renderProducts()" class="h-[38px] sm:h-[42px] border border-gray-200 rounded-xl bg-white px-2 text-xs font-bold text-navy-text focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main shadow-sm cursor-pointer shrink-0">
+                            <option value="latest">최신 등록순</option>
+                            <option value="oldest">오래된 순</option>
+                            <option value="companyAsc">업체명 오름차순</option>
+                            <option value="companyDesc">업체명 내림차순</option>
+                        </select>
                     </div>
-                    <div class="relative w-full sm:max-w-md">
+                    <div class="relative w-full sm:max-w-md shrink-0">
                         <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"></i>
                         <input type="text" id="searchProduct" placeholder="회사명, 품번, 금형, 비고 검색" class="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main transition-all shadow-sm">
                     </div>
@@ -260,7 +270,7 @@
                                 </div>
                                 <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">회사명</label>
-                                    <input type="text" id="p-company" required placeholder="고객사명" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none">
+                                    <input type="text" id="p-company" list="company-list" required autocomplete="off" placeholder="고객사명 (검색/입력)" class="w-full min-w-0 h-9 sm:h-10 border border-gray-300 rounded-lg px-2 text-xs sm:text-sm focus:border-navy-main outline-none focus:ring-1 focus:ring-navy-main transition-colors">
                                 </div>
                                 <div class="flex flex-col min-w-0">
                                     <label class="block text-[10px] sm:text-xs font-bold mb-1 text-gray-600">품번</label>
@@ -317,7 +327,6 @@
                             </div>
                         </div>
 
-                        <!-- 설비 가동 조건 섹션 -->
                         <div id="modal-pane-equipment" class="mt-5 pt-5 border-t border-gray-200">
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="settings" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 설비 가동 조건 및 후공정</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
@@ -414,7 +423,6 @@
                             </div>
                         </div>
 
-                        <!-- 배합 정보 섹션 -->
                         <div id="modal-pane-mixture" class="mt-5 pt-5 border-t border-gray-200">
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보</h4>
                             <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
@@ -811,7 +819,6 @@
             updateLargePreviewUI();
         }
 
-
         // ==========================================
         // 공통 UI 함수
         // ==========================================
@@ -886,6 +893,20 @@
             item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
             let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
             item.mixture = `<div class="flex flex-col gap-1.5 w-full"><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span></div><div class="w-full h-px bg-amber-200/50 my-0.5"></div><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span></div></div>`;
+        }
+
+        // ==========================================
+        // 업체명 자동완성(Datalist) 업데이트
+        // ==========================================
+        function updateCompanyDatalist() {
+            const companies = [...new Set(dbData.map(item => item.company).filter(Boolean))];
+            let datalist = document.getElementById('company-list');
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = 'company-list';
+                document.body.appendChild(datalist);
+            }
+            datalist.innerHTML = companies.map(c => `<option value="${c}"></option>`).join('');
         }
 
         // ==========================================
@@ -1056,6 +1077,7 @@
             else if (m === '수동커팅') manualF.classList.remove('hidden'); 
         }
 
+        // 비율입력 기능 제거, 항상 갯수 기반 작동
         function addRawRow(type = 'KCC', name = '', count = '1') {
             const container = document.getElementById('raw-container'); const row = document.createElement('div');
             row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 mt-1.5';
@@ -1177,9 +1199,20 @@
 
         function renderProducts() {
             const term = document.getElementById('searchProduct')?.value.toLowerCase() || '';
-            const filtered = dbData.filter(i => {
+            const sortMode = document.getElementById('sortProduct')?.value || 'latest';
+
+            let filtered = dbData.filter(i => {
                 const searchStr = `${i.company || ''} ${i.itemCode || ''} ${i.measIn || ''} ${i.measOut || ''} ${i.remarks || ''}`.toLowerCase();
                 return searchStr.includes(term);
+            });
+
+            // 정렬 로직
+            filtered.sort((a, b) => {
+                if (sortMode === 'latest') return b.id.localeCompare(a.id);
+                if (sortMode === 'oldest') return a.id.localeCompare(b.id);
+                if (sortMode === 'companyAsc') return (a.company || '').localeCompare(b.company || '');
+                if (sortMode === 'companyDesc') return (b.company || '').localeCompare(a.company || '');
+                return 0;
             });
             
             const feedCon = document.getElementById('productFeedContainer'); const empty = document.getElementById('emptyProduct');
@@ -1188,12 +1221,12 @@
             if(filtered.length === 0) { if(empty) { empty.classList.remove('hidden'); empty.classList.add('flex'); } } 
             else {
                 if(empty) { empty.classList.add('hidden'); empty.classList.remove('flex'); }
-                filtered.sort((a,b) => b.id - a.id).forEach(item => {
+                filtered.forEach(item => {
                     const isChecked = selectedProductIds.has(String(item.id));
                     
-                    let thumbnailHtml = '';
+                    let imageWrapperHtml = '';
                     if (item.images && item.images.length > 0) {
-                        thumbnailHtml = `
+                        let thumbnailHtml = `
                             <div class="relative w-full h-full group/slider overflow-hidden rounded-lg">
                                 <img id="img-feed-${item.id}" src="${item.images[0]}" class="w-full h-full object-cover transition-all duration-300" data-index="0" onclick="openLargeImage('${item.id}', document.getElementById('img-feed-${item.id}').getAttribute('data-index')); event.stopPropagation();">
                                 ${item.images.length > 1 ? `
@@ -1203,8 +1236,7 @@
                                 ` : ''}
                             </div>
                         `;
-                    } else {
-                        thumbnailHtml = `<div class="w-full h-full rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-300"><i data-lucide="image" class="w-5 h-5"></i></div>`;
+                        imageWrapperHtml = `<div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">${thumbnailHtml}</div>`;
                     }
 
                     if(feedCon) {
@@ -1222,9 +1254,7 @@
                                 <div class="p-1 shrink-0" onclick="event.stopPropagation()">
                                     <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
                                 </div>
-                                <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">
-                                    ${thumbnailHtml}
-                                </div>
+                                ${imageWrapperHtml}
                                 <div class="flex flex-col gap-1 min-w-0 flex-1 ml-1">
                                     <div class="flex items-center gap-2">
                                         ${getBadge(item.type)}
@@ -1273,7 +1303,18 @@
             if(selectedProductIds.size === 0) { panel.classList.add('hidden'); return; }
             panel.classList.remove('hidden'); document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
-            container.innerHTML = dbData.filter(i => selectedProductIds.has(String(i.id))).sort((a,b)=>b.id-a.id).map(item => {
+            // 여기서도 뷰와 동일하게 정렬된 순서대로 보이기 위해 정렬 로직 추가
+            const sortMode = document.getElementById('sortProduct')?.value || 'latest';
+            let selectedArr = dbData.filter(i => selectedProductIds.has(String(i.id)));
+            selectedArr.sort((a, b) => {
+                if (sortMode === 'latest') return b.id.localeCompare(a.id);
+                if (sortMode === 'oldest') return a.id.localeCompare(b.id);
+                if (sortMode === 'companyAsc') return (a.company || '').localeCompare(b.company || '');
+                if (sortMode === 'companyDesc') return (b.company || '').localeCompare(a.company || '');
+                return 0;
+            });
+
+            container.innerHTML = selectedArr.map(item => {
                 const dSpec = formatSpec(item.specIn, item.specOut, item.specLen); 
                 const dMeas = formatSpec(item.measIn, item.measOut, ''); 
                 
@@ -1321,8 +1362,6 @@
                             ` : ''}
                         </div>
                     `;
-                } else {
-                    detailImgHtml = `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-300 shrink-0"><i data-lucide="image" class="w-8 h-8"></i></div>`;
                 }
 
                 return `
@@ -1335,6 +1374,17 @@
                                 <h4 class="font-black text-base sm:text-xl text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
                                 <p class="text-sm text-navy-muted font-medium mt-1">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
                             </div>
+                        </div>
+                        <div class="flex gap-1.5 shrink-0 self-end sm:self-center mt-2 sm:mt-0 relative z-10">
+                            <button type="button" onclick="duplicateProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors" title="복사">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button" onclick="editProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors" title="수정">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button" onclick="requestDelete('product', '${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl transition-colors" title="삭제">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
                     
@@ -1440,6 +1490,8 @@
             document.getElementById('p-remarks').value = '';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
+            updateCompanyDatalist(); // 자동완성 리스트 업데이트
+
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
             const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]'); if(exNumRadio) exNumRadio.checked = true;
             const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]'); if(manualDryRadio) manualDryRadio.checked = true;
@@ -1520,6 +1572,9 @@
             const item = dbData.find(i => String(i.id) === String(id)); document.getElementById('p-id').value = item.id;
             const tr = document.querySelector(`input[name="p-type"][value="${item.type}"]`); if(tr) tr.checked = true;
             const wr = document.querySelector(`input[name="p-work"][value="${item.workMethod}"]`); if(wr) wr.checked = true;
+            
+            updateCompanyDatalist(); // 자동완성 리스트 업데이트
+
             document.getElementById('p-company').value = item.company || ''; 
             document.getElementById('p-code').value = item.itemCode;
             document.getElementById('p-spec-in').value = item.specIn || ''; document.getElementById('p-spec-out').value = item.specOut || ''; document.getElementById('p-spec-len').value = item.specLen || '';
