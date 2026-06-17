@@ -419,22 +419,16 @@
                             <h4 class="text-xs sm:text-sm font-bold text-navy-main mb-3"><i data-lucide="beaker" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 -mt-0.5"></i> 배합 정보</h4>
                             <div class="bg-navy-light/30 p-3 sm:p-4 rounded-xl border border-navy-borderLight">
                                 <div class="flex items-center gap-2 mb-4 bg-white p-2 sm:p-3 rounded-lg border border-blue-100 shadow-sm inline-flex">
-                                    <span class="text-xs font-bold text-navy-main flex items-center"><i data-lucide="scale" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>기준 중량 설정</span>
-                                    <input type="number" id="p-base-kg" step="0.1" value="20" oninput="calcBatch()" class="w-20 min-w-0 h-8 border border-navy-main bg-blue-50 rounded text-xs sm:text-sm text-right font-mono font-bold focus:ring-2 focus:ring-navy-main/20 focus:border-navy-main outline-none shadow-sm text-navy-main">
+                                    <span class="text-xs font-bold text-navy-main flex items-center"><i data-lucide="scale" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i>자동 산출 중량</span>
+                                    <input type="text" id="p-base-kg" readonly class="w-20 min-w-0 h-8 border border-gray-200 bg-gray-50 rounded text-xs sm:text-sm text-right font-mono font-bold text-gray-500 shadow-sm outline-none cursor-not-allowed">
                                     <span class="text-xs font-bold text-gray-500">KG</span>
                                 </div>
 
                                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-4">
                                     <div class="lg:border-r lg:border-gray-200/50 lg:pr-3 flex flex-col min-w-0">
                                         <div class="flex justify-between items-center mb-1">
-                                            <div class="flex items-center gap-2">
-                                                <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
-                                                <label class="flex items-center gap-1 cursor-pointer bg-white border border-gray-200 px-1.5 py-0.5 rounded shadow-sm hover:border-navy-main transition-colors">
-                                                    <input type="checkbox" id="use-raw-ratio" class="w-2.5 h-2.5 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer" onchange="toggleRawRatio()">
-                                                    <span class="text-[9px] font-bold text-gray-500">비율입력</span>
-                                                </label>
-                                            </div>
-                                            <button type="button" onclick="addRawRow(undefined, '', '', true)" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
+                                            <label class="text-[11px] sm:text-xs font-bold text-navy-text">원자재 구성</label>
+                                            <button type="button" onclick="addRawRow(undefined, '', '1')" class="text-[9px] sm:text-[10px] font-bold bg-white border border-gray-300 px-2 py-1 rounded text-gray-600 shadow-sm flex items-center gap-1 active:bg-gray-50"><i data-lucide="plus" class="w-3 h-3"></i> 추가</button>
                                         </div>
                                         <div id="raw-container" class="space-y-1"></div>
                                     </div>
@@ -472,28 +466,59 @@
         </div>
     </div>
 
-    <!-- 이미지 크게 보기 모달 -->
+    <!-- 이미지 크게 보기 모달 (공용 & 슬라이더 및 모바일 터치 지원) -->
     <div id="imagePreviewModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 sm:p-6">
-        <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" onclick="closeModal('imagePreviewModal')"></div>
-        <div class="relative w-full max-w-4xl max-h-[90vh] flex flex-col items-center justify-center fade-in z-10">
-            <button type="button" onclick="closeModal('imagePreviewModal')" class="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 transition-colors"><i data-lucide="x" class="w-8 h-8"></i></button>
-            <img id="largeImagePreview" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl border-4 border-white/10">
+        <div class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm transition-opacity" onclick="closeModal('imagePreviewModal')"></div>
+        <div class="relative w-full max-w-4xl max-h-[90vh] flex items-center justify-center fade-in z-10 select-none">
+            
+            <button type="button" onclick="closeModal('imagePreviewModal')" class="absolute top-0 right-0 sm:-top-12 sm:right-0 text-white hover:text-gray-300 p-3 transition-colors z-30 drop-shadow-md">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+            
+            <!-- 왼쪽 화살표 -->
+            <button type="button" onclick="navigateLargePreview(-1); event.stopPropagation();" id="largePreviewPrevBtn" class="absolute left-1 sm:-left-12 text-white bg-black/30 hover:bg-black/60 p-3 sm:p-4 rounded-full transition-all z-30 drop-shadow-lg backdrop-blur-sm">
+                <i data-lucide="chevron-left" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            </button>
+
+            <!-- 메인 이미지 -->
+            <img id="largeImagePreview" src="" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl relative z-10 transition-transform duration-300 cursor-grab active:cursor-grabbing">
+            
+            <!-- 오른쪽 화살표 -->
+            <button type="button" onclick="navigateLargePreview(1); event.stopPropagation();" id="largePreviewNextBtn" class="absolute right-1 sm:-right-12 text-white bg-black/30 hover:bg-black/60 p-3 sm:p-4 rounded-full transition-all z-30 drop-shadow-lg backdrop-blur-sm">
+                <i data-lucide="chevron-right" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+            </button>
+
+            <!-- 인디케이터 -->
+            <div id="largePreviewCounter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white font-mono text-sm bg-black/60 backdrop-blur-sm px-4 py-1.5 rounded-full z-30 tracking-widest font-bold shadow-lg">
+                1/1
+            </div>
         </div>
     </div>
 
     <!-- 일정 모달 -->
     <div id="scheduleModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden fade-in">
-            <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-base text-navy-text" id="scheduleModalTitle">일정 추가</h3><button type="button" onclick="closeModal('scheduleModal')" class="text-gray-400 p-2 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button></div>
-            <div class="p-5">
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden fade-in flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 border-b flex justify-between items-center shrink-0"><h3 class="font-bold text-base text-navy-text" id="scheduleModalTitle">일정 추가</h3><button type="button" onclick="closeModal('scheduleModal')" class="text-gray-400 p-2 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="h-5 w-5"></i></button></div>
+            <div class="p-5 overflow-y-auto custom-scrollbar flex-1">
                 <form id="scheduleForm" class="space-y-4">
                     <input type="hidden" id="s-id">
-                    <div><label class="block text-xs font-bold mb-1.5">작업 내용 <span class="text-navy-red">*</span></label><input type="text" id="s-task" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"></div>
-                    <div><label class="block text-xs font-bold mb-1.5">상태</label><select id="s-status" class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"><option value="pending">대기중</option><option value="done">완료</option></select></div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5">작업 내용 <span class="text-navy-red">*</span></label>
+                        <input type="text" id="s-task" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1.5">상태</label>
+                        <select id="s-status" class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white focus:border-navy-main focus:ring-1 focus:ring-navy-main outline-none"><option value="pending">대기중</option><option value="done">완료</option></select>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100">
+                        <label class="block text-xs font-bold mb-2">사진 첨부 (최대 5장)</label>
+                        <div class="flex flex-wrap gap-2" id="schedule-image-grid"></div>
+                        <input type="file" id="s-image" accept="image/*" multiple class="hidden" onchange="handleMultipleScheduleImageUpload(event)">
+                    </div>
                 </form>
             </div>
-            <div class="bg-gray-50 px-5 py-4 flex gap-3">
+            <div class="bg-gray-50 px-5 py-4 flex gap-3 shrink-0">
                 <button type="button" onclick="closeModal('scheduleModal')" class="flex-1 border border-gray-300 bg-white rounded-xl py-3 text-sm font-bold shadow-sm transition-colors hover:bg-gray-50">취소</button>
                 <button type="button" onclick="saveSchedule()" class="flex-1 bg-navy-main text-white rounded-xl py-3 text-sm font-bold shadow-sm hover:bg-navy-hover transition-colors">저장</button>
             </div>
@@ -532,7 +557,7 @@
         <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-[320px] overflow-hidden text-center fade-in p-6">
             <div class="mx-auto w-14 h-14 bg-red-50 text-navy-red rounded-full flex items-center justify-center mb-4"><i data-lucide="alert-circle" class="w-7 h-7"></i></div>
             <h3 class="text-lg font-bold text-navy-text">데이터 삭제</h3>
-            <p class="text-sm text-gray-500 mt-2 mb-6">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 무습니다.</p>
+            <p class="text-sm text-gray-500 mt-2 mb-6">이 데이터를 삭제하시겠습니까?<br>삭제 후 복구할 수 없습니다.</p>
             <div class="flex gap-3">
                 <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold active:bg-gray-200 transition-colors">취소</button>
                 <button type="button" id="confirmDeleteBtn" class="flex-1 py-3.5 bg-red-500 text-white rounded-xl text-sm font-bold active:bg-red-600 transition-colors">삭제</button>
@@ -562,6 +587,7 @@
                 localStorage.setItem(key, JSON.stringify(dataObj));
             } catch (e) {
                 if (e.name === 'QuotaExceededError') {
+                    // 용량 부족 시 이미지 데이터 제외 후 저장
                     const strippedData = dataObj.map(item => ({...item, images: []}));
                     try { localStorage.setItem(key, JSON.stringify(strippedData)); } catch (err) {}
                 }
@@ -578,6 +604,11 @@
         let deleteInfo = { type: null, id: null }; 
         let selectedProductIds = new Set();
         let tempImages = [];
+        let tempScheduleImages = []; 
+        
+        // 확대 모달 전역 변수
+        let currentPreviewItem = null;
+        let currentPreviewIndex = 0;
 
         // ==========================================
         // 초기화 및 데이터 로드
@@ -667,11 +698,15 @@
                 renderProducts();
             });
 
+            // 모바일 터치 스와이프 이벤트 설정
+            setupSwipeEvents();
+
             loadLocalData(); 
             switchTab('product'); 
             loadDataFromGoogleSheets(); 
         });
 
+        // 엔터키 폼 제출 방지
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 if(e.target.tagName === 'TEXTAREA' || e.target.type === 'button' || e.target.type === 'submit') return;
@@ -684,6 +719,98 @@
                 if (index > -1 && index < focusable.length - 1) focusable[index + 1].focus();
             }
         });
+
+        // ==========================================
+        // 모달 이미지 슬라이더 및 스와이프 로직
+        // ==========================================
+        function setupSwipeEvents() {
+            const previewImg = document.getElementById('largeImagePreview');
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            if(!previewImg) return;
+
+            previewImg.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+
+            previewImg.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+
+            function handleSwipe() {
+                const swipeThreshold = 50; 
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    // 왼쪽으로 스와이프 (다음 사진)
+                    navigateLargePreview(1);
+                }
+                if (touchEndX > touchStartX + swipeThreshold) {
+                    // 오른쪽으로 스와이프 (이전 사진)
+                    navigateLargePreview(-1);
+                }
+            }
+        }
+
+        function updateLargePreviewUI() {
+            if (!currentPreviewItem || !currentPreviewItem.images || currentPreviewItem.images.length === 0) return;
+            
+            const imgEl = document.getElementById('largeImagePreview');
+            const counterEl = document.getElementById('largePreviewCounter');
+            const prevBtn = document.getElementById('largePreviewPrevBtn');
+            const nextBtn = document.getElementById('largePreviewNextBtn');
+
+            imgEl.src = currentPreviewItem.images[currentPreviewIndex];
+            counterEl.textContent = `${currentPreviewIndex + 1} / ${currentPreviewItem.images.length}`;
+
+            // 사진이 2장 이상일 때만 화살표와 카운터 표시
+            if (currentPreviewItem.images.length > 1) {
+                prevBtn.classList.remove('hidden');
+                nextBtn.classList.remove('hidden');
+                counterEl.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                counterEl.classList.add('hidden');
+            }
+        }
+
+        function openLargeImage(id, index) {
+            const item = dbData.find(i => String(i.id) === String(id));
+            if(item && item.images && item.images.length > 0) {
+                currentPreviewItem = item;
+                currentPreviewIndex = parseInt(index) || 0;
+                updateLargePreviewUI();
+                openModal('imagePreviewModal');
+            }
+        }
+
+        function openLargeScheduleImage(e, id, index) {
+            if(e) e.stopPropagation();
+            const item = scheduleData.find(i => String(i.id) === String(id));
+            if(item && item.images && item.images.length > 0) {
+                currentPreviewItem = item;
+                currentPreviewIndex = parseInt(index) || 0;
+                updateLargePreviewUI();
+                openModal('imagePreviewModal');
+            }
+        }
+
+        function navigateLargePreview(direction) {
+            if (!currentPreviewItem || !currentPreviewItem.images || currentPreviewItem.images.length <= 1) return;
+            
+            currentPreviewIndex += direction;
+            
+            // 루프 처리
+            if (currentPreviewIndex < 0) {
+                currentPreviewIndex = currentPreviewItem.images.length - 1;
+            } else if (currentPreviewIndex >= currentPreviewItem.images.length) {
+                currentPreviewIndex = 0;
+            }
+            
+            updateLargePreviewUI();
+        }
+
 
         // ==========================================
         // 공통 UI 함수
@@ -704,23 +831,6 @@
             });
             if(view === 'product') renderProducts(); if(view === 'schedule') renderSchedule(); if(view === 'inventory') renderInventory();
             lucide.createIcons();
-        }
-
-        function switchModalTab(tabName) {
-            const tabs = ['mixture', 'equipment'];
-            tabs.forEach(t => {
-                const pane = document.getElementById('modal-pane-' + t);
-                const btn = document.getElementById('modal-tab-' + t);
-                if(t === tabName) {
-                    pane.classList.remove('hidden');
-                    btn.classList.add('border-navy-main', 'text-navy-main', 'font-bold');
-                    btn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
-                } else {
-                    pane.classList.add('hidden');
-                    btn.classList.remove('border-navy-main', 'text-navy-main', 'font-bold');
-                    btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'font-medium');
-                }
-            });
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -767,7 +877,10 @@
         function formatMixtureHTML(item) {
             if (!item.raws) item.raws = []; if (!item.cures) item.cures = []; if (!item.adds) item.adds = [];
             let rawItems = [];
-            item.raws.forEach(r => { let fN = r.name ? `${r.type} ${r.name}` : r.type; if(fN) rawItems.push((item.useRawRatio === true && r.pct) ? `${fN} ${r.pct}%` : fN); });
+            item.raws.forEach(r => { 
+                let fN = r.name ? `${r.type} ${r.name}` : r.type; 
+                if(fN) rawItems.push(`${fN} (${r.count || 1})`); 
+            });
             let sumItems = [];
             item.cures.forEach(c => { let nm = c.type === '직접입력' ? c.direct : c.type; let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
             item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
@@ -776,7 +889,7 @@
         }
 
         // ==========================================
-        // 이미지 처리 기능
+        // 이미지 처리 기능 (제품)
         // ==========================================
         function handleMultipleImageUpload(event) {
             const files = Array.from(event.target.files);
@@ -820,13 +933,72 @@
 
         function removeTempImage(idx) { tempImages.splice(idx, 1); renderModalImages(); }
 
-        function openLargeImage(id, index) {
+        // 작은 목록 이미지 슬라이더 공통 로직
+        function slideImageLogic(event, id, dir, prefix) {
+            event.stopPropagation();
             const item = dbData.find(i => String(i.id) === String(id));
-            if(item && item.images && item.images[index]) {
-                document.getElementById('largeImagePreview').src = item.images[index];
-                openModal('imagePreviewModal');
-            }
+            if(!item || !item.images || item.images.length < 2) return;
+            const imgEl = document.getElementById(`img-${prefix}-${id}`);
+            const idxEl = document.getElementById(`idx-${prefix}-${id}`);
+            if(!imgEl) return;
+            
+            let currIdx = parseInt(imgEl.getAttribute('data-index') || '0');
+            currIdx += dir;
+            if(currIdx < 0) currIdx = item.images.length - 1;
+            if(currIdx >= item.images.length) currIdx = 0;
+            
+            imgEl.src = item.images[currIdx];
+            imgEl.setAttribute('data-index', currIdx);
+            if(idxEl) idxEl.textContent = `${currIdx + 1}/${item.images.length}`;
         }
+        function slideFeedImage(e, id, dir) { slideImageLogic(e, id, dir, 'feed'); }
+        function slideDetailImage(e, id, dir) { slideImageLogic(e, id, dir, 'det'); }
+
+        // ==========================================
+        // 이미지 처리 기능 (일정)
+        // ==========================================
+        function handleMultipleScheduleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+            const remainingSlots = 5 - tempScheduleImages.length;
+            const filesToProcess = files.slice(0, remainingSlots);
+            let loadedCount = 0;
+            
+            filesToProcess.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                        let width = img.width; let height = img.height;
+                        if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                        else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                        canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
+                        tempScheduleImages.push(canvas.toDataURL('image/jpeg', 0.6));
+                        loadedCount++;
+                        if (loadedCount === filesToProcess.length) renderScheduleImages();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = ''; 
+        }
+
+        function renderScheduleImages() {
+            const grid = document.getElementById('schedule-image-grid'); let html = '';
+            tempScheduleImages.forEach((img, idx) => {
+                html += `<div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 shadow-sm relative group overflow-hidden shrink-0"><img src="${img}" class="w-full h-full object-cover"><button type="button" onclick="removeScheduleImage(${idx})" class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;
+            });
+            if (tempScheduleImages.length < 5) {
+                html += `<div onclick="document.getElementById('s-image').click()" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-navy-main hover:bg-navy-light transition-colors group shrink-0"><div class="text-center flex flex-col items-center text-gray-400 group-hover:text-navy-main transition-colors"><i data-lucide="camera" class="w-5 h-5 mb-0.5"></i><span class="text-[9px] font-bold"><span>${tempScheduleImages.length}</span>/5</span></div></div>`;
+            }
+            grid.innerHTML = html; lucide.createIcons();
+        }
+
+        function removeScheduleImage(idx) { tempScheduleImages.splice(idx, 1); renderScheduleImages(); }
+
 
         // ==========================================
         // 삭제 공통 기능
@@ -884,33 +1056,21 @@
             else if (m === '수동커팅') manualF.classList.remove('hidden'); 
         }
 
-        function toggleRawRatio() {
-            const ratioCb = document.getElementById('use-raw-ratio'); if(!ratioCb) return;
-            document.querySelectorAll('.raw-ratio-wrapper').forEach(wrapper => { if(ratioCb.checked) wrapper.classList.remove('hidden'); else wrapper.classList.add('hidden'); });
-            calcBatch(); 
-        }
-
-        function addRawRow(type = 'KCC', name = '', pct = '', autoCalc = true) {
+        function addRawRow(type = 'KCC', name = '', count = '1') {
             const container = document.getElementById('raw-container'); const row = document.createElement('div');
             row.className = 'raw-row flex items-center gap-1.5 w-full relative pt-1 border-t border-gray-100 mt-1.5';
-            const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
             row.innerHTML = `
                 <select class="raw-type flex-[3] min-w-0 h-9 border border-gray-300 rounded-lg px-1.5 text-[11px] sm:text-xs bg-white outline-none">
                     <option value="KCC" ${type==='KCC'?'selected':''}>KCC</option><option value="어울림" ${type==='어울림'?'selected':''}>어울림</option><option value="대일소재" ${type==='대일소재'?'selected':''}>대일소재</option>
                 </select>
                 <input type="text" class="raw-name flex-[4] min-w-0 h-9 border border-gray-300 rounded-lg px-2 text-[11px] sm:text-xs bg-white outline-none" placeholder="명칭" value="${name}" oninput="calcBatch()">
-                <div class="raw-ratio-wrapper relative flex-[3] min-w-0 h-9 ${useRatio ? '' : 'hidden'}">
-                    <input type="number" step="any" class="raw-percent w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-4 text-[11px] sm:text-xs text-right bg-white outline-none" placeholder="비율" value="${pct}" oninput="calcBatch()">
-                    <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-bold">%</span>
+                <div class="raw-count-wrapper relative flex-[3] min-w-0 h-9">
+                    <input type="number" min="1" step="1" class="raw-count w-full h-full border border-gray-300 rounded-lg pl-1.5 pr-5 text-[11px] sm:text-xs text-right bg-white outline-none" placeholder="갯수" value="${count}" oninput="calcBatch()">
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">개</span>
                 </div>
-                <button type="button" onclick="this.closest('.raw-row').remove(); autoDistributeRawPercents(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                <button type="button" onclick="this.closest('.raw-row').remove(); calcBatch();" class="h-9 w-8 shrink-0 flex items-center justify-center bg-gray-100 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-500"><i data-lucide="minus" class="w-4 h-4"></i></button>
             `;
-            container.appendChild(row); lucide.createIcons(); if(autoCalc) autoDistributeRawPercents(); calcBatch();
-        }
-        
-        function autoDistributeRawPercents() {
-            const rows = document.querySelectorAll('.raw-row'); if (rows.length === 0) return;
-            const pct = (100 / rows.length).toFixed(1).replace(/\.0$/, ''); rows.forEach(row => row.querySelector('.raw-percent').value = pct);
+            container.appendChild(row); lucide.createIcons(); calcBatch();
         }
 
         function toggleCureDirect(sEl) {
@@ -953,15 +1113,24 @@
         }
 
         function calcBatch() {
-            const baseKg = parseFloat(document.getElementById('p-base-kg').value) || 0;
-            const useRatio = document.getElementById('use-raw-ratio')?.checked === true;
-            
+            let totalCount = 0;
             let rawItems = [];
             document.querySelectorAll('.raw-row').forEach(row => {
-                const type = row.querySelector('.raw-type').value; const name = row.querySelector('.raw-name').value.trim(); const pct = row.querySelector('.raw-percent').value;
+                const type = row.querySelector('.raw-type').value; 
+                const name = row.querySelector('.raw-name').value.trim(); 
+                const count = parseInt(row.querySelector('.raw-count').value) || 0;
+                totalCount += count;
+                
                 let fN = name ? `${type} ${name}` : type; 
-                if(fN) { if (useRatio && pct) rawItems.push(`${fN} ${pct}%`); else rawItems.push(fN); }
+                if(fN && count > 0) { 
+                    rawItems.push(`${fN} (${count})`);
+                }
             });
+
+            // 1갯수당 10kg 자동 산출
+            const baseKg = totalCount * 10;
+            const baseKgEl = document.getElementById('p-base-kg');
+            if(baseKgEl) baseKgEl.value = baseKg;
 
             let sumItems = [];
             document.querySelectorAll('.cure-row').forEach(row => {
@@ -1021,7 +1190,22 @@
                 if(empty) { empty.classList.add('hidden'); empty.classList.remove('flex'); }
                 filtered.sort((a,b) => b.id - a.id).forEach(item => {
                     const isChecked = selectedProductIds.has(String(item.id));
-                    let thumbnailHtml = (item.images && item.images.length > 0) ? `<img src="${item.images[0]}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-5 h-5 text-gray-300"></i>`;
+                    
+                    let thumbnailHtml = '';
+                    if (item.images && item.images.length > 0) {
+                        thumbnailHtml = `
+                            <div class="relative w-full h-full group/slider overflow-hidden rounded-lg">
+                                <img id="img-feed-${item.id}" src="${item.images[0]}" class="w-full h-full object-cover transition-all duration-300" data-index="0" onclick="openLargeImage('${item.id}', document.getElementById('img-feed-${item.id}').getAttribute('data-index')); event.stopPropagation();">
+                                ${item.images.length > 1 ? `
+                                    <button type="button" onclick="slideFeedImage(event, '${item.id}', -1)" class="absolute left-0 top-0 bottom-0 px-1 bg-black/30 text-white opacity-0 group-hover/slider:opacity-100 transition-opacity flex items-center justify-center hover:bg-black/50"><i data-lucide="chevron-left" class="w-3 h-3"></i></button>
+                                    <button type="button" onclick="slideFeedImage(event, '${item.id}', 1)" class="absolute right-0 top-0 bottom-0 px-1 bg-black/30 text-white opacity-0 group-hover/slider:opacity-100 transition-opacity flex items-center justify-center hover:bg-black/50"><i data-lucide="chevron-right" class="w-3 h-3"></i></button>
+                                    <div class="absolute bottom-0 right-0 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded-tl font-mono" id="idx-feed-${item.id}">1/${item.images.length}</div>
+                                ` : ''}
+                            </div>
+                        `;
+                    } else {
+                        thumbnailHtml = `<div class="w-full h-full rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-300"><i data-lucide="image" class="w-5 h-5"></i></div>`;
+                    }
 
                     if(feedCon) {
                         const activeClass = isChecked ? 'border-navy-main bg-blue-50/20 shadow-md ring-1 ring-navy-main' : 'border-gray-200 bg-white hover:shadow-md';
@@ -1038,7 +1222,7 @@
                                 <div class="p-1 shrink-0" onclick="event.stopPropagation()">
                                     <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
                                 </div>
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">
                                     ${thumbnailHtml}
                                 </div>
                                 <div class="flex flex-col gap-1 min-w-0 flex-1 ml-1">
@@ -1125,16 +1309,20 @@
                     </div>`;
                 }
 
-                let imgHtml = '';
+                let detailImgHtml = '';
                 if (item.images && item.images.length > 0) {
-                    imgHtml = `<div class="flex gap-2 flex-wrap">` + item.images.map((img, idx) => `
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0 overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-navy-main transition-all group" onclick="openLargeImage('${item.id}', ${idx})" title="사진 크게 보기">
-                            <img src="${img}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center transition-all"><i data-lucide="zoom-in" class="w-4 h-4 text-white drop-shadow-md"></i></div>
+                    detailImgHtml = `
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden relative group/dslider border border-gray-200 shadow-sm bg-gray-50">
+                            <img id="img-det-${item.id}" src="${item.images[0]}" class="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover/dslider:scale-105" onclick="openLargeImage('${item.id}', document.getElementById('img-det-${item.id}').getAttribute('data-index'))" data-index="0">
+                            ${item.images.length > 1 ? `
+                                <button type="button" onclick="slideDetailImage(event, '${item.id}', -1)" class="absolute left-0 top-0 bottom-0 px-1.5 bg-black/20 text-white opacity-0 group-hover/dslider:opacity-100 transition-opacity flex items-center justify-center hover:bg-black/50"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                <button type="button" onclick="slideDetailImage(event, '${item.id}', 1)" class="absolute right-0 top-0 bottom-0 px-1.5 bg-black/20 text-white opacity-0 group-hover/dslider:opacity-100 transition-opacity flex items-center justify-center hover:bg-black/50"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                <div class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-mono" id="idx-det-${item.id}">1/${item.images.length}</div>
+                            ` : ''}
                         </div>
-                    `).join('') + `</div>`;
+                    `;
                 } else {
-                    imgHtml = `<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center text-gray-300 shrink-0"><i data-lucide="image" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>`;
+                    detailImgHtml = `<div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-300 shrink-0"><i data-lucide="image" class="w-8 h-8"></i></div>`;
                 }
 
                 return `
@@ -1142,7 +1330,7 @@
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-gray-100 gap-3 shrink-0">
                         <div class="flex items-start sm:items-center gap-4">
-                            ${imgHtml}
+                            ${detailImgHtml}
                             <div>
                                 <h4 class="font-black text-base sm:text-xl text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
                                 <p class="text-sm text-navy-muted font-medium mt-1">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
@@ -1230,10 +1418,10 @@
                                 <div class="col-span-3 sm:col-span-4 bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm mt-1">
                                     <span class="text-[11px] text-gray-400 font-bold block mb-1.5">자동 투입 기계</span>
                                     <div class="grid grid-cols-4 gap-1 text-center">
-                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">투입</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSpeed||'-'}</span></div>
-                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">감속</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdDecel||'-'}</span></div>
-                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">역전</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdRev||'-'}</span></div>
-                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">싱글</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSingle||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">투입속도</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSpeed||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">다량감속</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdDecel||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">역회전</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdRev||'-'}</span></div>
+                                        <div class="bg-gray-50 p-1.5 rounded flex flex-col items-center justify-center"><span class="text-gray-500 text-[10px] font-bold mb-0.5">싱글속도</span><span class="font-roboto text-navy-main font-black text-sm sm:text-base">${item.fdSingle||'-'}</span></div>
                                     </div>
                                 </div>
                                 
@@ -1253,14 +1441,13 @@
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
-            const ratioCb = document.getElementById('use-raw-ratio'); if(ratioCb) ratioCb.checked = false;
             const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]'); if(exNumRadio) exNumRadio.checked = true;
             const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]'); if(manualDryRadio) manualDryRadio.checked = true;
             document.getElementById('p-manual-len').value = '';
             document.getElementById('p-manual-ten').value = ''; 
             tempImages = []; renderModalImages(); 
-            addRawRow('KCC', '', '', true); addCureRow('백금AB'); addAddRow();
-            toggleWorkMethod(); toggleRawRatio(); openModal('productModal');
+            addRawRow('KCC', '', '1'); addCureRow('백금AB'); addAddRow();
+            toggleWorkMethod(); openModal('productModal');
         }
 
         function duplicateProduct(id) {
@@ -1283,11 +1470,10 @@
             const id = document.getElementById('p-id').value;
             const typeEl = document.querySelector('input[name="p-type"]:checked'); const workEl = document.querySelector('input[name="p-work"]:checked');
             
-            let raws = []; document.querySelectorAll('.raw-row').forEach(row => raws.push({type: row.querySelector('.raw-type').value, name: row.querySelector('.raw-name').value.trim(), pct: row.querySelector('.raw-percent').value}));
+            let raws = []; document.querySelectorAll('.raw-row').forEach(row => raws.push({type: row.querySelector('.raw-type').value, name: row.querySelector('.raw-name').value.trim(), count: row.querySelector('.raw-count').value}));
             let cures = []; document.querySelectorAll('.cure-row').forEach(row => cures.push({type: row.querySelector('.cure-type').value, direct: row.querySelector('.cure-direct').value.trim(), ratio: row.querySelector('.cure-ratio').value}));
             let adds = []; document.querySelectorAll('.add-row').forEach(row => adds.push({name: row.querySelector('.add-name').value.trim(), ratio: row.querySelector('.add-ratio').value}));
 
-            const useRawRatio = document.getElementById('use-raw-ratio') ? document.getElementById('use-raw-ratio').checked : false;
             const exNumEl = document.querySelector('input[name="p-ex-num"]:checked');
             const manualDryEl = document.querySelector('input[name="p-manual-dry"]:checked');
 
@@ -1305,7 +1491,7 @@
                 specIn: document.getElementById('p-spec-in').value, specOut: document.getElementById('p-spec-out').value, specLen: document.getElementById('p-spec-len').value,
                 measIn: document.getElementById('p-meas-in').value, measOut: document.getElementById('p-meas-out').value, measLen: '',
                 laser: document.getElementById('p-laser').value, shrinkage: document.getElementById('p-shrink').value, weight: document.getElementById('p-weight').value, prodTime: prodTimeVal, remarks: document.getElementById('p-remarks').value,
-                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, useRawRatio: useRawRatio, raws: raws, cures: cures, adds: adds, mixture: '',
+                baseKg: parseFloat(document.getElementById('p-base-kg').value) || 20, raws: raws, cures: cures, adds: adds, mixture: '',
                 workMethod: workEl ? workEl.value : '자동커팅',
                 exNum: exNumEl ? exNumEl.value : '1번', exTemp: document.getElementById('p-ex-temp').value, exSpeed: document.getElementById('p-ex-speed').value,
                 cuTemp: document.getElementById('p-cu-temp').value, cuTime: document.getElementById('p-cu-time').value,
@@ -1342,10 +1528,12 @@
             document.getElementById('p-weight').value = item.weight || ''; document.getElementById('p-prod-time').value = item.prodTime || '';
             document.getElementById('p-base-kg').value = item.baseKg || 20; document.getElementById('p-remarks').value = item.remarks || '';
             
-            const ratioCb = document.getElementById('use-raw-ratio'); if(ratioCb) ratioCb.checked = item.useRawRatio === true;
             tempImages = item.images && item.images.length > 0 ? [...item.images] : []; renderModalImages();
 
-            document.getElementById('raw-container').innerHTML = ''; if(item.raws && item.raws.length > 0) item.raws.forEach(r => addRawRow(r.type, r.name, r.pct, false)); else addRawRow('KCC', '', '100', false);
+            document.getElementById('raw-container').innerHTML = ''; 
+            if(item.raws && item.raws.length > 0) item.raws.forEach(r => addRawRow(r.type, r.name, r.count || r.pct || '1')); 
+            else addRawRow('KCC', '', '1');
+            
             document.getElementById('cure-container').innerHTML = ''; if(item.cures && item.cures.length > 0) item.cures.forEach(c => addCureRow(c.type, c.direct, c.ratio)); else addCureRow('백금AB');
             document.getElementById('add-container').innerHTML = ''; if(item.adds && item.adds.length > 0) item.adds.forEach(a => addAddRow(a.name, a.ratio)); else addAddRow();
             
@@ -1362,7 +1550,7 @@
             const md = document.querySelector(`input[name="p-manual-dry"][value="${item.manualDry || '건조 전'}"]`); if(md) md.checked = true;
 
             document.getElementById('productModalTitle').textContent = '생산 레코드 수정';
-            toggleWorkMethod(); toggleRawRatio(); openModal('productModal'); calcBatch(); 
+            toggleWorkMethod(); openModal('productModal'); calcBatch(); 
         }
 
         // ==========================================
@@ -1375,10 +1563,31 @@
             scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
                 const isDone = item.status === 'done'; const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
                 const iconClass = isDone ? 'text-blue-500 border-blue-500 bg-blue-50' : 'text-transparent border-gray-300 bg-white';
+                
+                let imgHtml = '';
+                if(item.images && item.images.length > 0) {
+                    imgHtml = `<div class="ml-3 w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-gray-200 relative group cursor-pointer" onclick="openLargeScheduleImage(event, '${item.id}', 0)"><img src="${item.images[0]}" class="w-full h-full object-cover">${item.images.length > 1 ? `<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-[9px] font-bold transition-all">+${item.images.length-1}</div>` : `<div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center text-white transition-all"><i data-lucide="zoom-in" class="w-4 h-4"></i></div>`}</div>`;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between hover:border-navy-main transition-colors group cursor-pointer';
                 card.onclick = () => toggleScheduleStatus(String(item.id));
-                card.innerHTML = `<div class="flex items-center gap-3.5 flex-1"><div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0"><i data-lucide="check" class="w-4 h-4 ${isDone ? 'text-blue-500' : 'hidden'}"></i></div><div class="flex flex-col"><span class="text-sm sm:text-base ${textStyle}">${item.task}</span><span class="text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 inline pb-0.5"></i> ${item.date || ''}</span></div></div><div class="flex gap-1.5 shrink-0 ml-3 relative z-10"><button type="button" onclick="editSchedule('${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button type="button" onclick="requestDelete('schedule', '${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5 flex-1 min-w-0">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${iconClass} shrink-0">
+                            <i data-lucide="check" class="w-4 h-4 ${isDone ? 'text-blue-500' : 'hidden'}"></i>
+                        </div>
+                        <div class="flex flex-col min-w-0 flex-1">
+                            <span class="text-sm sm:text-base ${textStyle} truncate">${item.task}</span>
+                            <span class="text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 inline pb-0.5"></i> ${item.date || ''}</span>
+                        </div>
+                        ${imgHtml}
+                    </div>
+                    <div class="flex gap-1.5 shrink-0 ml-3 relative z-10">
+                        <button type="button" onclick="editSchedule('${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button type="button" onclick="requestDelete('schedule', '${item.id}'); event.stopPropagation();" class="p-2 text-gray-400 hover:text-navy-red bg-gray-50 hover:bg-red-50 rounded-xl"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `;
                 container.appendChild(card);
             });
             lucide.createIcons();
@@ -1394,7 +1603,14 @@
             } 
         }
 
-        function openScheduleModal() { document.getElementById('scheduleForm').reset(); document.getElementById('s-id').value = ''; document.getElementById('scheduleModalTitle').textContent = '일정 추가'; openModal('scheduleModal'); }
+        function openScheduleModal() { 
+            document.getElementById('scheduleForm').reset(); 
+            document.getElementById('s-id').value = ''; 
+            document.getElementById('scheduleModalTitle').textContent = '일정 추가'; 
+            tempScheduleImages = [];
+            renderScheduleImages();
+            openModal('scheduleModal'); 
+        }
 
         function saveSchedule() {
             const form = document.getElementById('scheduleForm'); if(!form.checkValidity()) return form.reportValidity();
@@ -1403,7 +1619,13 @@
             const newId = "SCH_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
             const currentId = id ? String(id) : newId;
 
-            const data = { id: currentId, task: document.getElementById('s-task').value, status: document.getElementById('s-status').value, date: getNowFormattedString() };
+            const data = { 
+                id: currentId, 
+                task: document.getElementById('s-task').value, 
+                status: document.getElementById('s-status').value, 
+                date: getNowFormattedString(),
+                images: [...tempScheduleImages]
+            };
             
             if(id) {
                 const foundIndex = scheduleData.findIndex(i=>String(i.id)===String(id));
@@ -1417,7 +1639,16 @@
             closeModal('scheduleModal'); renderSchedule();
         }
 
-        function editSchedule(id) { const item = scheduleData.find(i => String(i.id) === String(id)); document.getElementById('s-id').value = item.id; document.getElementById('s-task').value = item.task; document.getElementById('s-status').value = item.status; document.getElementById('scheduleModalTitle').textContent = '일정 수정'; openModal('scheduleModal'); }
+        function editSchedule(id) { 
+            const item = scheduleData.find(i => String(i.id) === String(id)); 
+            document.getElementById('s-id').value = item.id; 
+            document.getElementById('s-task').value = item.task; 
+            document.getElementById('s-status').value = item.status; 
+            document.getElementById('scheduleModalTitle').textContent = '일정 수정'; 
+            tempScheduleImages = item.images && item.images.length > 0 ? [...item.images] : [];
+            renderScheduleImages();
+            openModal('scheduleModal'); 
+        }
 
         // ==========================================
         // 재고 관리 기능
