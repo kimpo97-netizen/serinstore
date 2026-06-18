@@ -123,7 +123,6 @@
                     <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">생산 레코드와 제원을 직관적으로 관리합니다.</p>
                 </div>
                 <div class="flex gap-2">
-                    <!-- 엑셀 대신 새로고침 버튼으로 변경 -->
                     <button onclick="loadDataFromGoogleSheets()" class="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-gray-300 text-navy-text text-sm font-bold rounded-xl hover:bg-gray-50 flex items-center justify-center shadow-sm transition-colors">
                         <i data-lucide="refresh-cw" class="h-4 w-4 mr-2 text-navy-muted"></i> 새로고침
                     </button>
@@ -181,27 +180,52 @@
             </div>
         </div>
 
-        <!-- VIEW 2: 오늘의 일정 -->
+        <!-- VIEW 2: 오늘의 일정 (달력 + 리스트) -->
         <div id="view-schedule" class="hidden fade-in">
             <div class="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
-                    <h2 class="text-base sm:text-xl font-bold text-navy-text">오늘의 일정 관리</h2>
-                    <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">공정 라인 점검 및 스케줄을 기록합니다.</p>
+                    <h2 class="text-base sm:text-xl font-bold text-navy-text">일정 관리</h2>
+                    <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">날짜별 공정 라인 점검 및 스케줄을 기록합니다.</p>
                 </div>
                 <button onclick="openScheduleModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-navy-main text-white text-sm font-bold rounded-xl hover:bg-navy-hover flex items-center justify-center shadow-sm">
                     <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 새 일정 등록
                 </button>
             </div>
 
-            <div class="bg-white border border-navy-border rounded-xl shadow-card overflow-hidden p-3 sm:p-4">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                    <h3 class="font-bold text-navy-text text-sm flex items-center"><i data-lucide="list-todo" class="w-4 h-4 mr-1.5 text-navy-main"></i> 작업 리스트</h3>
-                    <span id="dateDisplay" class="text-[10px] sm:text-xs font-bold text-navy-muted bg-gray-50 px-2 sm:px-3 py-1 rounded-full border border-gray-200"></span>
+            <!-- 달력 및 일정 리스트 레이아웃 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                <!-- 달력 영역 (좌측) -->
+                <div class="lg:col-span-5 bg-white p-4 sm:p-5 rounded-2xl border border-navy-border shadow-card flex flex-col h-max">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                        <button onclick="changeMonth(-1)" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="chevron-left" class="w-5 h-5 text-gray-600"></i></button>
+                        <h3 id="calendarMonthYear" class="font-black text-navy-main text-lg tracking-wide">2024. 06</h3>
+                        <button onclick="changeMonth(1)" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                        <div class="text-[11px] font-bold text-red-500">일</div>
+                        <div class="text-[11px] font-bold text-gray-500">월</div>
+                        <div class="text-[11px] font-bold text-gray-500">화</div>
+                        <div class="text-[11px] font-bold text-gray-500">수</div>
+                        <div class="text-[11px] font-bold text-gray-500">목</div>
+                        <div class="text-[11px] font-bold text-gray-500">금</div>
+                        <div class="text-[11px] font-bold text-blue-500">토</div>
+                    </div>
+                    <div id="calendarDays" class="grid grid-cols-7 gap-1 sm:gap-1.5">
+                        <!-- 달력 날짜 동적 생성 -->
+                    </div>
                 </div>
-                <div id="scheduleCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
-                <div id="emptySchedule" class="hidden py-16 text-center">
-                    <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
-                    <p class="text-sm font-bold text-navy-text">등록된 일정이 없습니다.</p>
+
+                <!-- 일정 리스트 영역 (우측) -->
+                <div class="lg:col-span-7 bg-white p-4 sm:p-5 rounded-2xl border border-navy-border shadow-card flex flex-col min-h-[400px]">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                        <h3 class="font-bold text-navy-text text-sm sm:text-base flex items-center"><i data-lucide="list-todo" class="w-4 h-4 mr-1.5 text-navy-main"></i> 작업 리스트</h3>
+                        <span id="scheduleSelectedDateDisplay" class="text-[11px] sm:text-sm font-black text-navy-main bg-navy-light px-3 py-1 rounded-lg border border-navy-borderLight tracking-tight"></span>
+                    </div>
+                    <div id="scheduleCardContainer" class="flex flex-col gap-3"></div>
+                    <div id="emptySchedule" class="hidden flex-col justify-center items-center py-16 text-center m-auto">
+                        <i data-lucide="calendar-x" class="h-10 w-10 text-gray-300 mx-auto mb-3"></i>
+                        <p class="text-sm font-bold text-gray-500">선택한 날짜에 등록된 일정이 없습니다.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -608,7 +632,6 @@
                 localStorage.setItem(key, JSON.stringify(dataObj));
             } catch (e) {
                 if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    // 저장 공간 부족 시 알림을 띄우고 이미지를 제외한 채로 강제 저장합니다. (버그 방지)
                     alert('⚠️ 기기 저장 공간(5MB)이 초과되어 이미지가 저장되지 않았습니다. 불필요한 데이터를 삭제해 주세요.');
                     const strippedData = dataObj.map(item => ({...item, images: []}));
                     try { localStorage.setItem(key, JSON.stringify(strippedData)); } catch (err) {}
@@ -616,6 +639,58 @@
                     console.error('Storage error:', e);
                 }
             }
+        }
+
+        // ==========================================
+        // 유틸리티 함수 (호이스팅 문제 방지를 위해 상단 배치)
+        // ==========================================
+        function getNowFormattedString() {
+            const now = new Date();
+            return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
+
+        function formatTimeFromSeconds(s) {
+            if(!s) return '0초';
+            const h = Math.floor(s/3600);
+            const m = Math.floor((s%3600)/60);
+            const sec = parseFloat((s%60).toFixed(1));
+            let parts = [];
+            if(h > 0) parts.push(h + '시간');
+            if(m > 0) parts.push(m + '분');
+            if(sec > 0 || (h === 0 && m === 0)) parts.push(sec + '초');
+            return parts.join(' ');
+        }
+        
+        function parseTimeToSeconds(t) {
+            if(!t) return 0;
+            let s = 0;
+            const h = t.match(/([\d.]+)\s*시간/);
+            const m = t.match(/([\d.]+)\s*분/);
+            const sec = t.match(/([\d.]+)\s*초/);
+            if (h) s += parseFloat(h[1]) * 3600;
+            if (m) s += parseFloat(m[1]) * 60;
+            if (sec) s += parseFloat(sec[1]);
+            return s || parseFloat(t) || 0;
+        }
+        
+        function formatWeightFromGrams(totalGrams) { if (totalGrams === 0) return '0G'; if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG'; return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G'; }
+
+        const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
+        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
+        const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
+
+        function formatMixtureHTML(item) {
+            if (!item.raws) item.raws = []; if (!item.cures) item.cures = []; if (!item.adds) item.adds = [];
+            let rawItems = [];
+            item.raws.forEach(r => { 
+                let fN = r.name ? `${r.type} ${r.name}` : r.type; 
+                if(fN) rawItems.push(`${fN} (${r.count || 1})`); 
+            });
+            let sumItems = [];
+            item.cures.forEach(c => { let nm = c.type === '직접입력' ? c.direct : c.type; let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
+            item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
+            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
+            item.mixture = `<div class="flex flex-col gap-1.5 w-full"><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span></div><div class="w-full h-px bg-amber-200/50 my-0.5"></div><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span></div></div>`;
         }
 
         // ==========================================
@@ -630,10 +705,15 @@
         let selectedProductIds = new Set();
         let tempImages = [];
         let tempScheduleImages = []; 
+        let isProcessingImages = false; // 이미지 처리 중 상태 플래그
         
         // 확대 모달 전역 변수
         let currentPreviewItem = null;
         let currentPreviewIndex = 0;
+
+        // 달력 관련 전역 변수
+        let currentCalDate = new Date();
+        let selectedDateStr = ""; // DOMContentLoaded 에서 초기화됩니다.
 
         // ==========================================
         // 초기화 및 데이터 로드
@@ -707,7 +787,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => { 
+            selectedDateStr = getNowFormattedString().split(' ')[0]; // 초기 날짜 설정
             lucide.createIcons();
+            
             const dateEl = document.getElementById('dateDisplay');
             if(dateEl) {
                 const today = new Date();
@@ -721,6 +803,7 @@
             setupSwipeEvents();
 
             loadLocalData(); 
+            renderCalendar();
             switchTab('product'); 
             loadDataFromGoogleSheets(); 
         });
@@ -738,6 +821,78 @@
                 if (index > -1 && index < focusable.length - 1) focusable[index + 1].focus();
             }
         });
+
+        // ==========================================
+        // 달력 기능 로직
+        // ==========================================
+        function renderCalendar() {
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            const monthYearEl = document.getElementById('calendarMonthYear');
+            if(monthYearEl) monthYearEl.textContent = `${year}. ${String(month + 1).padStart(2, '0')}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+            
+            const daysContainer = document.getElementById('calendarDays');
+            if(!daysContainer) return;
+            daysContainer.innerHTML = '';
+            
+            // 해당 월에 일정이 있는 날짜들을 Set에 수집
+            const scheduleDates = new Set();
+            scheduleData.forEach(s => {
+                if (s.date) {
+                    const dStr = s.date.split(' ')[0]; // YYYY-MM-DD 추출
+                    scheduleDates.add(dStr);
+                }
+            });
+
+            // 이전 달 빈 칸
+            for(let i=0; i<firstDay; i++) {
+                daysContainer.innerHTML += `<div class="aspect-square"></div>`;
+            }
+            
+            const todayStr = getNowFormattedString().split(' ')[0];
+
+            for(let i=1; i<=lastDate; i++) {
+                const currDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const hasTask = scheduleDates.has(currDateStr);
+                const isSelected = currDateStr === selectedDateStr;
+                const isToday = currDateStr === todayStr;
+                
+                let btnClass = "w-full aspect-square flex flex-col items-center justify-center rounded-xl text-xs sm:text-sm transition-all cursor-pointer relative font-bold ";
+                
+                if(isSelected) {
+                    btnClass += "bg-navy-main text-white shadow-md";
+                } else if(isToday) {
+                    btnClass += "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100";
+                } else {
+                    btnClass += "text-gray-700 hover:bg-gray-100";
+                }
+                
+                // 일정이 있으면 남색 점(선택된 상태면 흰색 점) 표시
+                let dotHtml = hasTask ? `<div class="absolute bottom-1.5 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-navy-main'}"></div>` : '';
+                
+                daysContainer.innerHTML += `
+                    <div onclick="selectCalendarDate('${currDateStr}')" class="${btnClass}">
+                        ${i}
+                        ${dotHtml}
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function changeMonth(offset) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        function selectCalendarDate(dateStr) {
+            selectedDateStr = dateStr;
+            renderCalendar();
+            renderSchedule();
+        }
 
         // ==========================================
         // 모달 이미지 슬라이더 및 스와이프 로직
@@ -861,64 +1016,14 @@
                     iconBg.classList.replace('bg-navy-light', 'bg-gray-50'); iconBg.classList.replace('text-navy-main', 'text-gray-400');
                 }
             });
-            if(view === 'product') renderProducts(); if(view === 'schedule') renderSchedule(); if(view === 'inventory') renderInventory();
+            if(view === 'product') renderProducts(); 
+            if(view === 'schedule') { renderCalendar(); renderSchedule(); }
+            if(view === 'inventory') renderInventory();
             lucide.createIcons();
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        // ==========================================
-        // 유틸리티 함수
-        // ==========================================
-        function getNowFormattedString() {
-            const now = new Date();
-            return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        }
-
-        function formatTimeFromSeconds(s) {
-            if(!s) return '0초';
-            const h = Math.floor(s/3600);
-            const m = Math.floor((s%3600)/60);
-            const sec = parseFloat((s%60).toFixed(1));
-            let parts = [];
-            if(h > 0) parts.push(h + '시간');
-            if(m > 0) parts.push(m + '분');
-            if(sec > 0 || (h === 0 && m === 0)) parts.push(sec + '초');
-            return parts.join(' ');
-        }
-        
-        function parseTimeToSeconds(t) {
-            if(!t) return 0;
-            let s = 0;
-            const h = t.match(/([\d.]+)\s*시간/);
-            const m = t.match(/([\d.]+)\s*분/);
-            const sec = t.match(/([\d.]+)\s*초/);
-            if (h) s += parseFloat(h[1]) * 3600;
-            if (m) s += parseFloat(m[1]) * 60;
-            if (sec) s += parseFloat(sec[1]);
-            return s || parseFloat(t) || 0;
-        }
-        
-        function formatWeightFromGrams(totalGrams) { if (totalGrams === 0) return '0G'; if (totalGrams >= 1000) return (totalGrams / 1000).toLocaleString(undefined, {maximumFractionDigits: 2}) + 'KG'; return totalGrams.toLocaleString(undefined, {maximumFractionDigits: 1}) + 'G'; }
-
-        const getBadge = (type) => type==='압출' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-navy-main border-navy-main/30">압출</span>` : type==='프레스' ? `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-purple-600 border-purple-300">프레스</span>` : `<span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold rounded-lg bg-white border text-gray-600 border-gray-300">${type}</span>`;
-        const getInvBadge = (cat) => cat.includes('원자재') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-orange-50 text-orange-600 border-orange-100">원자재</span>` : cat.includes('첨가제') ? `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-purple-50 text-purple-600 border-purple-100">첨가제</span>` : `<span class="px-2.5 py-1 text-[10px] rounded-lg font-bold border whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200">기타</span>`;
-        const formatSpec = (inVal, outVal, lenVal) => [inVal, outVal, lenVal].filter(Boolean).join(' * ');
-
-        function formatMixtureHTML(item) {
-            if (!item.raws) item.raws = []; if (!item.cures) item.cures = []; if (!item.adds) item.adds = [];
-            let rawItems = [];
-            item.raws.forEach(r => { 
-                let fN = r.name ? `${r.type} ${r.name}` : r.type; 
-                if(fN) rawItems.push(`${fN} (${r.count || 1})`); 
-            });
-            let sumItems = [];
-            item.cures.forEach(c => { let nm = c.type === '직접입력' ? c.direct : c.type; let tot = (parseFloat(c.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
-            item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
-            let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
-            item.mixture = `<div class="flex flex-col gap-1.5 w-full"><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span></div><div class="w-full h-px bg-amber-200/50 my-0.5"></div><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span></div></div>`;
-        }
 
         // ==========================================
         // 이미지 처리 기능 (제품)
@@ -929,6 +1034,7 @@
             const remainingSlots = 5 - tempImages.length;
             const filesToProcess = files.slice(0, remainingSlots);
             let loadedCount = 0;
+            isProcessingImages = true; // 처리 중 플래그 활성화
             
             filesToProcess.forEach(file => {
                 const reader = new FileReader();
@@ -936,15 +1042,20 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                        // 화질 대폭 개선: 해상도 1200x1200px, JPEG 압축률 85% 로 상향 설정
-                        const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
+                        // 안정적인 저장을 위해 해상도 800px, 압축률 70% 설정 (버그 방지 및 화질 유지)
+                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                         let width = img.width; let height = img.height;
                         if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                         else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                         canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                        tempImages.push(canvas.toDataURL('image/jpeg', 0.85));
+                        
+                        tempImages.push(canvas.toDataURL('image/jpeg', 0.7));
                         loadedCount++;
-                        if (loadedCount === filesToProcess.length) renderModalImages();
+                        
+                        if (loadedCount === filesToProcess.length) {
+                            isProcessingImages = false; // 처리 완료
+                            renderModalImages();
+                        }
                     };
                     img.src = e.target.result;
                 };
@@ -966,7 +1077,6 @@
 
         function removeTempImage(idx) { tempImages.splice(idx, 1); renderModalImages(); }
 
-        // 작은 목록 이미지 슬라이더 공통 로직
         function slideImageLogic(event, id, dir, prefix) {
             event.stopPropagation();
             const item = dbData.find(i => String(i.id) === String(id));
@@ -996,6 +1106,7 @@
             const remainingSlots = 5 - tempScheduleImages.length;
             const filesToProcess = files.slice(0, remainingSlots);
             let loadedCount = 0;
+            isProcessingImages = true;
             
             filesToProcess.forEach(file => {
                 const reader = new FileReader();
@@ -1003,15 +1114,19 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                        // 화질 대폭 개선: 해상도 1200x1200px, JPEG 압축률 85% 로 상향 설정
-                        const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
+                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                         let width = img.width; let height = img.height;
                         if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                         else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                         canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                        tempScheduleImages.push(canvas.toDataURL('image/jpeg', 0.85));
+                        
+                        tempScheduleImages.push(canvas.toDataURL('image/jpeg', 0.7));
                         loadedCount++;
-                        if (loadedCount === filesToProcess.length) renderScheduleImages();
+                        
+                        if (loadedCount === filesToProcess.length) {
+                            isProcessingImages = false;
+                            renderScheduleImages();
+                        }
                     };
                     img.src = e.target.result;
                 };
@@ -1082,6 +1197,7 @@
             if(delType === 'schedule') { 
                 scheduleData = scheduleData.filter(i => String(i.id) !== delId); 
                 safeSetLocalStorage('silicon_scheduleData', scheduleData); 
+                renderCalendar();
                 renderSchedule(); 
             }
             if(delType === 'inventory') { 
@@ -1559,6 +1675,11 @@
         }
         
         function saveProduct() {
+            if (isProcessingImages) {
+                alert('이미지를 처리 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
             const form = document.getElementById('productForm'); if(!form.checkValidity()) return form.reportValidity();
             const id = document.getElementById('p-id').value;
             const typeEl = document.querySelector('input[name="p-type"]:checked'); const workEl = document.querySelector('input[name="p-work"]:checked');
@@ -1650,10 +1771,30 @@
         // 일정 관리 기능
         // ==========================================
         function renderSchedule() {
-            const container = document.getElementById('scheduleCardContainer'); const empty = document.getElementById('emptySchedule'); container.innerHTML = '';
-            if(scheduleData.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
-            if(empty) empty.classList.add('hidden');
-            scheduleData.sort((a,b) => b.id - a.id).forEach(item => {
+            const container = document.getElementById('scheduleCardContainer'); 
+            const empty = document.getElementById('emptySchedule'); 
+            const dateDisplay = document.getElementById('scheduleSelectedDateDisplay');
+            
+            container.innerHTML = '';
+            
+            if(dateDisplay) {
+                const parts = selectedDateStr.split('-');
+                dateDisplay.textContent = `${parts[0]}년 ${parseInt(parts[1])}월 ${parseInt(parts[2])}일`;
+            }
+
+            const filteredData = scheduleData.filter(s => s.date && s.date.startsWith(selectedDateStr));
+
+            if(filteredData.length === 0) { 
+                if(empty) empty.classList.remove('hidden'); 
+                empty.classList.add('flex');
+                return; 
+            }
+            if(empty) {
+                empty.classList.add('hidden');
+                empty.classList.remove('flex');
+            }
+
+            filteredData.sort((a,b) => b.id.localeCompare(a.id)).forEach(item => {
                 const isDone = item.status === 'done'; const textStyle = isDone ? 'text-gray-400 line-through' : 'text-navy-text font-bold';
                 const iconClass = isDone ? 'text-blue-500 border-blue-500 bg-blue-50' : 'text-transparent border-gray-300 bg-white';
                 
@@ -1672,7 +1813,7 @@
                         </div>
                         <div class="flex flex-col min-w-0 flex-1">
                             <span class="text-sm sm:text-base ${textStyle} truncate">${item.task}</span>
-                            <span class="text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 inline pb-0.5"></i> ${item.date || ''}</span>
+                            <span class="text-[10px] text-gray-400 font-mono mt-0.5"><i data-lucide="clock" class="w-2.5 h-2.5 inline pb-0.5"></i> ${item.date.split(' ')[1] || item.date}</span>
                         </div>
                         ${imgHtml}
                     </div>
@@ -1690,7 +1831,6 @@
             const idx = scheduleData.findIndex(i => String(i.id) === String(id)); 
             if(idx > -1) { 
                 scheduleData[idx].status = scheduleData[idx].status === 'done' ? 'pending' : 'done';
-                scheduleData[idx].date = getNowFormattedString();
                 safeSetLocalStorage('silicon_scheduleData', scheduleData);
                 sendDataToGoogleSheets('saveSchedule', scheduleData[idx]); renderSchedule(); 
             } 
@@ -1706,17 +1846,27 @@
         }
 
         function saveSchedule() {
+            if (isProcessingImages) {
+                alert('이미지를 처리 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
             const form = document.getElementById('scheduleForm'); if(!form.checkValidity()) return form.reportValidity();
             const id = document.getElementById('s-id').value; 
             
             const newId = "SCH_" + new Date().getTime() + "_" + Math.floor(Math.random()*1000);
             const currentId = id ? String(id) : newId;
 
+            // 선택된 달력 날짜 + 현재 시간 저장
+            const now = new Date();
+            const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            const finalDateStr = selectedDateStr + ' ' + timeStr;
+
             const data = { 
                 id: currentId, 
                 task: document.getElementById('s-task').value, 
                 status: document.getElementById('s-status').value, 
-                date: getNowFormattedString(),
+                date: finalDateStr,
                 images: [...tempScheduleImages]
             };
             
@@ -1729,7 +1879,9 @@
             
             safeSetLocalStorage('silicon_scheduleData', scheduleData);
             sendDataToGoogleSheets('saveSchedule', data);
-            closeModal('scheduleModal'); renderSchedule();
+            closeModal('scheduleModal'); 
+            renderCalendar();
+            renderSchedule();
         }
 
         function editSchedule(id) { 
