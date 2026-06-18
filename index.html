@@ -123,8 +123,9 @@
                     <p class="text-[11px] sm:text-sm text-navy-muted mt-0.5 sm:mt-1">생산 레코드와 제원을 직관적으로 관리합니다.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button class="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-gray-300 text-navy-text text-sm font-bold rounded-xl hover:bg-gray-50 flex items-center justify-center shadow-sm transition-colors">
-                        <i data-lucide="download" class="h-4 w-4 mr-2 text-navy-muted"></i> 엑셀
+                    <!-- 엑셀 대신 새로고침 버튼으로 변경 -->
+                    <button onclick="loadDataFromGoogleSheets()" class="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-gray-300 text-navy-text text-sm font-bold rounded-xl hover:bg-gray-50 flex items-center justify-center shadow-sm transition-colors">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 mr-2 text-navy-muted"></i> 새로고침
                     </button>
                     <button onclick="openProductModal()" class="flex-1 sm:flex-none px-5 py-2.5 bg-navy-main text-white text-sm font-bold rounded-xl hover:bg-navy-hover flex items-center justify-center shadow-sm transition-colors">
                         <i data-lucide="plus" class="h-4 w-4 mr-2"></i> 생산 등록
@@ -134,12 +135,14 @@
 
             <!-- 선택 상세 제원 패널 -->
             <div id="detailsPanel" class="hidden mb-4 bg-navy-light/50 border border-navy-borderLight rounded-xl shadow-sm overflow-hidden panel-enter">
-                <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-between items-center">
-                    <div class="flex items-center">
-                        <i data-lucide="check-square" class="h-4 w-4 sm:h-5 sm:w-5 text-navy-main mr-2"></i>
-                        <h3 class="text-xs sm:text-sm font-bold text-navy-text">선택 상세 제원 비교 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[10px] rounded-full">0</span></h3>
+                <div class="bg-navy-light px-4 py-3 border-b border-navy-borderLight flex justify-start items-center gap-3">
+                    <button onclick="clearSelection()" class="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:text-navy-main hover:border-navy-main hover:bg-blue-50 shadow-sm transition-colors shrink-0">
+                        <i data-lucide="x-square" class="w-4 h-4"></i> 전체 선택 해제
+                    </button>
+                    <div class="w-px h-4 bg-gray-300 hidden sm:block shrink-0"></div>
+                    <div class="flex items-center min-w-0">
+                        <h3 class="text-xs sm:text-sm font-bold text-navy-text truncate">상세 제원 비교 <span id="selectedCount" class="ml-1.5 px-2 py-0.5 bg-navy-main text-white text-[10px] rounded-full">0</span></h3>
                     </div>
-                    <button onclick="clearSelection()" class="text-xs font-bold text-navy-muted hover:text-navy-main transition-colors">선택 해제</button>
                 </div>
                 <div class="p-4 sm:p-5">
                     <div id="detailsCardContainer" class="grid grid-cols-1 gap-4 sm:gap-6"></div>
@@ -150,11 +153,7 @@
             <div class="bg-transparent flex flex-col overflow-hidden">
                 <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <label class="flex items-center gap-2 cursor-pointer bg-white px-3.5 py-2 rounded-xl border border-gray-200 hover:border-navy-main/50 transition-colors shadow-sm shrink-0">
-                            <input type="checkbox" id="selectAllFeedCheckbox" class="w-4 h-4 text-navy-main border-gray-300 rounded focus:ring-navy-main cursor-pointer">
-                            <span class="text-xs sm:text-sm font-bold text-navy-text">전체 선택</span>
-                        </label>
-                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-200 hidden sm:inline-block shrink-0">총 <span id="totalProductCount" class="text-navy-main font-black">0</span>건</span>
+                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-2 rounded-lg border border-gray-200 inline-block shrink-0">총 <span id="totalProductCount" class="text-navy-main font-black">0</span>건</span>
                         
                         <!-- 정렬 드롭다운 -->
                         <select id="sortProduct" onchange="renderProducts()" class="h-[38px] sm:h-[42px] border border-gray-200 rounded-xl bg-white px-2 text-xs font-bold text-navy-text focus:outline-none focus:border-navy-main focus:ring-1 focus:ring-navy-main shadow-sm cursor-pointer shrink-0">
@@ -608,10 +607,13 @@
             try {
                 localStorage.setItem(key, JSON.stringify(dataObj));
             } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    // 용량 부족 시 이미지 데이터 제외 후 저장
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    // 저장 공간 부족 시 알림을 띄우고 이미지를 제외한 채로 강제 저장합니다. (버그 방지)
+                    alert('⚠️ 기기 저장 공간(5MB)이 초과되어 이미지가 저장되지 않았습니다. 불필요한 데이터를 삭제해 주세요.');
                     const strippedData = dataObj.map(item => ({...item, images: []}));
                     try { localStorage.setItem(key, JSON.stringify(strippedData)); } catch (err) {}
+                } else {
+                    console.error('Storage error:', e);
                 }
             }
         }
@@ -714,12 +716,6 @@
             
             document.getElementById('searchProduct')?.addEventListener('input', renderProducts);
             document.getElementById('searchInventory')?.addEventListener('input', renderInventory);
-            
-            document.getElementById('selectAllFeedCheckbox')?.addEventListener('change', (e) => {
-                const cbs = document.querySelectorAll('.prod-cb');
-                cbs.forEach(c => { e.target.checked ? selectedProductIds.add(String(c.value)) : selectedProductIds.delete(String(c.value)); });
-                renderProducts();
-            });
 
             // 모바일 터치 스와이프 이벤트 설정
             setupSwipeEvents();
@@ -940,12 +936,13 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                        // 화질 대폭 개선: 해상도 1200x1200px, JPEG 압축률 85% 로 상향 설정
+                        const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
                         let width = img.width; let height = img.height;
                         if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                         else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                         canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                        tempImages.push(canvas.toDataURL('image/jpeg', 0.6));
+                        tempImages.push(canvas.toDataURL('image/jpeg', 0.85));
                         loadedCount++;
                         if (loadedCount === filesToProcess.length) renderModalImages();
                     };
@@ -1006,12 +1003,13 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                        // 화질 대폭 개선: 해상도 1200x1200px, JPEG 압축률 85% 로 상향 설정
+                        const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
                         let width = img.width; let height = img.height;
                         if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
                         else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                         canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                        tempScheduleImages.push(canvas.toDataURL('image/jpeg', 0.6));
+                        tempScheduleImages.push(canvas.toDataURL('image/jpeg', 0.85));
                         loadedCount++;
                         if (loadedCount === filesToProcess.length) renderScheduleImages();
                     };
@@ -1099,7 +1097,7 @@
         // ==========================================
         // 제품 DB 기능
         // ==========================================
-        function clearSelection() { selectedProductIds.clear(); const allCbs = document.getElementById('selectAllFeedCheckbox'); if(allCbs) allCbs.checked = false; renderProducts(); }
+        function clearSelection() { selectedProductIds.clear(); renderProducts(); }
         function removeSelection(id) { selectedProductIds.delete(String(id)); renderProducts(); }
 
         function toggleSample() { const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value; ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st; }
@@ -1281,15 +1279,18 @@
                         card.className = `p-3.5 sm:p-5 rounded-2xl border cursor-pointer transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${activeClass}`;
                         
                         card.onclick = (e) => { 
-                            if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.type === 'checkbox') return; 
-                            const cb = card.querySelector('.prod-cb'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); 
+                            if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return; 
+                            const strId = String(item.id);
+                            if (selectedProductIds.has(strId)) {
+                                selectedProductIds.delete(strId);
+                            } else {
+                                selectedProductIds.add(strId);
+                            }
+                            renderProducts(); 
                         };
                         
                         card.innerHTML = `
                             <div class="flex items-center gap-3.5 flex-1 min-w-0">
-                                <div class="p-1 shrink-0" onclick="event.stopPropagation()">
-                                    <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
-                                </div>
                                 ${item.images && item.images.length > 0 ? `<div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">${thumbnailHtml}</div>` : ''}
                                 <div class="flex flex-col gap-1 min-w-0 flex-1 ml-1">
                                     <div class="flex items-center gap-2">
@@ -1301,7 +1302,7 @@
                                         <span class="font-medium truncate max-w-[120px] sm:max-w-[200px] text-gray-600">${item.company}</span>
                                         <span class="text-gray-300">|</span>
                                         <i data-lucide="ruler" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-                                        <span class="font-roboto text-gray-700 font-black tracking-wide text-[12px] sm:text-[13px] truncate">${formatSpec(item.specIn, item.specOut, item.specLen) || '-'}</span>
+                                        <span class="font-roboto text-gray-700 font-black tracking-wide text-[14px] sm:text-[15px] truncate">${formatSpec(item.specIn, item.specOut, item.specLen) || '-'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1325,12 +1326,6 @@
             const countEl = document.getElementById('totalProductCount');
             if(countEl) countEl.textContent = filtered.length;
 
-            document.querySelectorAll('.prod-cb').forEach(cb => { cb.addEventListener('change', e => { e.target.checked ? selectedProductIds.add(String(e.target.value)) : selectedProductIds.delete(String(e.target.value)); renderProducts(); }); });
-            const allCbs = document.getElementById('selectAllFeedCheckbox');
-            if (allCbs) {
-                const cbs = document.querySelectorAll('.prod-cb'); 
-                allCbs.checked = cbs.length > 0 && Array.from(cbs).every(c => c.checked);
-            }
             lucide.createIcons(); updateProductDetails();
         }
 
