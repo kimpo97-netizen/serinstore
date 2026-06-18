@@ -503,6 +503,20 @@
         </div>
     </div>
 
+    <!-- 복사 확인 모달 -->
+    <div id="copyConfirmModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-[320px] overflow-hidden text-center fade-in p-6">
+            <div class="mx-auto w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-4"><i data-lucide="copy-plus" class="w-7 h-7"></i></div>
+            <h3 class="text-lg font-bold text-navy-text">데이터 복사</h3>
+            <p class="text-sm text-gray-500 mt-2 mb-6">선택한 생산 레코드를 복사하여<br>새 데이터를 생성하시겠습니까?</p>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeCopyModal()" class="flex-1 py-3.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold active:bg-gray-200 transition-colors">취소</button>
+                <button type="button" id="confirmCopyBtn" class="flex-1 py-3.5 bg-green-600 text-white rounded-xl text-sm font-bold active:bg-green-700 transition-colors">복사하기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 일정 모달 -->
     <div id="scheduleModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal('scheduleModal')"></div>
@@ -610,6 +624,7 @@
         let inventoryData = [];
         let currentView = 'product'; 
         let deleteInfo = { type: null, id: null }; 
+        let copyTargetId = null;
         let selectedProductIds = new Set();
         let tempImages = [];
         let tempScheduleImages = []; 
@@ -820,6 +835,20 @@
         }
 
         // ==========================================
+        // 업체명 자동완성(Datalist) 업데이트
+        // ==========================================
+        function updateCompanyDatalist() {
+            const companies = [...new Set(dbData.map(item => item.company).filter(Boolean))];
+            let datalist = document.getElementById('company-list');
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = 'company-list';
+                document.body.appendChild(datalist);
+            }
+            datalist.innerHTML = companies.map(c => `<option value="${c}"></option>`).join('');
+        }
+
+        // ==========================================
         // 공통 UI 함수
         // ==========================================
         function switchTab(view) {
@@ -893,20 +922,6 @@
             item.adds.forEach(a => { let nm = a.name; let tot = (parseFloat(a.ratio)||0) * (item.baseKg||20); if(nm && tot>0) sumItems.push(`${nm} ${Math.round(tot)}g`); });
             let rawStr = rawItems.length > 0 ? rawItems.join(', ') : '지정안됨'; let addStr = sumItems.length > 0 ? sumItems.join(' + ') : '첨가물 없음';
             item.mixture = `<div class="flex flex-col gap-1.5 w-full"><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">원자재</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${rawStr}</span></div><div class="w-full h-px bg-amber-200/50 my-0.5"></div><div class="flex items-start gap-2"><span class="text-[11px] sm:text-xs text-gray-500 font-bold min-w-[45px] mt-1">첨가제</span><span class="font-roboto font-black text-base sm:text-lg text-navy-main tracking-wide">${addStr}</span></div></div>`;
-        }
-
-        // ==========================================
-        // 업체명 자동완성(Datalist) 업데이트
-        // ==========================================
-        function updateCompanyDatalist() {
-            const companies = [...new Set(dbData.map(item => item.company).filter(Boolean))];
-            let datalist = document.getElementById('company-list');
-            if (!datalist) {
-                datalist = document.createElement('datalist');
-                datalist.id = 'company-list';
-                document.body.appendChild(datalist);
-            }
-            datalist.innerHTML = companies.map(c => `<option value="${c}"></option>`).join('');
         }
 
         // ==========================================
@@ -1022,6 +1037,27 @@
 
 
         // ==========================================
+        // 복사 확인 모달 기능
+        // ==========================================
+        function requestCopy(id) {
+            copyTargetId = String(id);
+            openModal('copyConfirmModal');
+        }
+
+        function closeCopyModal() {
+            copyTargetId = null;
+            closeModal('copyConfirmModal');
+        }
+
+        document.getElementById('confirmCopyBtn').addEventListener('click', () => {
+            if (copyTargetId) {
+                duplicateProduct(copyTargetId);
+                closeCopyModal();
+            }
+        });
+
+
+        // ==========================================
         // 삭제 공통 기능
         // ==========================================
         function requestDelete(type, id) { 
@@ -1064,6 +1100,7 @@
         // 제품 DB 기능
         // ==========================================
         function clearSelection() { selectedProductIds.clear(); const allCbs = document.getElementById('selectAllFeedCheckbox'); if(allCbs) allCbs.checked = false; renderProducts(); }
+        function removeSelection(id) { selectedProductIds.delete(String(id)); renderProducts(); }
 
         function toggleSample() { const ci = document.getElementById('p-code'); const st = '(샘플)'; let val = ci.value; ci.value = val.includes(st) ? val.replace(st, '').trim() : val.trim() + (val ? ' ' : '') + st; }
         function generateAutoCode() { const companyInput = document.getElementById('p-company').value.trim(); const prefix = companyInput ? companyInput.replace(/\s+/g, '').substring(0, 2) : ''; const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); document.getElementById('p-code').value = prefix + randomNum; }
@@ -1201,7 +1238,7 @@
             const term = document.getElementById('searchProduct')?.value.toLowerCase() || '';
             const sortMode = document.getElementById('sortProduct')?.value || 'latest';
 
-            let filtered = dbData.filter(i => {
+            const filtered = dbData.filter(i => {
                 const searchStr = `${i.company || ''} ${i.itemCode || ''} ${i.measIn || ''} ${i.measOut || ''} ${i.remarks || ''}`.toLowerCase();
                 return searchStr.includes(term);
             });
@@ -1224,9 +1261,9 @@
                 filtered.forEach(item => {
                     const isChecked = selectedProductIds.has(String(item.id));
                     
-                    let imageWrapperHtml = '';
+                    let thumbnailHtml = '';
                     if (item.images && item.images.length > 0) {
-                        let thumbnailHtml = `
+                        thumbnailHtml = `
                             <div class="relative w-full h-full group/slider overflow-hidden rounded-lg">
                                 <img id="img-feed-${item.id}" src="${item.images[0]}" class="w-full h-full object-cover transition-all duration-300" data-index="0" onclick="openLargeImage('${item.id}', document.getElementById('img-feed-${item.id}').getAttribute('data-index')); event.stopPropagation();">
                                 ${item.images.length > 1 ? `
@@ -1236,7 +1273,6 @@
                                 ` : ''}
                             </div>
                         `;
-                        imageWrapperHtml = `<div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">${thumbnailHtml}</div>`;
                     }
 
                     if(feedCon) {
@@ -1254,7 +1290,7 @@
                                 <div class="p-1 shrink-0" onclick="event.stopPropagation()">
                                     <input type="checkbox" class="prod-cb w-4 h-4 text-navy-main border-gray-300 rounded cursor-pointer" value="${item.id}" ${isChecked?'checked':''}>
                                 </div>
-                                ${imageWrapperHtml}
+                                ${item.images && item.images.length > 0 ? `<div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center">${thumbnailHtml}</div>` : ''}
                                 <div class="flex flex-col gap-1 min-w-0 flex-1 ml-1">
                                     <div class="flex items-center gap-2">
                                         ${getBadge(item.type)}
@@ -1265,12 +1301,12 @@
                                         <span class="font-medium truncate max-w-[120px] sm:max-w-[200px] text-gray-600">${item.company}</span>
                                         <span class="text-gray-300">|</span>
                                         <i data-lucide="ruler" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-                                        <span class="font-roboto text-gray-700 font-black tracking-wide truncate">${formatSpec(item.specIn, item.specOut, item.specLen) || '-'}</span>
+                                        <span class="font-roboto text-gray-700 font-black tracking-wide text-[12px] sm:text-[13px] truncate">${formatSpec(item.specIn, item.specOut, item.specLen) || '-'}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex gap-1.5 shrink-0 relative z-10 sm:opacity-0 sm:group-hover:opacity-100 justify-end mt-2 sm:mt-0">
-                                <button type="button" onclick="duplicateProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl" title="복사">
+                                <button type="button" onclick="requestCopy('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl" title="복사">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                 </button>
                                 <button type="button" onclick="editProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl" title="수정">
@@ -1303,7 +1339,6 @@
             if(selectedProductIds.size === 0) { panel.classList.add('hidden'); return; }
             panel.classList.remove('hidden'); document.getElementById('selectedCount').textContent = selectedProductIds.size;
             
-            // 여기서도 뷰와 동일하게 정렬된 순서대로 보이기 위해 정렬 로직 추가
             const sortMode = document.getElementById('sortProduct')?.value || 'latest';
             let selectedArr = dbData.filter(i => selectedProductIds.has(String(i.id)));
             selectedArr.sort((a, b) => {
@@ -1367,16 +1402,16 @@
                 return `
                 <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-navy-main shadow-lg relative overflow-hidden transition-all flex flex-col">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-navy-main"></div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-gray-100 gap-3 shrink-0">
-                        <div class="flex items-start sm:items-center gap-4">
-                            ${detailImgHtml}
-                            <div>
-                                <h4 class="font-black text-base sm:text-xl text-navy-text flex items-center gap-2">${item.itemCode} ${getBadge(item.type)}</h4>
-                                <p class="text-sm text-navy-muted font-medium mt-1">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1.5 shrink-0 self-end sm:self-center mt-2 sm:mt-0 relative z-10">
-                            <button type="button" onclick="duplicateProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors" title="복사">
+
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-gray-100 gap-4 shrink-0 pt-1 sm:pt-2">
+                        
+                        <!-- 좌측: 기능 버튼 -->
+                        <div class="flex flex-wrap items-center gap-1.5 shrink-0 relative z-10 w-full sm:w-auto justify-start order-2 sm:order-1 mt-2 sm:mt-0">
+                            <button type="button" onclick="removeSelection('${item.id}');" class="flex items-center gap-1.5 px-3 py-2 sm:py-2.5 text-gray-600 hover:text-red-600 bg-gray-100 hover:bg-red-50 rounded-xl transition-colors font-bold text-xs shadow-sm" title="닫기">
+                                <i data-lucide="x" class="w-4 h-4 -ml-0.5"></i> 닫기
+                            </button>
+                            <div class="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
+                            <button type="button" onclick="requestCopy('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl transition-colors" title="복사">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
                             <button type="button" onclick="editProduct('${item.id}'); event.stopPropagation();" class="p-2 sm:p-2.5 text-gray-500 hover:text-navy-main bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors" title="수정">
@@ -1386,6 +1421,19 @@
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
+
+                        <!-- 우측: 제품 정보 (모바일에서는 버튼 위, 데스크탑에서는 우측) -->
+                        <div class="flex items-start sm:items-center gap-4 min-w-0 w-full sm:w-auto flex-1 sm:justify-end order-1 sm:order-2 flex-row sm:flex-row-reverse text-left sm:text-right">
+                            ${detailImgHtml}
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-black text-base sm:text-xl text-navy-text flex items-center sm:justify-end gap-2 flex-wrap">
+                                    <span class="break-all leading-tight">${item.itemCode}</span>
+                                    ${getBadge(item.type)}
+                                </h4>
+                                <p class="text-sm text-navy-muted font-medium mt-1 truncate">${item.company} <span class="mx-1 text-gray-300">|</span> ${item.date}</p>
+                            </div>
+                        </div>
+
                     </div>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 flex-1">
@@ -1490,8 +1538,6 @@
             document.getElementById('p-remarks').value = '';
             document.getElementById('productModalTitle').textContent = '생산 레코드 등록';
             
-            updateCompanyDatalist(); // 자동완성 리스트 업데이트
-
             document.getElementById('raw-container').innerHTML = ''; document.getElementById('cure-container').innerHTML = ''; document.getElementById('add-container').innerHTML = '';
             const exNumRadio = document.querySelector('input[name="p-ex-num"][value="1번"]'); if(exNumRadio) exNumRadio.checked = true;
             const manualDryRadio = document.querySelector('input[name="p-manual-dry"][value="건조 전"]'); if(manualDryRadio) manualDryRadio.checked = true;
@@ -1572,9 +1618,6 @@
             const item = dbData.find(i => String(i.id) === String(id)); document.getElementById('p-id').value = item.id;
             const tr = document.querySelector(`input[name="p-type"][value="${item.type}"]`); if(tr) tr.checked = true;
             const wr = document.querySelector(`input[name="p-work"][value="${item.workMethod}"]`); if(wr) wr.checked = true;
-            
-            updateCompanyDatalist(); // 자동완성 리스트 업데이트
-
             document.getElementById('p-company').value = item.company || ''; 
             document.getElementById('p-code').value = item.itemCode;
             document.getElementById('p-spec-in').value = item.specIn || ''; document.getElementById('p-spec-out').value = item.specOut || ''; document.getElementById('p-spec-len').value = item.specLen || '';
